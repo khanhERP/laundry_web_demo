@@ -220,7 +220,7 @@ export function PrintDialog({
         console.log('🖨️ Print Dialog: Updating order status to paid before printing for order:', receiptData.orderId);
 
         try {
-          const statusResponse = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders/${receiptData.orderId}/status`, {
+          const statusResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${receiptData.orderId}/status`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -264,7 +264,7 @@ export function PrintDialog({
       // Always try POS API first for any device
       try {
         console.log('🖨️ Attempting POS printer API...');
-        const printApiResponse = await fetch('https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/pos/print-receipt', {
+        const printApiResponse = await fetch('https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/pos/print-receipt', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -793,7 +793,7 @@ export function PrintDialog({
 
                 // Send message to parent to stop any popup flows
                 try {
-                  fetch('https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/popup/close', {
+                  fetch('https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/popup/close', {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',

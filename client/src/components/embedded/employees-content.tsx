@@ -20,7 +20,7 @@ export default function EmployeesPageContent() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data: employeesData, isLoading: employeesLoading } = useQuery<Employee[]>({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/employees"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees"],
   });
 
   const handleEditEmployee = (employee: Employee) => {
@@ -32,10 +32,10 @@ export default function EmployeesPageContent() {
     if (!confirm(t("employees.confirmDelete"))) return;
 
     try {
-      const response = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/employees/${employeeId}`, { method: "DELETE" });
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees/${employeeId}`, { method: "DELETE" });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      await queryClient.refetchQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/employees"] });
+      await queryClient.refetchQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees"] });
       toast({ title: t("common.success"), description: t("employees.deleteSuccess") });
     } catch (error) {
       toast({ title: t("common.error"), description: t("employees.deleteError"), variant: "destructive" });

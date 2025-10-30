@@ -21,7 +21,7 @@ export function GeneralSettingsContent() {
 
   // Fetch general settings
   const { data: settings = [], isLoading } = useQuery<GeneralSetting[]>({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/general-settings"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings"],
   });
 
   // Update setting active status
@@ -32,7 +32,7 @@ export function GeneralSettingsContent() {
         const st003 = settings.find(s => s.settingCode === "ST-003");
         if (st003) {
           // ST-002 bật → ST-003 tắt, ST-002 tắt → ST-003 bật
-          await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/general-settings/${st003.id}`, {
+          await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings/${st003.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ isActive: !isActive }),
@@ -43,7 +43,7 @@ export function GeneralSettingsContent() {
         const st002 = settings.find(s => s.settingCode === "ST-002");
         if (st002) {
           // ST-003 bật → ST-002 tắt, ST-003 tắt → ST-002 bật
-          await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/general-settings/${st002.id}`, {
+          await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings/${st002.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ isActive: !isActive }),
@@ -52,7 +52,7 @@ export function GeneralSettingsContent() {
         }
       }
 
-      const response = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/general-settings/${id}`, {
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive }),
@@ -62,7 +62,7 @@ export function GeneralSettingsContent() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/general-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings"] });
       toast({
         title: "Thành công",
         description: "Đã cập nhật trạng thái thiết lập",

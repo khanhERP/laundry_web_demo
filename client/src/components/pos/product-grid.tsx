@@ -63,9 +63,9 @@ export function ProductGrid({
 
   // Fetch store settings to check price inclusion of tax
   const { data: storeSettings } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
     queryFn: async () => {
-      const response = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings");
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
       if (!response.ok) throw new Error("Failed to fetch store settings");
       return response.json();
     },
@@ -82,7 +82,7 @@ export function ProductGrid({
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: [
-      "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/products",
+      "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products",
       { category: selectedCategory, search: searchQuery },
     ],
     queryFn: async () => {
@@ -91,7 +91,7 @@ export function ProductGrid({
         params.append("search", searchQuery);
       }
 
-      const response = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/products?${params}`);
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products?${params}`);
       if (!response.ok) throw new Error("Failed to fetch products");
       const allProducts = await response.json();
 

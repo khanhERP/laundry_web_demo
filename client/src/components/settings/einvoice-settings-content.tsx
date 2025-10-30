@@ -80,22 +80,22 @@ export function EInvoiceSettingsContent() {
 
   // Fetch e-invoice connections
   const { data: connections = [], isLoading: connectionsLoading } = useQuery<any[]>({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/einvoice-connections"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/einvoice-connections"],
   });
 
   // Fetch invoice templates
   const { data: templates = [], isLoading: templatesLoading } = useQuery<any[]>({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/invoice-templates"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-templates"],
   });
 
   // Connection mutations
   const createConnectionMutation = useMutation({
     mutationFn: async (data: typeof connectionFormData) => {
-      const response = await apiRequest("POST", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/einvoice-connections", data);
+      const response = await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/einvoice-connections", data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/einvoice-connections"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/einvoice-connections"] });
       toast({
         title: "Thành công",
         description: "Đã tạo kênh kết nối mới",
@@ -114,11 +114,11 @@ export function EInvoiceSettingsContent() {
 
   const updateConnectionMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: typeof connectionFormData }) => {
-      const response = await apiRequest("PUT", `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/einvoice-connections/${id}`, data);
+      const response = await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/einvoice-connections/${id}`, data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/einvoice-connections"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/einvoice-connections"] });
       toast({
         title: "Thành công",
         description: "Đã cập nhật kênh kết nối",
@@ -137,11 +137,11 @@ export function EInvoiceSettingsContent() {
 
   const deleteConnectionMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("DELETE", `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/einvoice-connections/${id}`);
+      const response = await apiRequest("DELETE", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/einvoice-connections/${id}`);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/einvoice-connections"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/einvoice-connections"] });
       toast({
         title: "Thành công",
         description: "Đã xóa kênh kết nối",
@@ -161,11 +161,11 @@ export function EInvoiceSettingsContent() {
   // Template mutations
   const createTemplateMutation = useMutation({
     mutationFn: async (data: typeof templateFormData) => {
-      const response = await apiRequest("POST", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/invoice-templates", data);
+      const response = await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-templates", data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/invoice-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-templates"] });
       toast({
         title: "Thành công",
         description: "Đã tạo mẫu hóa đơn mới",
@@ -184,11 +184,11 @@ export function EInvoiceSettingsContent() {
 
   const updateTemplateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: typeof templateFormData }) => {
-      const response = await apiRequest("PUT", `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/invoice-templates/${id}`, data);
+      const response = await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-templates/${id}`, data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/invoice-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-templates"] });
       toast({
         title: "Thành công",
         description: "Đã cập nhật mẫu hóa đơn",
@@ -207,11 +207,11 @@ export function EInvoiceSettingsContent() {
 
   const deleteTemplateMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("DELETE", `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/invoice-templates/${id}`);
+      const response = await apiRequest("DELETE", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-templates/${id}`);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/invoice-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-templates"] });
       toast({
         title: "Thành công",
         description: "Đã xóa mẫu hóa đơn",

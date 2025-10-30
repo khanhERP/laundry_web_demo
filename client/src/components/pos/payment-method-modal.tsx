@@ -91,9 +91,9 @@ export function PaymentMethodModal({
 
   // Query store settings to get dynamic address - ALWAYS CALL THIS HOOK
   const { data: storeSettings } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
       return response.json();
     },
     enabled: isOpen, // Only fetch when modal is open
@@ -176,9 +176,9 @@ export function PaymentMethodModal({
 
   // Query payment methods from API
   const { data: paymentMethodsData } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/payment-methods"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/payment-methods");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods");
       return response.json();
     },
     enabled: isOpen, // Only fetch when modal is open
@@ -394,7 +394,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
               console.log(
                 "🎯 QR Payment: Connecting to WebSocket for customer display:",
                 wsUrl,
@@ -529,7 +529,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
               console.log(
                 "Fallback QR Payment: Attempting to connect to WebSocket:",
                 wsUrl,
@@ -697,7 +697,7 @@ export function PaymentMethodModal({
         try {
           const protocol =
             window.location.protocol === "https:" ? "wss:" : "ws:";
-          const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+          const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
           const ws = new WebSocket(wsUrl);
 
           ws.onopen = () => {
@@ -865,7 +865,7 @@ export function PaymentMethodModal({
         console.log(`📦 Order items:`, orderItems);
 
         // Create order via API
-        const createResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders", {
+        const createResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -954,7 +954,7 @@ export function PaymentMethodModal({
 
         try {
           // First update the payment method and status
-          const updateResponse = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders/${orderInfo.id}`, {
+          const updateResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -990,7 +990,7 @@ export function PaymentMethodModal({
 
               try {
                 // Check if there are any other unpaid orders on this table
-                const ordersResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders", {
+                const ordersResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
                   method: "GET",
                   headers: {
                     "Content-Type": "application/json",
@@ -1033,7 +1033,7 @@ export function PaymentMethodModal({
                   );
 
                   const tableUpdateResponse = await fetch(
-                    `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
+                    `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
                     {
                       method: "PUT",
                       headers: {
@@ -1058,7 +1058,7 @@ export function PaymentMethodModal({
                   try {
                     const protocol =
                       window.location.protocol === "https:" ? "wss:" : "ws:";
-                    const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                    const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                     const ws = new WebSocket(wsUrl);
 
                     ws.onopen = () => {
@@ -1315,7 +1315,7 @@ export function PaymentMethodModal({
       console.log("📦 Order items:", orderItems);
 
       // Create order via API
-      const createResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders", {
+      const createResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1407,7 +1407,7 @@ export function PaymentMethodModal({
       try {
         console.log(`🔥 MAKING API CALL: PUT /api/orders/${orderInfo.id}`);
 
-        const statusResponse = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders/${orderInfo.id}`, {
+        const statusResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -1441,7 +1441,7 @@ export function PaymentMethodModal({
 
             try {
               // Check if there are any other unpaid orders on this table
-              const ordersResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders", {
+              const ordersResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
                 method: "GET",
                 headers: {
                   "Content-Type": "application/json",
@@ -1468,7 +1468,7 @@ export function PaymentMethodModal({
                 // If no other unpaid orders, update table to available
                 if (otherActiveOrders.length === 0) {
                   const tableUpdateResponse = await fetch(
-                    `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/tables/${data.tableId}/status`,
+                    `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${data.tableId}/status`,
                     {
                       method: "PUT",
                       headers: {
@@ -1489,7 +1489,7 @@ export function PaymentMethodModal({
                     try {
                       const protocol =
                         window.location.protocol === "https:" ? "wss:" : "ws:";
-                      const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                       const ws = new WebSocket(wsUrl);
 
                       ws.onopen = () => {
@@ -1601,7 +1601,7 @@ export function PaymentMethodModal({
     // Send message to customer display to clear QR payment
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
@@ -1728,7 +1728,7 @@ export function PaymentMethodModal({
         discount: discountAmount.toString(),
       };
 
-      const createResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders", {
+      const createResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order: orderData, items: orderItems }),
@@ -1747,7 +1747,7 @@ export function PaymentMethodModal({
       }
     } else {
       // Update existing order
-      const updateResponse = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders/${orderInfo.id}`, {
+      const updateResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1770,7 +1770,7 @@ export function PaymentMethodModal({
 
           try {
             // Check if there are any other unpaid orders on this table
-            const ordersResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders", {
+            const ordersResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
@@ -1811,7 +1811,7 @@ export function PaymentMethodModal({
               );
 
               const tableUpdateResponse = await fetch(
-                `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
+                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
                 {
                   method: "PUT",
                   headers: { "Content-Type": "application/json" },
@@ -1832,7 +1832,7 @@ export function PaymentMethodModal({
               try {
                 const protocol =
                   window.location.protocol === "https:" ? "wss:" : "ws:";
-                const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                 const ws = new WebSocket(wsUrl);
 
                 ws.onopen = () => {
@@ -2112,7 +2112,7 @@ export function PaymentMethodModal({
       console.log("📦 Order items:", orderItems);
 
       // Create order via API
-      const createResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders", {
+      const createResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2195,7 +2195,7 @@ export function PaymentMethodModal({
       try {
         console.log(`🔥 MAKING API CALL: PUT /api/orders/${orderInfo.id}`);
 
-        const statusResponse = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders/${orderInfo.id}`, {
+        const statusResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -2223,7 +2223,7 @@ export function PaymentMethodModal({
 
             try {
               // Check if there are any other unpaid orders on this table
-              const ordersResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders", {
+              const ordersResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
                 method: "GET",
                 headers: {
                   "Content-Type": "application/json",
@@ -2266,7 +2266,7 @@ export function PaymentMethodModal({
                 );
 
                 const tableUpdateResponse = await fetch(
-                  `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
+                  `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
                   {
                     method: "PUT",
                     headers: {
@@ -2291,7 +2291,7 @@ export function PaymentMethodModal({
                 try {
                   const protocol =
                     window.location.protocol === "https:" ? "wss:" : "ws:";
-                  const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                  const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                   const ws = new WebSocket(wsUrl);
 
                   ws.onopen = () => {
@@ -2593,7 +2593,7 @@ export function PaymentMethodModal({
         try {
           const protocol =
             window.location.protocol === "https:" ? "wss:" : "ws:";
-          const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+          const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
           const ws = new WebSocket(wsUrl);
 
           ws.onopen = () => {
@@ -2698,7 +2698,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
               const ws = new WebSocket(wsUrl);
 
               ws.onopen = () => {
@@ -2837,7 +2837,7 @@ export function PaymentMethodModal({
                     try {
                       const protocol =
                         window.location.protocol === "https:" ? "wss:" : "ws:";
-                      const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                       const ws = new WebSocket(wsUrl);
 
                       ws.onopen = () => {
@@ -3073,7 +3073,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3119,7 +3119,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3305,7 +3305,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3342,7 +3342,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/ws`;
+                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {

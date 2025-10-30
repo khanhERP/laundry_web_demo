@@ -132,9 +132,9 @@ export function PriceListManagement() {
 
   // Fetch current user store settings
   const { data: currentUserSettings } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
       if (!response.ok) throw new Error("Failed to fetch user settings");
       return response.json();
     },
@@ -146,9 +146,9 @@ export function PriceListManagement() {
 
   // Fetch all stores for selection
   const { data: allStores = [] } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings/list"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings/list"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings/list");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings/list");
       if (!response.ok) throw new Error("Failed to fetch stores");
       return response.json();
     },
@@ -164,9 +164,9 @@ export function PriceListManagement() {
 
   // Fetch next price list code
   const { data: nextCodeData } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists/next-code"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists/next-code"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists/next-code");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists/next-code");
       if (!response.ok) throw new Error("Failed to fetch next code");
       return response.json();
     },
@@ -185,9 +185,9 @@ export function PriceListManagement() {
 
   // Fetch price lists
   const { data: priceLists = [], isLoading: priceListsLoading } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists");
       if (!response.ok) throw new Error("Failed to fetch price lists");
       return response.json();
     },
@@ -209,9 +209,9 @@ export function PriceListManagement() {
 
   // Fetch all products for search/selection
   const { data: allProducts = [] } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/products"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/products");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products");
       if (!response.ok) throw new Error("Failed to fetch products");
       return response.json();
     },
@@ -219,9 +219,9 @@ export function PriceListManagement() {
 
   // Fetch categories
   const { data: categories = [] } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/categories"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/categories"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/categories");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/categories");
       if (!response.ok) throw new Error("Failed to fetch categories");
       return response.json();
     },
@@ -229,14 +229,14 @@ export function PriceListManagement() {
 
   // Fetch price list items for selected price lists
   const { data: priceListItemsData = [] } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", selectedPriceLists],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", selectedPriceLists],
     queryFn: async () => {
       if (selectedPriceLists.length === 0) return [];
 
       const itemsPromises = selectedPriceLists.map(async (priceListId) => {
         const response = await apiRequest(
           "GET",
-          `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists/${priceListId}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists/${priceListId}`,
         );
         if (!response.ok) throw new Error("Failed to fetch price list items");
         const data = await response.json();
@@ -259,7 +259,7 @@ export function PriceListManagement() {
         // Fetch current price lists to determine the next code
         const existingListsResponse = await apiRequest(
           "GET",
-          "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists",
+          "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists",
         );
         if (!existingListsResponse.ok)
           throw new Error(
@@ -278,7 +278,7 @@ export function PriceListManagement() {
         data.code = `BG-${String(maxCode + 1).padStart(6, "0")}`;
       }
 
-      const response = await apiRequest("POST", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists", data);
+      const response = await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists", data);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to create price list");
@@ -286,9 +286,9 @@ export function PriceListManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists"] });
       queryClient.invalidateQueries({
-        queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists/next-code"],
+        queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists/next-code"],
       });
       toast({
         title: "Thành công",
@@ -308,7 +308,7 @@ export function PriceListManagement() {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const response = await apiRequest("PUT", `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists/${id}`, data);
+      const response = await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists/${id}`, data);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to update price list");
@@ -316,7 +316,7 @@ export function PriceListManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists"] });
       toast({
         title: "Thành công",
         description: "Cập nhật bảng giá thành công",
@@ -335,7 +335,7 @@ export function PriceListManagement() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("DELETE", `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists/${id}`);
+      const response = await apiRequest("DELETE", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists/${id}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to delete price list");
@@ -343,7 +343,7 @@ export function PriceListManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-lists"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-lists"] });
       toast({
         title: "Thành công",
         description: "Xóa bảng giá thành công",
@@ -369,7 +369,7 @@ export function PriceListManagement() {
       productId: number;
       price: string;
     }) => {
-      const response = await apiRequest("POST", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", {
+      const response = await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", {
         priceListId,
         productId,
         price,
@@ -380,18 +380,18 @@ export function PriceListManagement() {
     onMutate: async (variables) => {
       // Cancel any outgoing refetches để tránh ghi đè optimistic update
       await queryClient.cancelQueries({
-        queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", selectedPriceLists],
+        queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", selectedPriceLists],
       });
 
       // Snapshot giá trị hiện tại
       const previousData = queryClient.getQueryData([
-        "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items",
+        "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items",
         selectedPriceLists,
       ]);
 
       // Optimistically update cache ngay lập tức
       queryClient.setQueryData(
-        ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", selectedPriceLists],
+        ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", selectedPriceLists],
         (old: any) => {
           if (!old) return old;
 
@@ -430,7 +430,7 @@ export function PriceListManagement() {
     onSuccess: (data, variables) => {
       // Update lại cache với data từ server (đảm bảo có ID)
       queryClient.setQueryData(
-        ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", selectedPriceLists],
+        ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", selectedPriceLists],
         (old: any) => {
           if (!old) return [data];
 
@@ -454,7 +454,7 @@ export function PriceListManagement() {
       // Rollback về giá trị cũ nếu có lỗi
       if (context?.previousData) {
         queryClient.setQueryData(
-          ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", selectedPriceLists],
+          ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", selectedPriceLists],
           context.previousData,
         );
       }
@@ -480,7 +480,7 @@ export function PriceListManagement() {
       );
       const response = await apiRequest(
         "DELETE",
-        `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items/${priceListId}/${productId}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items/${priceListId}/${productId}`,
       );
       if (!response.ok) {
         const error = await response
@@ -731,7 +731,7 @@ export function PriceListManagement() {
             throw new Error(`Không tìm thấy sản phẩm ID ${productId}`);
           }
 
-          const response = await apiRequest("POST", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", {
+          const response = await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", {
             priceListId,
             productId,
             price: "0",
@@ -756,7 +756,7 @@ export function PriceListManagement() {
     onSuccess: async () => {
       // Chỉ invalidate một lần, không refetch ngay
       queryClient.invalidateQueries({
-        queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", selectedPriceLists],
+        queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", selectedPriceLists],
       });
 
       setShowProductSelector(false);
@@ -948,7 +948,7 @@ export function PriceListManagement() {
 
         for (const update of updates) {
           try {
-            await apiRequest("POST", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items", update);
+            await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items", update);
             successCount++;
           } catch (error) {
             errorCount++;
@@ -957,10 +957,10 @@ export function PriceListManagement() {
         }
 
         await queryClient.invalidateQueries({
-          queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items"],
+          queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items"],
         });
         await queryClient.refetchQueries({
-          queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items"],
+          queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items"],
         });
 
         toast({
@@ -1616,7 +1616,7 @@ export function PriceListManagement() {
 
                                       await queryClient.refetchQueries({
                                         queryKey: [
-                                          "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/price-list-items",
+                                          "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/price-list-items",
                                           selectedPriceLists,
                                         ],
                                         exact: true,

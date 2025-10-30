@@ -59,28 +59,28 @@ export function EmployeeReport() {
   const [salesChannel, setSalesChannel] = useState("all");
 
   const { data: employees } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/employees"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees"],
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: transactions } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/transactions", startDate, endDate],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/transactions", startDate, endDate],
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 
   const { data: products } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/products"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products"],
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: categories } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/categories"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/categories"],
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Employee sales data query
   const { data: employeeSalesData } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/employee-sales", startDate, endDate, selectedEmployee],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employee-sales", startDate, endDate, selectedEmployee],
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 

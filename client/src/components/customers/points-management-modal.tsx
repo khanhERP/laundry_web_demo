@@ -57,13 +57,13 @@ export function PointsManagementModal({ isOpen, onClose }: PointsManagementModal
 
   // Fetch customers
   const { data: customers, isLoading: customersLoading } = useQuery<Customer[]>({
-    queryKey: ['https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/customers'],
+    queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers'],
     enabled: isOpen,
   });
 
   // Fetch point transactions history
   const { data: pointTransactions, isLoading: transactionsLoading } = useQuery<PointTransaction[]>({
-    queryKey: ['https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/point-transactions'],
+    queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/point-transactions'],
     enabled: isOpen && activeTab === 'history',
   });
 
@@ -75,7 +75,7 @@ export function PointsManagementModal({ isOpen, onClose }: PointsManagementModal
       type: string; 
       description: string 
     }) => {
-      const response = await apiRequest('POST', 'https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/customers/adjust-points', {
+      const response = await apiRequest('POST', 'https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers/adjust-points', {
         customerId,
         points,
         type,
@@ -84,8 +84,8 @@ export function PointsManagementModal({ isOpen, onClose }: PointsManagementModal
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/customers'] });
-      queryClient.invalidateQueries({ queryKey: ['https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/point-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers'] });
+      queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/point-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['customer-points', selectedCustomer?.id] });
       toast({
         title: t("customers.customerUpdated"),
@@ -107,15 +107,15 @@ export function PointsManagementModal({ isOpen, onClose }: PointsManagementModal
   // Point payment mutation
   const processPaymentMutation = useMutation({
     mutationFn: async ({ customerId, points }: { customerId: number; points: number }) => {
-      const response = await apiRequest('POST', 'https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/customers/redeem-points', {
+      const response = await apiRequest('POST', 'https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers/redeem-points', {
         customerId,
         points
       });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/customers'] });
-      queryClient.invalidateQueries({ queryKey: ['https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/point-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers'] });
+      queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/point-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['customer-points', selectedCustomer?.id] });
       toast({
         title: t("common.success"),

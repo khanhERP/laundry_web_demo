@@ -26,11 +26,11 @@ export default function SuppliersPageContent() {
   const itemsPerPage = 10;
 
   const { data: suppliersData, isLoading: suppliersLoading } = useQuery<Supplier[]>({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/suppliers"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers"],
   });
 
   const { data: storesData } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings/list"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings/list"],
   });
 
   const handleEditSupplier = (supplier: Supplier) => {
@@ -42,10 +42,10 @@ export default function SuppliersPageContent() {
     if (!confirm(t("suppliers.confirmDelete"))) return;
 
     try {
-      const response = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/suppliers/${supplierId}`, { method: "DELETE" });
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers/${supplierId}`, { method: "DELETE" });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      await queryClient.refetchQueries({ queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/suppliers"] });
+      await queryClient.refetchQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers"] });
       toast({ title: t("common.success"), description: t("suppliers.deleteSuccess") });
     } catch (error) {
       toast({ title: t("common.error"), description: t("suppliers.deleteError"), variant: "destructive" });

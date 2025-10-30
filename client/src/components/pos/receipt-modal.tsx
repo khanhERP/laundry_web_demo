@@ -117,9 +117,9 @@ export function ReceiptModal({
 
   // Query store settings
   const { data: storeSettings } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/store-settings");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
       console.log("🏢 Store settings fetched:", response.json());
       return response.json();
     },
@@ -128,14 +128,14 @@ export function ReceiptModal({
 
   // Query to get table info based on orderId
   const { data: tableInfo } = useQuery({
-    queryKey: ["https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/tables/by-order", receipt?.id],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/by-order", receipt?.id],
     queryFn: async () => {
       if (!receipt?.id) return null;
 
       // First get the order to find tableId
       const orderResponse = await apiRequest(
         "GET",
-        `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/orders/${receipt.id}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${receipt.id}`,
       );
       const order = await orderResponse.json();
       receipt.orderNumber = order.orderNumber;
@@ -145,7 +145,7 @@ export function ReceiptModal({
       // Then get the table info
       const tableResponse = await apiRequest(
         "GET",
-        `https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/tables/${order.tableId}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${order.tableId}`,
       );
       const table = await tableResponse.json();
 
@@ -227,7 +227,7 @@ export function ReceiptModal({
   useEffect(() => {
     async function fetchPrinterConfigs() {
       try {
-        const printerResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/printer-configs");
+        const printerResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/printer-configs");
         if (!printerResponse.ok) {
           console.error("Failed to fetch printer configs");
           return;
@@ -240,7 +240,7 @@ export function ReceiptModal({
         let tableFloor = null;
         if (receipt?.tableId) {
           try {
-            const tableResponse = await fetch(`https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/tables/${receipt.tableId}`);
+            const tableResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${receipt.tableId}`);
             if (tableResponse.ok) {
               const tableData = await tableResponse.json();
               tableFloor = tableData.floor;
@@ -472,7 +472,7 @@ export function ReceiptModal({
       let activePrinterConfigs = [];
       try {
         console.log("🖨️ Fetching active printer configurations...");
-        const printerResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/printer-configs");
+        const printerResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/printer-configs");
         if (printerResponse.ok) {
           const allConfigs = await printerResponse.json();
           activePrinterConfigs = allConfigs.filter(
@@ -511,7 +511,7 @@ export function ReceiptModal({
         console.log("🖨️ Trying configured POS printers for all platforms...");
 
         try {
-          const printResponse = await fetch("https://796f2db4-7848-49ea-8b2b-4c67f6de26d7-00-248bpbd8f87mj.sisko.replit.dev/api/pos/print-receipt", {
+          const printResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/pos/print-receipt", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
