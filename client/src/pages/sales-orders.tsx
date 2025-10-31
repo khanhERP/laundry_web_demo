@@ -28,6 +28,7 @@ import {
   X,
   Download,
   CreditCard, // Import CreditCard icon
+  Minus, // Import Minus icon
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -46,6 +47,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator"; // Import Separator
 
 interface Invoice {
   id: number;
@@ -159,6 +161,24 @@ export default function SalesOrders() {
   const [orderForPayment, setOrderForPayment] = useState<any>(null);
   const [showEInvoiceModal, setShowEInvoiceModal] = useState(false); // State for EInvoiceModal
   const [isTitle, setIsTitle] = useState(true); // State for title visibility
+  // State to track edited items locally (only update UI, not database)
+  const [editedOrderItems, setEditedOrderItems] = useState<{
+    [itemId: number]: {
+      quantity?: number;
+      unitPrice?: string;
+      discount?: string;
+      total?: string; // Add total to track calculated total
+      sku?: string; // Add sku field
+      productName?: string; // Add productName field
+      productId?: number; // Add productId field
+      _deleted?: boolean; // Flag for deletion
+      notes?: string; // Add notes field
+      tax?: string; // Add tax to edited item state
+      _isNew?: boolean; // Flag for new unsaved items
+      priceBeforeTax?: string; // Add priceBeforeTax to edited item state
+      taxRate?: string; // Add taxRate to edited item state
+    };
+  }>({});
 
   // Listen for print completion and einvoice modal close events
   useEffect(() => {
@@ -343,7 +363,7 @@ export default function SalesOrders() {
       startDate,
       endDate,
       dateFilterMode,
-      // customerSearch removed - only used for dropdown filtering, not for API query
+      customerSearch,
       orderNumberSearch,
       customerCodeSearch,
       searchTerm,
@@ -371,8 +391,7 @@ export default function SalesOrders() {
         params.append("dateFilterMode", dateFilterMode);
         if (customerSearch) params.append("customerName", customerSearch);
         if (orderNumberSearch) params.append("orderNumber", orderNumberSearch);
-        if (customerCodeSearch)
-          params.append("productSearch", customerCodeSearch);
+        if (customerCodeSearch) params.append("productSearch", searchTerm);
         if (searchTerm) params.append("productSearch", searchTerm);
         if (salesChannelFilter && salesChannelFilter !== "all") {
           params.append("salesChannel", salesChannelFilter);
@@ -397,7 +416,7 @@ export default function SalesOrders() {
           params.append("sortOrder", sortOrder);
         }
 
-        const url = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list?${params.toString()}`;
+        const url = `/api/orders/list?${params.toString()}`;
         const response = await apiRequest("GET", url);
 
         if (!response.ok) {
@@ -518,7 +537,7 @@ export default function SalesOrders() {
       try {
         const response = await apiRequest(
           "GET",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${selectedInvoice.id}`,
+          `/api/order-items/${selectedInvoice.id}`,
         );
 
         if (!response.ok) {
@@ -581,7 +600,7 @@ export default function SalesOrders() {
 
       const response = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${updatedOrder.id}`,
+        `/api/orders/${updatedOrder.id}`,
         updatePayload,
       );
 
@@ -637,7 +656,7 @@ export default function SalesOrders() {
           // For orders, update status to 'cancelled'
           const response = await apiRequest(
             "PUT",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
+            `/api/orders/${orderId}/status`,
             {
               status: "cancelled",
             },
@@ -738,7 +757,7 @@ export default function SalesOrders() {
 
           const updateResponse = await apiRequest(
             "PUT",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${selectedInvoice.id}`,
+            `/api/orders/${selectedInvoice.id}`,
             updateData,
           );
           console.log(
@@ -815,7 +834,7 @@ export default function SalesOrders() {
       // Changed to accept orderId
       const response = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
+        `/api/orders/${orderId}/status`,
         {
           status: "cancelled",
         },
@@ -1080,102 +1099,102 @@ export default function SalesOrders() {
 
   const filteredInvoices = Array.isArray(combinedData)
     ? combinedData.sort((a: any, b: any) => {
-        // Apply sorting if a field is selected
-        if (sortField) {
-          let aValue: any;
-          let bValue: any;
+          // Apply sorting if a field is selected
+          if (sortField) {
+            let aValue: any;
+            let bValue: any;
 
-          switch (sortField) {
-            case "orderNumber":
-              aValue = a.displayNumber || "";
-              bValue = b.displayNumber || "";
-              break;
-            case "createdAt":
-              aValue = new Date(a.createdAt || 0).getTime();
-              bValue = new Date(b.createdAt || 0).getTime();
-              break;
-            case "updatedAt":
-              aValue = new Date(a.updatedAt || 0).getTime();
-              bValue = new Date(b.updatedAt || 0).getTime();
-              break;
-            case "salesChannel":
-              aValue = a.salesChannel || "";
-              bValue = b.salesChannel || "";
-              break;
-            case "customerCode":
-              aValue = a.customerCode || a.customerTaxCode || "";
-              bValue = b.customerCode || b.customerTaxCode || "";
-              break;
-            case "customerName":
-              aValue = a.customerName || "";
-              bValue = b.customerName || "";
-              break;
-            case "customerPhone": // Added for sorting customer phone
-              aValue = a.customerPhone || "";
-              bValue = b.customerPhone || "";
-              break;
-            case "subtotal":
-              aValue = parseFloat(a.subtotal || "0");
-              bValue = parseFloat(b.subtotal || "0");
-              break;
-            case "discount":
-              aValue = parseFloat(a.discount || "0");
-              bValue = parseFloat(b.discount || "0");
-              break;
-            case "tax":
-              aValue = parseFloat(a.tax || "0");
-              bValue = parseFloat(b.tax || "0");
-              break;
-            case "total":
-              aValue = parseFloat(a.total || "0");
-              bValue = parseFloat(b.total || "0");
-              break;
-            // Removed employeeCode and employeeName from sorting
-            case "symbol":
-              aValue = a.symbol || a.templateNumber || "";
-              bValue = b.symbol || b.templateNumber || "";
-              break;
-            case "invoiceNumber":
-              aValue = a.invoiceNumber || "";
-              bValue = b.invoiceNumber || "";
-              break;
-            case "notes":
-              aValue = a.notes || "";
-              bValue = b.notes || "";
-              break;
-            case "status":
-              aValue = a.displayStatus || 0;
-              bValue = b.displayStatus || 0;
-              break;
-            default:
-              aValue = "";
-              bValue = "";
+            switch (sortField) {
+              case "orderNumber":
+                aValue = a.displayNumber || "";
+                bValue = b.displayNumber || "";
+                break;
+              case "createdAt":
+                aValue = new Date(a.createdAt || 0).getTime();
+                bValue = new Date(b.createdAt || 0).getTime();
+                break;
+              case "updatedAt":
+                aValue = new Date(a.updatedAt || 0).getTime();
+                bValue = new Date(b.updatedAt || 0).getTime();
+                break;
+              case "salesChannel":
+                aValue = a.salesChannel || "";
+                bValue = b.salesChannel || "";
+                break;
+              case "customerCode":
+                aValue = a.customerCode || a.customerTaxCode || "";
+                bValue = b.customerCode || b.customerTaxCode || "";
+                break;
+              case "customerName":
+                aValue = a.customerName || "";
+                bValue = b.customerName || "";
+                break;
+              case "customerPhone": // Added for sorting customer phone
+                aValue = a.customerPhone || "";
+                bValue = b.customerPhone || "";
+                break;
+              case "subtotal":
+                aValue = parseFloat(a.subtotal || "0");
+                bValue = parseFloat(b.subtotal || "0");
+                break;
+              case "discount":
+                aValue = parseFloat(a.discount || "0");
+                bValue = parseFloat(b.discount || "0");
+                break;
+              case "tax":
+                aValue = parseFloat(a.tax || "0");
+                bValue = parseFloat(b.tax || "0");
+                break;
+              case "total":
+                aValue = parseFloat(a.total || "0");
+                bValue = parseFloat(b.total || "0");
+                break;
+              // Removed employeeCode and employeeName from sorting
+              case "symbol":
+                aValue = a.symbol || a.templateNumber || "";
+                bValue = b.symbol || b.templateNumber || "";
+                break;
+              case "invoiceNumber":
+                aValue = a.invoiceNumber || "";
+                bValue = b.invoiceNumber || "";
+                break;
+              case "notes":
+                aValue = a.notes || "";
+                bValue = b.notes || "";
+                break;
+              case "status":
+                aValue = a.displayStatus || 0;
+                bValue = b.displayStatus || 0;
+                break;
+              default:
+                aValue = "";
+                bValue = "";
+            }
+
+            // Compare values
+            if (typeof aValue === "string" && typeof bValue === "string") {
+              const comparison = aValue.localeCompare(bValue, "vi");
+              return sortOrder === "asc" ? comparison : -comparison;
+            } else {
+              const comparison = aValue - bValue;
+              return sortOrder === "asc" ? comparison : -comparison;
+            }
           }
 
-          // Compare values
-          if (typeof aValue === "string" && typeof bValue === "string") {
-            const comparison = aValue.localeCompare(bValue, "vi");
-            return sortOrder === "asc" ? comparison : -comparison;
-          } else {
-            const comparison = aValue - bValue;
-            return sortOrder === "asc" ? comparison : -comparison;
-          }
-        }
+          // Default sort by date (newest first)
+          const dateA = new Date(
+            a.orderedAt || a.createdAt || a.date || a.invoiceDate,
+          );
+          const dateB = new Date(
+            b.orderedAt || b.createdAt || b.date || b.invoiceDate,
+          );
 
-        // Default sort by date (newest first)
-        const dateA = new Date(
-          a.orderedAt || a.createdAt || a.date || a.invoiceDate,
-        );
-        const dateB = new Date(
-          b.orderedAt || b.createdAt || b.date || b.invoiceDate,
-        );
+          if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
+          if (isNaN(dateA.getTime())) return 1;
+          if (isNaN(dateB.getTime())) return -1;
 
-        if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-        if (isNaN(dateA.getTime())) return 1;
-        if (isNaN(dateB.getTime())) return -1;
-
-        return dateB.getTime() - dateA.getTime();
-      })
+          return dateB.getTime() - dateA.getTime();
+        })
     : [];
 
   // Auto-expand matching order when data is available and order param exists
@@ -1492,7 +1511,7 @@ export default function SalesOrders() {
         console.log(`🗑️ Deleting order item ${item.id}`);
         const response = await apiRequest(
           "DELETE",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
+          `/api/order-items/${item.id}`,
         );
         if (!response.ok) {
           throw new Error(`Failed to delete order item ${item.id}`);
@@ -1572,7 +1591,6 @@ export default function SalesOrders() {
           discount: itemDiscountAmount.toFixed(2),
           tax: Math.round(itemTax).toFixed(2),
           priceBeforeTax: Math.round(priceBeforeTax).toFixed(2), // Thành tiền (chưa bao gồm thuế)
-          notes: item.notes || null,
         };
 
         console.log(
@@ -1582,7 +1600,7 @@ export default function SalesOrders() {
 
         const response = await apiRequest(
           "POST",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${editableInvoice.id}`,
+          `/api/order-items/${editableInvoice.id}`,
           payload,
         );
 
@@ -1684,7 +1702,7 @@ export default function SalesOrders() {
         // Update the item
         const response = await apiRequest(
           "PATCH",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
+          `/api/order-items/${item.id}`,
           payload,
         );
 
@@ -1699,7 +1717,7 @@ export default function SalesOrders() {
       // Step 5: Recalculate order totals from fresh data
       const allCurrentItemsResponse = await apiRequest(
         "GET",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${editableInvoice.id}`,
+        `/api/order-items/${editableInvoice.id}`,
       );
       const allCurrentItems = await allCurrentItemsResponse.json();
 
@@ -1716,7 +1734,7 @@ export default function SalesOrders() {
 
       allCurrentItems.forEach((item: any) => {
         const priceBeforeTax = parseFloat(item.priceBeforeTax || "0");
-        const unitPrice = parseFloat(item.unitPrice || "0");
+        const unitPrice = parseFloat(item.unitPrice || "0") * item.quantity;
         const itemTax = parseFloat(item.tax || "0");
         const itemDiscount = parseFloat(item.discount || "0");
 
@@ -1736,18 +1754,29 @@ export default function SalesOrders() {
       });
 
       // Step 6: Update order totals in database
+      // Determine isPaid status: if paymentStatus is 'paid' or status is 'paid', then isPaid should be true
+      const updatedIsPaid =
+        editableInvoice.paymentStatus === "paid" ||
+        editableInvoice.status === "paid" ||
+        editableInvoice.isPaid === true;
+
       const orderUpdatePayload = {
         subtotal: Math.round(exactSubtotal).toString(),
         tax: Math.round(exactTax).toString(),
         total: Math.round(exactTotal).toString(),
         discount: totalItemDiscount.toFixed(2),
+        isPaid: updatedIsPaid,
+        paymentMethod: editableInvoice.paymentMethod || null, // Include payment method
       };
 
-      console.log("💾 Updating order with totals:", orderUpdatePayload);
+      console.log(
+        "💾 Updating order with totals, isPaid status and paymentMethod:",
+        orderUpdatePayload,
+      );
 
       const orderUpdateResponse = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${editableInvoice.id}`,
+        `/api/orders/${editableInvoice.id}`,
         orderUpdatePayload,
       );
 
@@ -2045,6 +2074,22 @@ export default function SalesOrders() {
                 tax: Math.round(itemTax).toString(),
                 priceBeforeTax: Math.round(priceBeforeTax).toString(),
                 total: calculatedTotal.toString(),
+                taxRate: (taxRate * 100).toString(),
+                // Preserve other fields
+                productId:
+                  edited.productId !== undefined
+                    ? edited.productId
+                    : item.productId,
+                productName:
+                  edited.productName !== undefined
+                    ? edited.productName
+                    : item.productName,
+                sku:
+                  edited.sku !== undefined
+                    ? edited.sku
+                    : item.sku || item.productSku,
+                quantity: quantity,
+                unitPrice: unitPrice.toString(),
               };
             });
           }
@@ -2055,32 +2100,12 @@ export default function SalesOrders() {
 
         return; // Exit early since we already updated the state
       }
-
+      editableInvoice[field] = value;
       setEditableInvoice({
         ...editableInvoice,
-        [field]: value,
       });
     }
   };
-
-  // State to track edited items locally (only update UI, not database)
-  const [editedOrderItems, setEditedOrderItems] = useState<{
-    [itemId: number]: {
-      quantity?: number;
-      unitPrice?: string;
-      discount?: string;
-      total?: string; // Add total to track calculated total
-      sku?: string; // Add sku field
-      productName?: string; // Add productName field
-      productId?: number; // Add productId field
-      _deleted?: boolean; // Flag for deletion
-      notes?: string; // Add notes field
-      tax?: string; // Add tax to edited item state
-      _isNew?: boolean; // Flag for new unsaved items
-      priceBeforeTax?: string; // Add priceBeforeTax to edited item state
-      taxRate?: string; // Add taxRate to edited item state
-    };
-  }>({});
 
   // Query payment methods data
   const { data: paymentMethodsData = [] } = useQuery({
@@ -2142,6 +2167,13 @@ export default function SalesOrders() {
       // Recalculate discount allocation for each item
       if (totalBeforeDiscount > 0) {
         const newEditedItems: typeof editedOrderItems = {};
+
+        // Preserve deleted items - DON'T recalculate them
+        Object.keys(editedOrderItems).forEach((itemId) => {
+          if (editedOrderItems[parseInt(itemId)]?._deleted) {
+            newEditedItems[parseInt(itemId)] = editedOrderItems[parseInt(itemId)];
+          }
+        });
 
         visibleItems.forEach((item: any, index: number) => {
           const edited = editedOrderItems[item.id] || {};
@@ -2254,8 +2286,17 @@ export default function SalesOrders() {
           };
         });
 
-        // Update all items at once
-        setEditedOrderItems(newEditedItems);
+        // Update all items at once - merge with existing deleted items
+        setEditedOrderItems((prev) => {
+          const merged = { ...newEditedItems };
+          // Ensure deleted items are preserved
+          Object.keys(prev).forEach((itemId) => {
+            if (prev[parseInt(itemId)]?._deleted) {
+              merged[parseInt(itemId)] = prev[parseInt(itemId)];
+            }
+          });
+          return merged;
+        });
       }
     }
 
@@ -2346,6 +2387,8 @@ export default function SalesOrders() {
         total: newTotal,
       };
     });
+
+    // No need to filter filteredInvoices here, it's for the main list
   }, [
     editedOrderItems,
     orderItems,
@@ -2354,6 +2397,7 @@ export default function SalesOrders() {
     editableInvoice?.priceIncludeTax,
     products,
     storeSettings,
+    selectedInvoice, // Include selectedInvoice to ensure calculations are based on the current context
   ]);
 
   const updateOrderItemField = (itemId: number, field: string, value: any) => {
@@ -2506,10 +2550,10 @@ export default function SalesOrders() {
               );
               const itemAfterPerDiscount = subtotal - itemDiscount;
               const itemOrderDiscount =
-                totalAfterPerDiscount > 0
+                itemSubtotalAfterPerDiscount > 0
                   ? Math.round(
-                      (orderDiscount * itemAfterPerPerDiscount) /
-                        totalAfterPerDiscount,
+                      (orderDiscount * itemAfterPerDiscount) /
+                        itemSubtotalAfterPerDiscount,
                     )
                   : 0;
               previousDiscounts += itemOrderDiscount;
@@ -2517,10 +2561,10 @@ export default function SalesOrders() {
             itemDiscountAmount = Math.max(0, orderDiscount - previousDiscounts);
           } else {
             itemDiscountAmount =
-              totalAfterPerDiscount > 0
+              itemSubtotalAfterPerDiscount > 0
                 ? Math.round(
                     (orderDiscount * itemSubtotalAfterPerDiscount) /
-                      totalAfterPerDiscount,
+                      itemSubtotalAfterPerDiscount,
                   )
                 : 0;
           }
@@ -2730,7 +2774,7 @@ export default function SalesOrders() {
     return totals;
   };
 
-  // Calculate totals dynamically based on order items and edits
+  // Calculate totals from order items and edits
   const displayTotals = useMemo(() => {
     if (!selectedInvoice) return { subtotal: 0, tax: 0, discount: 0, total: 0 };
 
@@ -2742,9 +2786,7 @@ export default function SalesOrders() {
         false;
       let calculatedSubtotal = 0;
       let calculatedTax = 0;
-      const orderDiscount = parseFloat(
-        editableInvoice?.discount || selectedInvoice.discount || "0",
-      );
+      const orderDiscount = parseFloat(editableInvoice?.discount || "0");
 
       // Calculate from visible order items (excluding deleted ones)
       const visibleItems = orderItems.filter(
@@ -3119,7 +3161,7 @@ export default function SalesOrders() {
     try {
       const updateResponse = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${order.id}`,
+        `/api/orders/${order.id}`,
         {
           paymentStatus: "paid",
           status: "paid",
@@ -3146,7 +3188,7 @@ export default function SalesOrders() {
           // Fetch fresh order items
           const itemsResponse = await apiRequest(
             "GET",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+            `/api/order-items/${order.id}`,
           );
           const items = await itemsResponse.json();
 
@@ -3238,7 +3280,7 @@ export default function SalesOrders() {
       console.log("📄 Sales Orders: Preparing receipt for order:", order.id);
 
       // Fetch order items with tax information
-      const response = await apiRequest("GET", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`);
+      const response = await apiRequest("GET", `/api/order-items/${order.id}`);
       const items = await response.json();
 
       // Enrich items with product information including tax rates
@@ -3523,8 +3565,43 @@ export default function SalesOrders() {
                       size="sm"
                       variant="outline"
                       className="flex items-center gap-2 border-red-500 text-red-600 hover:bg-red-50"
-                      disabled={selectedOrderIds.size === 0}
-                      onClick={() => setShowBulkCancelDialog(true)}
+                      disabled={
+                        selectedOrderIds.size === 0 ||
+                        filteredInvoices
+                          .filter((item) =>
+                            selectedOrderIds.has(`${item.type}-${item.id}`),
+                          )
+                          .some(
+                            (item) =>
+                              item.displayStatus === 1 || // Completed orders
+                              item.status === "paid" || // Paid orders
+                              item.status === "cancelled", // Already cancelled
+                          )
+                      }
+                      onClick={() => {
+                        // Check if any selected orders are not deletable
+                        const selectedOrders = filteredInvoices.filter((item) =>
+                          selectedOrderIds.has(`${item.type}-${item.id}`),
+                        );
+                        const hasCompletedOrders = selectedOrders.some(
+                          (item) =>
+                            item.displayStatus === 1 ||
+                            item.status === "paid" ||
+                            item.status === "cancelled",
+                        );
+
+                        if (hasCompletedOrders) {
+                          toast({
+                            title: "Không thể hủy",
+                            description:
+                              "Không thể hủy đơn hàng đã hoàn thành, đã thanh toán hoặc đã hủy",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        setShowBulkCancelDialog(true);
+                      }}
                     >
                       <X className="w-4 h-4" />
                       {t("common.cancelOrder")} ({selectedOrderIds.size})
@@ -3801,1389 +3878,1537 @@ export default function SalesOrders() {
                             </td>
                           </tr>
                         ) : (
-                          filteredInvoices.map((item) => {
-                            // Get customer info - prioritize customerId from customer table if order has customerId
-                            let customerCode =
-                              item.customerCode || item.customerTaxCode || "";
+                          filteredInvoices
+                            .filter(
+                              (item: any) =>
+                                !editedOrderItems[item.id]?._deleted,
+                            )
+                            .map((item) => {
+                              // Get customer info - prioritize customerId from customer table if order has customerId
+                              let customerCode =
+                                item.customerCode || item.customerTaxCode || "";
 
-                            // If order has customerId, try to find customer in customers list
-                            if (
-                              item.customerId &&
-                              customers &&
-                              customers.length > 0
-                            ) {
-                              const customer = customers.find(
-                                (c: any) =>
-                                  c.id === item.customerId ||
-                                  c.name == item.customerName,
-                              );
-                              if (customer && customer.customerId) {
-                                customerCode = customer.customerId;
+                              // If order has customerId, try to find customer in customers list
+                              if (
+                                item.customerId &&
+                                customers &&
+                                customers.length > 0
+                              ) {
+                                const customer = customers.find(
+                                  (c: any) =>
+                                    c.id === item.customerId ||
+                                    c.name == item.customerName,
+                                );
+                                if (customer && customer.customerId) {
+                                  customerCode = customer.customerId;
+                                }
                               }
-                            }
 
-                            const customerName = item.customerName || "";
-                            const customerPhone = item.customerPhone || ""; // Get customer phone
-                            const discount = parseFloat(item.discount || "0");
-                            const tax = parseFloat(item.tax || "0");
-                            const subtotal = parseFloat(item.subtotal || "0");
-                            const total = parseFloat(item.total || "0");
-                            const paid = total;
-                            const symbol = item.symbol || "";
-                            const invoiceNumber =
-                              item.invoiceNumber ||
-                              String(item.id).padStart(8, "0");
-                            const notes = item.notes || "";
+                              const customerName = item.customerName || "";
+                              const customerPhone = item.customerPhone || ""; // Get customer phone
+                              const discount = parseFloat(item.discount || "0");
+                              const tax = parseFloat(item.tax || "0");
+                              const subtotal = parseFloat(item.subtotal || "0");
+                              const total = parseFloat(item.total || "0");
+                              const paid = total;
+                              const symbol = item.symbol || "";
+                              const invoiceNumber =
+                                item.invoiceNumber ||
+                                String(item.id).padStart(8, "0");
+                              const notes = item.notes || "";
 
-                            const itemSymbol =
-                              item.symbol || item.templateNumber || "";
+                              const itemSymbol =
+                                item.symbol || item.templateNumber || "";
 
-                            return (
-                              <>
-                                <tr
-                                  key={`${item.type}-${item.id}`}
-                                  className={`hover:bg-gray-50 ${
-                                    selectedInvoice?.id === item.id &&
-                                    selectedInvoice?.type === item.type
-                                      ? "bg-blue-100"
-                                      : ""
-                                  }`}
-                                  onClick={() => {
-                                    const itemWithType = {
-                                      ...item,
-                                      type:
-                                        item.type ||
-                                        (item.orderNumber
-                                          ? "order"
-                                          : "invoice"),
-                                    };
-                                    setSelectedInvoice(itemWithType);
-                                  }}
-                                >
-                                  <td className="px-3 py-3 text-center">
-                                    <Checkbox
-                                      checked={isOrderSelected(
-                                        item.id,
-                                        item.type,
-                                      )}
-                                      onCheckedChange={(checked) =>
-                                        handleSelectOrder(
+                              return (
+                                <>
+                                  <tr
+                                    key={`${item.type}-${item.id}`}
+                                    className={`hover:bg-gray-50 ${
+                                      selectedInvoice?.id === item.id &&
+                                      selectedInvoice?.type === item.type
+                                        ? "bg-blue-100"
+                                        : ""
+                                    }`}
+                                    onClick={() => {
+                                      const itemWithType = {
+                                        ...item,
+                                        type:
+                                          item.type ||
+                                          (item.orderNumber
+                                            ? "order"
+                                            : "invoice"),
+                                      };
+                                      setSelectedInvoice(itemWithType);
+                                    }}
+                                  >
+                                    <td className="px-3 py-3 text-center">
+                                      <Checkbox
+                                        checked={isOrderSelected(
                                           item.id,
                                           item.type,
-                                          checked as boolean,
-                                        )
-                                      }
-                                      onClick={(e) => e.stopPropagation()}
-                                    />
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    <div
-                                      className="font-medium text-[16px]"
-                                      title={
-                                        item.orderNumber || item.displayNumber
-                                      }
-                                    >
-                                      {item.orderNumber || item.displayNumber}
-                                    </div>
-                                  </td>
-                                  {storeSettings?.businessType ===
-                                    "laundry" && (
-                                    <td className="text-center border-r min-w-[100px] px-4">
-                                      <Badge
-                                        className={
-                                          item.isPaid
-                                            ? "bg-green-100 text-green-800"
-                                            : "bg-gray-100 text-gray-600"
+                                        )}
+                                        onCheckedChange={(checked) =>
+                                          handleSelectOrder(
+                                            item.id,
+                                            item.type,
+                                            checked as boolean,
+                                          )
+                                        }
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      <div
+                                        className="font-medium text-[16px]"
+                                        title={
+                                          item.orderNumber || item.displayNumber
                                         }
                                       >
-                                        {item.isPaid
-                                          ? t("common.returned")
-                                          : t("common.notReturned")}
-                                      </Badge>
+                                        {item.orderNumber || item.displayNumber}
+                                      </div>
                                     </td>
-                                  )}
-                                  <td className="px-3 py-3 text-center">
-                                    {getInvoiceStatusBadge(
-                                      item.displayStatus,
-                                      item,
+                                    {storeSettings?.businessType ===
+                                      "laundry" && (
+                                      <td className="text-center border-r min-w-[100px] px-4">
+                                        <Badge
+                                          className={
+                                            item.isPaid
+                                              ? "bg-green-100 text-green-800"
+                                              : "bg-gray-100 text-gray-600"
+                                          }
+                                        >
+                                          {item.isPaid
+                                            ? t("common.returned")
+                                            : t("common.notReturned")}
+                                        </Badge>
+                                      </td>
                                     )}
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    <div className="text-[16px] truncate">
-                                      {formatDate(item.createdAt)}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    <div className="text-[16px] truncate">
-                                      {(() => {
-                                        // Show completion/cancellation date based on status
-                                        if (
-                                          item.displayStatus === 1 ||
-                                          item.status === "paid"
-                                        ) {
-                                          // Completed - show updatedAt
-                                          return formatDate(item.updatedAt);
-                                        } else if (
-                                          item.displayStatus === 3 ||
-                                          item.status === "cancelled"
-                                        ) {
-                                          // Cancelled - show updatedAt
-                                          return formatDate(item.updatedAt);
-                                        }
-                                        return "-";
-                                      })()}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    <div className="text-[16px]">
-                                      {(() => {
-                                        if (item.salesChannel === "table") {
-                                          return t("orders.eatIn");
-                                        } else if (
-                                          item.salesChannel === "pos"
-                                        ) {
-                                          return t("orders.atCounter");
-                                        } else if (
-                                          item.salesChannel === "online"
-                                        ) {
-                                          return t("orders.online");
-                                        } else if (
-                                          item.salesChannel === "delivery"
-                                        ) {
-                                          return t("orders.delivery");
-                                        }
-                                        return t("orders.atCounter"); // default fallback
-                                      })()}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    <div
-                                      className="font-mono truncate"
-                                      title={customerCode}
-                                    >
-                                      {customerCode || "-"}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    <div
-                                      className="truncate"
-                                      title={customerName}
-                                    >
-                                      {customerName}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    {" "}
-                                    {/* Added cell for customer phone */}
-                                    <div
-                                      className="truncate"
-                                      title={customerPhone}
-                                    >
-                                      {customerPhone || "-"}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3 text-right">
-                                    <div className="font-medium">
-                                      {formatCurrency(subtotal)}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3 text-right">
-                                    <div className="text-red-600">
-                                      {(() => {
-                                        // If order discount is 0, calculate from order items
-                                        if (discount === 0 && item.id) {
-                                          // Get order items for this order from cache
-                                          const cachedItems =
-                                            queryClient.getQueryData([
-                                              "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items",
-                                              item.id,
-                                            ]) as any[];
+                                    <td className="px-3 py-3 text-center">
+                                      {getInvoiceStatusBadge(
+                                        item.displayStatus,
+                                        item,
+                                      )}
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      <div className="text-[16px] truncate">
+                                        {formatDate(item.createdAt)}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      <div className="text-[16px] truncate">
+                                        {(() => {
+                                          // Show completion/cancellation date based on status
                                           if (
-                                            cachedItems &&
-                                            cachedItems.length > 0
+                                            item.displayStatus === 1 ||
+                                            item.status === "paid"
                                           ) {
-                                            const totalItemDiscount =
-                                              cachedItems.reduce(
-                                                (sum, orderItem) => {
-                                                  return (
-                                                    sum +
-                                                    parseFloat(
-                                                      orderItem.discount || "0",
-                                                    )
-                                                  );
-                                                },
-                                                0,
-                                              );
-                                            // Only show if there's actually item discount
-                                            if (totalItemDiscount > 0) {
-                                              return formatCurrency(
-                                                totalItemDiscount,
-                                              );
+                                            // Completed - show updatedAt
+                                            return formatDate(item.updatedAt);
+                                          } else if (
+                                            item.displayStatus === 3 ||
+                                            item.status === "cancelled"
+                                          ) {
+                                            // Cancelled - show updatedAt
+                                            return formatDate(item.updatedAt);
+                                          }
+                                          return "-";
+                                        })()}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      <div className="text-[16px]">
+                                        {(() => {
+                                          if (item.salesChannel === "table") {
+                                            return t("orders.eatIn");
+                                          } else if (
+                                            item.salesChannel === "pos"
+                                          ) {
+                                            return t("orders.atCounter");
+                                          } else if (
+                                            item.salesChannel === "online"
+                                          ) {
+                                            return t("orders.online");
+                                          } else if (
+                                            item.salesChannel === "delivery"
+                                          ) {
+                                            return t("orders.delivery");
+                                          }
+                                          return t("orders.atCounter"); // default fallback
+                                        })()}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      <div
+                                        className="font-mono truncate"
+                                        title={customerCode}
+                                      >
+                                        {customerCode || "-"}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      <div
+                                        className="truncate"
+                                        title={customerName}
+                                      >
+                                        {customerName}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      {" "}
+                                      {/* Added cell for customer phone */}
+                                      <div
+                                        className="truncate"
+                                        title={customerPhone}
+                                      >
+                                        {customerPhone || "-"}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3 text-right">
+                                      <div className="font-medium">
+                                        {formatCurrency(subtotal)}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3 text-right">
+                                      <div className="text-red-600">
+                                        {(() => {
+                                          // If order discount is 0, calculate from order items
+                                          if (discount === 0 && item.id) {
+                                            // Get order items for this order from cache
+                                            const cachedItems =
+                                              queryClient.getQueryData([
+                                                "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items",
+                                                item.id,
+                                              ]) as any[];
+                                            if (
+                                              cachedItems &&
+                                              cachedItems.length > 0
+                                            ) {
+                                              const totalItemDiscount =
+                                                cachedItems.reduce(
+                                                  (sum, orderItem) => {
+                                                    return (
+                                                      sum +
+                                                      parseFloat(
+                                                        orderItem.discount ||
+                                                          "0",
+                                                      )
+                                                    );
+                                                  },
+                                                  0,
+                                                );
+                                              // Only show if there's actually item discount
+                                              if (totalItemDiscount > 0) {
+                                                return formatCurrency(
+                                                  totalItemDiscount,
+                                                );
+                                              }
                                             }
                                           }
-                                        }
-                                        return formatCurrency(discount);
-                                      })()}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3 text-right">
-                                    <div className="">
-                                      {formatCurrency(tax)}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3 text-right">
-                                    <div className="font-medium">
-                                      {formatCurrency(total)}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    <div className="">
-                                      {getPaymentMethodName(item.paymentMethod)}
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-3">
-                                    <div className="">{symbol || "-"}</div>
-                                  </td>
+                                          return formatCurrency(discount);
+                                        })()}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3 text-right">
+                                      <div className="">
+                                        {formatCurrency(tax)}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3 text-right">
+                                      <div className="font-medium">
+                                        {formatCurrency(total)}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      <div className="">
+                                        {getPaymentMethodName(
+                                          item.paymentMethod,
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-3">
+                                      <div className="">{symbol || "-"}</div>
+                                    </td>
 
-                                  <td className="px-3 py-3">
-                                    <div
-                                      className="truncate"
-                                      title={notes || "-"}
-                                    >
-                                      {notes || "-"}
-                                    </div>
-                                  </td>
-                                </tr>
-                                {selectedInvoice &&
-                                  selectedInvoice.id === item.id &&
-                                  selectedInvoice.type === item.type && (
-                                    <tr>
-                                      <td
-                                        colSpan={
-                                          storeSettings?.businessType ===
-                                          "laundry"
-                                            ? 16
-                                            : 15
-                                        }
-                                        className="p-0"
+                                    <td className="px-3 py-3">
+                                      <div
+                                        className="truncate"
+                                        title={notes || "-"}
                                       >
-                                        <div className="p-4 border-l-4 border-blue-500 bg-gray-50">
-                                          <Card className="shadow-lg">
-                                            <CardHeader className="pb-3">
-                                              <CardTitle className="text-lg text-blue-700">
-                                                {t("common.orderDetails")}
-                                              </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="space-y-4">
-                                              <div className="bg-white p-4 rounded-lg overflow-x-auto">
-                                                <div className="min-w-[1200px]">
-                                                  <table className="w-full text-base border-collapse">
-                                                    <tbody>
-                                                      <tr>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t(
-                                                            "orders.orderNumberLabel",
-                                                          )}
-                                                          :
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-blue-600 font-semibold text-base">
-                                                          {isEditing &&
-                                                          editableInvoice ? (
-                                                            <Input
-                                                              {...form.register(
-                                                                "orderNumber",
-                                                              )}
-                                                              value={
-                                                                editableInvoice.orderNumber ||
-                                                                ""
-                                                              }
-                                                              onChange={(e) => {
-                                                                updateEditableInvoiceField(
-                                                                  "orderNumber",
-                                                                  e.target
-                                                                    .value,
-                                                                );
-                                                                form.setValue(
-                                                                  "orderNumber",
-                                                                  e.target
-                                                                    .value,
-                                                                );
-                                                              }}
-                                                              className="w-32"
-                                                              disabled={true}
-                                                            />
-                                                          ) : (
-                                                            selectedInvoice.orderNumber ||
-                                                            selectedInvoice.displayNumber
-                                                          )}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t("common.date")}:
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-base">
-                                                          {isEditing &&
-                                                          editableInvoice ? (
-                                                            <Input
-                                                              type="datetime-local"
-                                                              {...form.register(
-                                                                "createdAt",
-                                                              )}
-                                                              value={
-                                                                editableInvoice.createdAt?.slice(
-                                                                  0,
-                                                                  16,
-                                                                ) || ""
-                                                              }
-                                                              onChange={(e) => {
-                                                                updateEditableInvoiceField(
-                                                                  "createdAt",
-                                                                  e.target
-                                                                    .value,
-                                                                );
-                                                                form.setValue(
-                                                                  "createdAt",
-                                                                  e.target
-                                                                    .value,
-                                                                );
-                                                              }}
-                                                              className="w-44"
-                                                              disabled={
-                                                                selectedInvoice.displayStatus ===
-                                                                1
-                                                              }
-                                                            />
-                                                          ) : (
-                                                            formatDate(
-                                                              selectedInvoice.createdAt,
-                                                            )
-                                                          )}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t("orders.customer")}
-                                                          :
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-blue-600 font-semibold text-base">
-                                                          {isEditing &&
-                                                          editableInvoice ? (
-                                                            <div className="relative">
+                                        {notes || "-"}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  {selectedInvoice &&
+                                    selectedInvoice.id === item.id &&
+                                    selectedInvoice.type === item.type && (
+                                      <tr>
+                                        <td
+                                          colSpan={
+                                            storeSettings?.businessType ===
+                                            "laundry"
+                                              ? 16
+                                              : 15
+                                          }
+                                          className="p-0"
+                                        >
+                                          <div className="p-4 border-l-4 border-blue-500 bg-gray-50">
+                                            <Card className="shadow-lg">
+                                              <CardHeader className="pb-3">
+                                                <CardTitle className="text-lg text-blue-700">
+                                                  {t("common.orderDetails")}
+                                                </CardTitle>
+                                              </CardHeader>
+                                              <CardContent className="space-y-4">
+                                                <div className="bg-white p-4 rounded-lg overflow-x-auto">
+                                                  <div className="min-w-[1200px]">
+                                                    <table className="w-full text-base border-collapse">
+                                                      <tbody>
+                                                        <tr>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t(
+                                                              "orders.orderNumberLabel",
+                                                            )}
+                                                            :
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-blue-600 font-semibold text-base">
+                                                            {isEditing &&
+                                                            editableInvoice ? (
                                                               <Input
-                                                                list={`customer-name-list-${selectedInvoice.id}`}
+                                                                {...form.register(
+                                                                  "orderNumber",
+                                                                )}
                                                                 value={
-                                                                  editableInvoice.customerName ||
+                                                                  editableInvoice.orderNumber ||
                                                                   ""
                                                                 }
                                                                 onChange={(
                                                                   e,
                                                                 ) => {
-                                                                  const inputValue =
-                                                                    e.target
-                                                                      .value;
-
-                                                                  // Always update customer name as user types
                                                                   updateEditableInvoiceField(
-                                                                    "customerName",
-                                                                    inputValue,
+                                                                    "orderNumber",
+                                                                    e.target
+                                                                      .value,
                                                                   );
-
-                                                                  // Try to find exact match in customers list
-                                                                  const selectedCustomer =
-                                                                    customers.find(
-                                                                      (
-                                                                        c: any,
-                                                                      ) => {
-                                                                        // Check for exact name match
-                                                                        if (
-                                                                          c.name ===
-                                                                          inputValue
-                                                                        )
-                                                                          return true;
-
-                                                                        // Check if input matches datalist format: "Name - Phone (Code)"
-                                                                        const datalistValue = `${c.name} - ${c.phone || "N/A"} (${c.customerId || "N/A"})`;
-                                                                        if (
-                                                                          datalistValue ===
-                                                                          inputValue
-                                                                        )
-                                                                          return true;
-
-                                                                        return false;
-                                                                      },
-                                                                    );
-
-                                                                  if (
-                                                                    selectedCustomer
-                                                                  ) {
-                                                                    // Auto-fill customer information
-                                                                    updateEditableInvoiceField(
-                                                                      "customerName",
-                                                                      selectedCustomer.name,
-                                                                    );
-                                                                    updateEditableInvoiceField(
-                                                                      "customerPhone",
-                                                                      selectedCustomer.phone ||
-                                                                        "",
-                                                                    );
-                                                                    updateEditableInvoiceField(
-                                                                      "customerTaxCode",
-                                                                      selectedCustomer.customerTaxCode ||
-                                                                        selectedCustomer.taxCode ||
-                                                                        "",
-                                                                    );
-                                                                    updateEditableInvoiceField(
-                                                                      "customerAddress",
-                                                                      selectedCustomer.address ||
-                                                                        "",
-                                                                    );
-                                                                    updateEditableInvoiceField(
-                                                                      "customerEmail",
-                                                                      selectedCustomer.email ||
-                                                                        "",
-                                                                    );
-                                                                    updateEditableInvoiceField(
-                                                                      "customerId",
-                                                                      selectedCustomer.id,
-                                                                    );
-                                                                    updateEditableInvoiceField(
-                                                                      "customerCode",
-                                                                      selectedCustomer.customerId ||
-                                                                        selectedCustomer.customerTaxCode ||
-                                                                        "",
-                                                                    );
-                                                                  }
+                                                                  form.setValue(
+                                                                    "orderNumber",
+                                                                    e.target
+                                                                      .value,
+                                                                  );
                                                                 }}
-                                                                className="w-60"
+                                                                className="w-32"
+                                                                disabled={true}
+                                                              />
+                                                            ) : (
+                                                              selectedInvoice.orderNumber ||
+                                                              selectedInvoice.displayNumber
+                                                            )}
+                                                          </td>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t("common.date")}:
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-base">
+                                                            {isEditing &&
+                                                            editableInvoice ? (
+                                                              <Input
+                                                                type="datetime-local"
+                                                                {...form.register(
+                                                                  "createdAt",
+                                                                )}
+                                                                value={
+                                                                  editableInvoice.createdAt?.slice(
+                                                                    0,
+                                                                    16,
+                                                                  ) || ""
+                                                                }
+                                                                onChange={(
+                                                                  e,
+                                                                ) => {
+                                                                  updateEditableInvoiceField(
+                                                                    "createdAt",
+                                                                    e.target
+                                                                      .value,
+                                                                  );
+                                                                  form.setValue(
+                                                                    "createdAt",
+                                                                    e.target
+                                                                      .value,
+                                                                  );
+                                                                }}
+                                                                className="w-44"
                                                                 disabled={
                                                                   selectedInvoice.displayStatus ===
                                                                   1
                                                                 }
-                                                                placeholder="Nhập tên khách hàng..."
                                                               />
-                                                              <datalist
-                                                                id={`customer-name-list-${selectedInvoice.id}`}
-                                                              >
-                                                                {customers.map(
-                                                                  (c: any) => (
-                                                                    <option
-                                                                      key={c.id}
-                                                                      value={`${c.name} - ${c.phone || "N/A"} (${c.customerId || "N/A"})`}
-                                                                    >
-                                                                      {c.name} -{" "}
-                                                                      {c.phone ||
-                                                                        "N/A"}{" "}
-                                                                      (
-                                                                      {c.customerId ||
-                                                                        "N/A"}
-                                                                      )
-                                                                    </option>
-                                                                  ),
+                                                            ) : (
+                                                              formatDate(
+                                                                selectedInvoice.createdAt,
+                                                              )
+                                                            )}
+                                                          </td>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t(
+                                                              "orders.customer",
+                                                            )}
+                                                            :
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-blue-600 font-semibold text-base">
+                                                            {isEditing &&
+                                                            editableInvoice ? (
+                                                              <div className="relative">
+                                                                <Input
+                                                                  list={`customer-name-list-${selectedInvoice.id}`}
+                                                                  value={
+                                                                    editableInvoice.customerName ||
+                                                                    ""
+                                                                  }
+                                                                  onChange={(
+                                                                    e,
+                                                                  ) => {
+                                                                    const inputValue =
+                                                                      e.target
+                                                                        .value;
+
+                                                                    // Try to find exact match in customers list
+                                                                    const selectedCustomer =
+                                                                      customers.find(
+                                                                        (
+                                                                          c: any,
+                                                                        ) =>
+                                                                          c.name ===
+                                                                          inputValue,
+                                                                      );
+
+                                                                    if (
+                                                                      selectedCustomer
+                                                                    ) {
+                                                                      // Auto-fill customer information when exact match found
+                                                                      updateEditableInvoiceField(
+                                                                        "customerName",
+                                                                        selectedCustomer.name,
+                                                                      );
+                                                                      updateEditableInvoiceField(
+                                                                        "customerPhone",
+                                                                        selectedCustomer.phone ||
+                                                                          "",
+                                                                      );
+                                                                      updateEditableInvoiceField(
+                                                                        "customerTaxCode",
+                                                                        selectedCustomer.address ||
+                                                                          "",
+                                                                      );
+                                                                      updateEditableInvoiceField(
+                                                                        "customerAddress",
+                                                                        selectedCustomer.address ||
+                                                                          "",
+                                                                      );
+                                                                      updateEditableInvoiceField(
+                                                                        "customerEmail",
+                                                                        selectedCustomer.email ||
+                                                                          "",
+                                                                      );
+                                                                      updateEditableInvoiceField(
+                                                                        "customerId",
+                                                                        selectedCustomer.id,
+                                                                      );
+                                                                      updateEditableInvoiceField(
+                                                                        "customerCode",
+                                                                        selectedCustomer.customerId ||
+                                                                          selectedCustomer.customerTaxCode ||
+                                                                          "",
+                                                                      );
+                                                                    } else {
+                                                                      // Only update customer name if no match found (user is typing freely)
+                                                                      updateEditableInvoiceField(
+                                                                        "customerName",
+                                                                        inputValue,
+                                                                      );
+                                                                    }
+                                                                  }}
+                                                                  className="w-60"
+                                                                  disabled={
+                                                                    selectedInvoice.displayStatus ===
+                                                                    1
+                                                                  }
+                                                                  placeholder="Nhập tên khách hàng..."
+                                                                />
+                                                                <datalist
+                                                                  id={`customer-name-list-${selectedInvoice.id}`}
+                                                                >
+                                                                  {customers.map(
+                                                                    (
+                                                                      c: any,
+                                                                    ) => (
+                                                                      <option
+                                                                        key={
+                                                                          c.id
+                                                                        }
+                                                                        value={
+                                                                          c.name
+                                                                        }
+                                                                      />
+                                                                    ),
+                                                                  )}
+                                                                </datalist>
+                                                              </div>
+                                                            ) : (
+                                                              <>
+                                                                {(isEditing
+                                                                  ? editableInvoice?.customerName
+                                                                  : selectedInvoice.customerName) ||
+                                                                  "Khách hàng"}
+                                                                {(isEditing
+                                                                  ? editableInvoice?.customerPhone
+                                                                  : selectedInvoice.customerPhone) &&
+                                                                  ` - ${isEditing ? editableInvoice?.customerPhone : selectedInvoice.customerPhone}`}
+                                                              </>
+                                                            )}
+                                                          </td>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t(
+                                                              "orders.phoneNumber",
+                                                            )}
+                                                            :
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-base">
+                                                            {isEditing &&
+                                                            editableInvoice ? (
+                                                              <Input
+                                                                {...form.register(
+                                                                  "customerPhone",
                                                                 )}
-                                                              </datalist>
-                                                            </div>
-                                                          ) : (
+                                                                value={
+                                                                  editableInvoice.customerPhone ||
+                                                                  ""
+                                                                }
+                                                                onChange={(
+                                                                  e,
+                                                                ) => {
+                                                                  updateEditableInvoiceField(
+                                                                    "customerPhone",
+                                                                    e.target
+                                                                      .value,
+                                                                  );
+                                                                  form.setValue(
+                                                                    "customerPhone",
+                                                                    e.target
+                                                                      .value,
+                                                                  );
+                                                                }}
+                                                                className="w-32"
+                                                                disabled={
+                                                                  selectedInvoice.displayStatus ===
+                                                                  1
+                                                                }
+                                                                placeholder="Số điện thoại"
+                                                              />
+                                                            ) : (
+                                                              <span className="text-sm">
+                                                                {selectedInvoice.customerPhone ||
+                                                                  "-"}
+                                                              </span>
+                                                            )}
+                                                          </td>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t("orders.table")}:
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-base">
+                                                            {selectedInvoice.salesChannel ===
+                                                              "table" &&
+                                                            selectedInvoice.tableId
+                                                              ? getTableNumber(
+                                                                  selectedInvoice.tableId,
+                                                                )
+                                                              : "-"}
+                                                          </td>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t("common.status")}
+                                                            :
+                                                          </td>
+                                                          <td className="py-2 text-base">
+                                                            {(() => {
+                                                              const statusLabels =
+                                                                {
+                                                                  1: `${t("common.completed")}`,
+                                                                  2: `${t("common.serving")}`,
+                                                                  3: `${t("common.cancelled")}`,
+                                                                };
+                                                              return (
+                                                                statusLabels[
+                                                                  selectedInvoice
+                                                                    .displayStatus
+                                                                ] ||
+                                                                "Đang phục vụ"
+                                                              );
+                                                            })()}
+                                                          </td>
+                                                        </tr>
+                                                        <tr>
+                                                          {storeSettings?.businessType ===
+                                                            "laundry" && (
                                                             <>
-                                                              {(isEditing
-                                                                ? editableInvoice?.customerName
-                                                                : selectedInvoice.customerName) ||
-                                                                "Khách hàng"}
-                                                              {(isEditing
-                                                                ? editableInvoice?.customerPhone
-                                                                : selectedInvoice.customerPhone) &&
-                                                                ` - ${isEditing ? editableInvoice?.customerPhone : selectedInvoice.customerPhone}`}
+                                                              <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                                {t(
+                                                                  "common.returned",
+                                                                )}
+                                                                :
+                                                              </td>
+                                                              <td className="py-2 pr-6 text-base">
+                                                                {isEditing &&
+                                                                editableInvoice ? (
+                                                                  <Checkbox
+                                                                    {...form.register(
+                                                                      "isPaid",
+                                                                    )}
+                                                                    checked={
+                                                                      editableInvoice.isPaid ||
+                                                                      false
+                                                                    }
+                                                                    onCheckedChange={(
+                                                                      checked,
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "✅ isPaid checkbox changed to:",
+                                                                        checked,
+                                                                      );
+                                                                      updateEditableInvoiceField(
+                                                                        "isPaid",
+                                                                        checked as boolean,
+                                                                      );
+                                                                      form.setValue(
+                                                                        "isPaid",
+                                                                        checked,
+                                                                      );
+                                                                    }}
+                                                                  />
+                                                                ) : (
+                                                                  <Badge
+                                                                    className={
+                                                                      selectedInvoice?.isPaid
+                                                                        ? "bg-green-100 text-green-800"
+                                                                        : "bg-gray-100 text-gray-600"
+                                                                    }
+                                                                  >
+                                                                    {selectedInvoice?.isPaid
+                                                                      ? t(
+                                                                          "common.returned",
+                                                                        )
+                                                                      : t(
+                                                                          "common.notReturned",
+                                                                        )}
+                                                                  </Badge>
+                                                                )}
+                                                              </td>
                                                             </>
                                                           )}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t(
-                                                            "orders.phoneNumber",
-                                                          )}
-                                                          :
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-base">
-                                                          {isEditing &&
-                                                          editableInvoice ? (
-                                                            <Input
-                                                              {...form.register(
-                                                                "customerPhone",
-                                                              )}
-                                                              value={
-                                                                editableInvoice.customerPhone ||
-                                                                ""
-                                                              }
-                                                              onChange={(e) => {
-                                                                updateEditableInvoiceField(
-                                                                  "customerPhone",
-                                                                  e.target
-                                                                    .value,
-                                                                );
-                                                                form.setValue(
-                                                                  "customerPhone",
-                                                                  e.target
-                                                                    .value,
-                                                                );
-                                                              }}
-                                                              className="w-32"
-                                                              disabled={
-                                                                selectedInvoice.displayStatus ===
-                                                                1
-                                                              }
-                                                              placeholder="Số điện thoại"
-                                                            />
-                                                          ) : (
-                                                            <span className="text-sm">
-                                                              {selectedInvoice.customerPhone ||
-                                                                "-"}
-                                                            </span>
-                                                          )}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t("orders.table")}:
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-base">
-                                                          {selectedInvoice.salesChannel ===
-                                                            "table" &&
-                                                          selectedInvoice.tableId
-                                                            ? getTableNumber(
-                                                                selectedInvoice.tableId,
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t(
+                                                              "orders.salesType",
+                                                            )}
+                                                            :
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-base">
+                                                            {(() => {
+                                                              const salesChannel =
+                                                                selectedInvoice.salesChannel;
+                                                              if (
+                                                                salesChannel ===
+                                                                "table"
                                                               )
-                                                            : "-"}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t("common.status")}:
-                                                        </td>
-                                                        <td className="py-2 text-base">
-                                                          {(() => {
-                                                            const statusLabels =
-                                                              {
-                                                                1: `${t("common.completed")}`,
-                                                                2: `${t("common.serving")}`,
-                                                                3: `${t("common.cancelled")}`,
-                                                              };
-                                                            return (
-                                                              statusLabels[
-                                                                selectedInvoice
-                                                                  .displayStatus
-                                                              ] ||
-                                                              "Đang phục vụ"
-                                                            );
-                                                          })()}
-                                                        </td>
-                                                      </tr>
-                                                      <tr>
-                                                        {storeSettings?.businessType ===
-                                                          "laundry" && (
-                                                          <>
-                                                            <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                              {t(
-                                                                "common.returned",
-                                                              )}
-                                                              :
-                                                            </td>
-                                                            <td className="py-2 pr-6 text-base">
-                                                              {isEditing &&
-                                                              editableInvoice ? (
-                                                                <Checkbox
-                                                                  {...form.register(
-                                                                    "isPaid",
-                                                                  )}
-                                                                  checked={
-                                                                    editableInvoice.isPaid ||
-                                                                    false
-                                                                  }
-                                                                  onCheckedChange={(
-                                                                    checked,
-                                                                  ) => {
-                                                                    console.log(
-                                                                      "✅ isPaid checkbox changed to:",
-                                                                      checked,
-                                                                    );
-                                                                    updateEditableInvoiceField(
-                                                                      "isPaid",
-                                                                      checked as boolean,
-                                                                    );
-                                                                    form.setValue(
-                                                                      "isPaid",
-                                                                      checked,
-                                                                    );
-                                                                  }}
-                                                                />
-                                                              ) : (
-                                                                <Badge
-                                                                  className={
-                                                                    selectedInvoice?.isPaid
-                                                                      ? "bg-green-100 text-green-800"
-                                                                      : "bg-gray-100 text-gray-600"
-                                                                  }
-                                                                >
-                                                                  {selectedInvoice?.isPaid
-                                                                    ? t(
-                                                                        "common.returned",
-                                                                      )
-                                                                    : t(
-                                                                        "common.notReturned",
-                                                                      )}
-                                                                </Badge>
-                                                              )}
-                                                            </td>
-                                                          </>
-                                                        )}
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t(
-                                                            "orders.salesType",
-                                                          )}
-                                                          :
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-base">
-                                                          {(() => {
-                                                            const salesChannel =
-                                                              selectedInvoice.salesChannel;
-                                                            if (
-                                                              salesChannel ===
-                                                              "table"
-                                                            )
-                                                              return t(
-                                                                "orders.eatIn",
-                                                              );
-                                                            if (
-                                                              salesChannel ===
-                                                              "pos"
-                                                            )
+                                                                return t(
+                                                                  "orders.eatIn",
+                                                                );
+                                                              if (
+                                                                salesChannel ===
+                                                                "pos"
+                                                              )
+                                                                return t(
+                                                                  "orders.atCounter",
+                                                                );
+                                                              if (
+                                                                salesChannel ===
+                                                                "online"
+                                                              )
+                                                                return t(
+                                                                  "orders.online",
+                                                                );
+                                                              if (
+                                                                salesChannel ===
+                                                                "delivery"
+                                                              )
+                                                                return t(
+                                                                  "orders.delivery",
+                                                                );
                                                               return t(
                                                                 "orders.atCounter",
                                                               );
-                                                            if (
-                                                              salesChannel ===
-                                                              "online"
-                                                            )
-                                                              return t(
-                                                                "orders.online",
-                                                              );
-                                                            if (
-                                                              salesChannel ===
-                                                              "delivery"
-                                                            )
-                                                              return t(
-                                                                "orders.delivery",
-                                                              );
-                                                            return t(
-                                                              "orders.atCounter",
-                                                            );
-                                                          })()}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t(
-                                                            "orders.invoiceSymbol",
-                                                          )}
-                                                          :
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-base">
-                                                          {isEditing &&
-                                                          editableInvoice ? (
-                                                            <Input
-                                                              {...form.register(
-                                                                "symbol",
-                                                              )}
-                                                              value={
-                                                                editableInvoice.symbol ||
-                                                                ""
-                                                              }
-                                                              onChange={(e) =>
-                                                                updateEditableInvoiceField(
+                                                            })()}
+                                                          </td>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t(
+                                                              "orders.invoiceSymbol",
+                                                            )}
+                                                            :
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-base">
+                                                            {isEditing &&
+                                                            editableInvoice ? (
+                                                              <Input
+                                                                {...form.register(
                                                                   "symbol",
-                                                                  e.target
-                                                                    .value,
-                                                                )
-                                                              }
-                                                              className="w-32"
-                                                              disabled={
-                                                                selectedInvoice.displayStatus ===
-                                                                1
-                                                              }
-                                                            />
-                                                          ) : (
-                                                            <span className="text-sm">
-                                                              {selectedInvoice.symbol ||
-                                                                selectedInvoice.templateNumber ||
-                                                                "-"}
-                                                            </span>
-                                                          )}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t(
-                                                            "orders.invoiceNumber",
-                                                          )}
-                                                          :
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-base">
-                                                          {isEditing &&
-                                                          editableInvoice &&
-                                                          selectedInvoice.displayStatus !==
-                                                            1 ? (
-                                                            <Input
-                                                              {...form.register(
-                                                                "templateNumber",
-                                                              )}
-                                                              value={
-                                                                editableInvoice.templateNumber ||
-                                                                ""
-                                                              }
-                                                              onChange={(e) =>
-                                                                updateEditableInvoiceField(
+                                                                )}
+                                                                value={
+                                                                  editableInvoice.symbol ||
+                                                                  ""
+                                                                }
+                                                                onChange={(e) =>
+                                                                  updateEditableInvoiceField(
+                                                                    "symbol",
+                                                                    e.target
+                                                                      .value,
+                                                                  )
+                                                                }
+                                                                className="w-32"
+                                                                disabled={
+                                                                  selectedInvoice.displayStatus ===
+                                                                  1
+                                                                }
+                                                              />
+                                                            ) : (
+                                                              <span className="text-sm">
+                                                                {selectedInvoice.symbol ||
+                                                                  selectedInvoice.templateNumber ||
+                                                                  "-"}
+                                                              </span>
+                                                            )}
+                                                          </td>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t(
+                                                              "orders.invoiceNumber",
+                                                            )}
+                                                            :
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-base">
+                                                            {isEditing &&
+                                                            editableInvoice &&
+                                                            selectedInvoice.displayStatus !==
+                                                              1 ? (
+                                                              <Input
+                                                                {...form.register(
                                                                   "templateNumber",
-                                                                  e.target
-                                                                    .value,
-                                                                )
-                                                              }
-                                                              className="w-40"
-                                                              disabled={
-                                                                selectedInvoice.displayStatus ===
-                                                                1
-                                                              }
-                                                            />
-                                                          ) : (
-                                                            <span className="text-sm">
-                                                              {selectedInvoice.templateNumber ||
-                                                                "-"}
-                                                            </span>
-                                                          )}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                          {t(
-                                                            "common.einvoiceStatusLabel",
-                                                          )}
-                                                        </td>
-                                                        <td className="py-2 pr-6 text-base">
-                                                          {getEInvoiceStatusBadge(
-                                                            selectedInvoice.einvoiceStatus,
-                                                          )}
-                                                        </td>
-                                                      </tr>
-                                                    </tbody>
-                                                  </table>
-                                                </div>
-                                              </div>
-
-                                              <div>
-                                                <h4 className="font-medium mb-3">
-                                                  {t("orders.itemList")}
-                                                </h4>
-                                                {orderItemsLoading ? (
-                                                  <div className="text-center py-8">
-                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                                                    <p className="mt-2 text-gray-500">
-                                                      {t("common.loading")}
-                                                    </p>
+                                                                )}
+                                                                value={
+                                                                  editableInvoice.templateNumber ||
+                                                                  ""
+                                                                }
+                                                                onChange={(e) =>
+                                                                  updateEditableInvoiceField(
+                                                                    "templateNumber",
+                                                                    e.target
+                                                                      .value,
+                                                                  )
+                                                                }
+                                                                className="w-40"
+                                                                disabled={
+                                                                  selectedInvoice.displayStatus ===
+                                                                  1
+                                                                }
+                                                              />
+                                                            ) : (
+                                                              <span className="text-sm">
+                                                                {selectedInvoice.templateNumber ||
+                                                                  "-"}
+                                                              </span>
+                                                            )}
+                                                          </td>
+                                                          <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
+                                                            {t(
+                                                              "common.einvoiceStatusLabel",
+                                                            )}
+                                                          </td>
+                                                          <td className="py-2 pr-6 text-base">
+                                                            {getEInvoiceStatusBadge(
+                                                              selectedInvoice.einvoiceStatus,
+                                                            )}
+                                                          </td>
+                                                        </tr>
+                                                      </tbody>
+                                                    </table>
                                                   </div>
-                                                ) : orderItemsError ? (
-                                                  <div className="text-center py-8">
-                                                    <div className="text-red-500 mb-4">
-                                                      <X className="w-8 h-8 mx-auto mb-2" />
-                                                      <p className="font-medium">
-                                                        {t(
-                                                          "errors.failedToLoadItems",
-                                                        )}
+                                                </div>
+
+                                                <div>
+                                                  <h4 className="font-medium mb-3">
+                                                    {t("orders.itemList")}
+                                                  </h4>
+                                                  {orderItemsLoading ? (
+                                                    <div className="text-center py-8">
+                                                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                                                      <p className="mt-2 text-gray-500">
+                                                        {t("common.loading")}
                                                       </p>
                                                     </div>
-                                                    <p className="text-gray-500 mb-4">
-                                                      {t(
-                                                        "errors.failedToLoadItemData",
-                                                      )}
-                                                    </p>
-                                                    <Button
-                                                      onClick={() => {
-                                                        queryClient.invalidateQueries(
-                                                          {
-                                                            queryKey: [
-                                                              "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items",
-                                                              selectedInvoice?.id,
-                                                            ],
-                                                          },
-                                                        );
-                                                      }}
-                                                      size="sm"
-                                                    >
-                                                      {t("common.retry")}
-                                                    </Button>
-                                                  </div>
-                                                ) : !orderItems ||
-                                                  orderItems.length === 0 ? (
-                                                  <div className="text-center py-8">
-                                                    <Package className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                                                    <p className="text-gray-500">
-                                                      {t("common.noItems")}
-                                                    </p>
-                                                  </div>
-                                                ) : (
-                                                  <div className="border rounded-lg overflow-x-auto">
-                                                    <table className="w-full text-sm min-w-[1200px]">
-                                                      <thead>
-                                                        <tr className="bg-gray-50 border-b">
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-left sticky left-0 bg-green-50 z-10 w-12">
-                                                            {t("common.no")}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-left min-w-[100px]">
-                                                            {t(
-                                                              "orders.itemCode",
-                                                            )}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-left min-w-[180px] max-w-[220px]">
-                                                            {t(
-                                                              "orders.itemName",
-                                                            )}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-center min-w-[60px]">
-                                                            {t("orders.unit")}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-center min-w-[80px]">
-                                                            {t(
-                                                              "common.quantity",
-                                                            )}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
-                                                            {t(
-                                                              "orders.unitPrice",
-                                                            )}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
-                                                            {t(
-                                                              "common.subtotalAmount",
-                                                            )}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
-                                                            {t(
-                                                              "common.discount",
-                                                            )}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
-                                                            {t("common.tax")}
-                                                          </th>
-                                                          <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
-                                                            {t("common.total")}
-                                                          </th>
-                                                          <th className="text-center px-3 py-2 font-medium text-base whitespace-nowrap w-[80px]">
-                                                            {isEditing &&
-                                                            selectedInvoice?.displayStatus !==
-                                                              1 &&
-                                                            !(
-                                                              storeSettings?.businessType ===
-                                                                "laundry" &&
-                                                              selectedInvoice?.status ===
-                                                                "paid"
-                                                            ) ? (
-                                                              <button
-                                                                onClick={
-                                                                  handleAddNewOrderItem
-                                                                }
-                                                                className="text-green-600 hover:text-green-700 font-bold text-lg"
-                                                                title="Thêm dòng mới"
-                                                              >
-                                                                +
-                                                              </button>
-                                                            ) : (
-                                                              ""
-                                                            )}
-                                                          </th>
-                                                        </tr>
-                                                      </thead>
-                                                      <tbody>
-                                                        {(() => {
-                                                          // Filter out items marked for deletion
-                                                          const visibleItems =
-                                                            orderItems.filter(
-                                                              (item: any) =>
-                                                                !editedOrderItems[
-                                                                  item.id
-                                                                ]?._deleted,
-                                                            );
-
-                                                          if (
-                                                            !visibleItems ||
-                                                            visibleItems.length ===
-                                                              0
-                                                          ) {
-                                                            return (
-                                                              <tr className="border-t">
-                                                                <td
-                                                                  colSpan={10} // Adjusted colspan
-                                                                  className="text-center py-4 text-gray-500"
+                                                  ) : orderItemsError ? (
+                                                    <div className="text-center py-8">
+                                                      <div className="text-red-500 mb-4">
+                                                        <X className="w-8 h-8 mx-auto mb-2" />
+                                                        <p className="font-medium">
+                                                          {t(
+                                                            "errors.failedToLoadItems",
+                                                          )}
+                                                        </p>
+                                                      </div>
+                                                      <p className="text-gray-500 mb-4">
+                                                        {t(
+                                                          "errors.failedToLoadItemData",
+                                                        )}
+                                                      </p>
+                                                      <Button
+                                                        onClick={() => {
+                                                          queryClient.invalidateQueries(
+                                                            {
+                                                              queryKey: [
+                                                                "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items",
+                                                                selectedInvoice?.id,
+                                                              ],
+                                                            },
+                                                          );
+                                                        }}
+                                                        size="sm"
+                                                      >
+                                                        {t("common.retry")}
+                                                      </Button>
+                                                    </div>
+                                                  ) : !orderItems ||
+                                                    orderItems.length === 0 ? (
+                                                    <div className="text-center py-8">
+                                                      <Package className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                                                      <p className="text-gray-500">
+                                                        {t("common.noItems")}
+                                                      </p>
+                                                    </div>
+                                                  ) : (
+                                                    <div className="border rounded-lg overflow-x-auto">
+                                                      <table className="w-full text-sm min-w-[1200px]">
+                                                        <thead>
+                                                          <tr className="bg-gray-50 border-b">
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-left sticky left-0 bg-green-50 z-10 w-12">
+                                                              {t("common.no")}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-left min-w-[100px]">
+                                                              {t(
+                                                                "orders.itemCode",
+                                                              )}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-left min-w-[180px] max-w-[220px]">
+                                                              {t(
+                                                                "orders.itemName",
+                                                              )}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-center min-w-[60px]">
+                                                              {t("orders.unit")}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-center min-w-[80px]">
+                                                              {t(
+                                                                "common.quantity",
+                                                              )}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
+                                                              {t(
+                                                                "orders.unitPrice",
+                                                              )}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
+                                                              {t(
+                                                                "common.subtotalAmount",
+                                                              )}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
+                                                              {t(
+                                                                "common.discount",
+                                                              )}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
+                                                              {t("common.tax")}
+                                                            </th>
+                                                            <th className="border-r px-2 py-2 font-medium text-base text-right min-w-[100px]">
+                                                              {t(
+                                                                "common.total",
+                                                              )}
+                                                            </th>
+                                                            <th className="text-center px-3 py-2 font-medium text-base whitespace-nowrap w-[80px]">
+                                                              {isEditing &&
+                                                              selectedInvoice?.displayStatus !==
+                                                                1 &&
+                                                              !(
+                                                                storeSettings?.businessType ===
+                                                                  "laundry" &&
+                                                                selectedInvoice?.status ===
+                                                                  "paid"
+                                                              ) ? (
+                                                                <button
+                                                                  onClick={
+                                                                    handleAddNewOrderItem
+                                                                  }
+                                                                  className="text-green-600 hover:text-green-700 font-bold text-lg"
+                                                                  title="Thêm dòng mới"
                                                                 >
-                                                                  {t(
-                                                                    "common.noItems",
-                                                                  )}
-                                                                </td>
-                                                              </tr>
-                                                            );
-                                                          }
-                                                          return visibleItems.map(
-                                                            (
-                                                              item: any,
-                                                              index: number,
-                                                            ) => {
-                                                              // Get edited values or use original
-                                                              const editedItem =
-                                                                editedOrderItems[
-                                                                  item.id
-                                                                ] || {};
+                                                                  +
+                                                                </button>
+                                                              ) : (
+                                                                ""
+                                                              )}
+                                                            </th>
+                                                          </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                          {(() => {
+                                                            // Filter out ALL items marked for deletion (both positive and negative IDs)
+                                                            const visibleItems =
+                                                              orderItems.filter(
+                                                                (item: any) =>
+                                                                  !editedOrderItems[
+                                                                    item.id
+                                                                  ]?._deleted,
+                                                              );
 
-                                                              // For new items, prioritize edited values
-                                                              const isNewItem =
-                                                                editedItem._isNew ||
-                                                                item._isNew;
-
-                                                              // Get product info - prioritize edited productId
-                                                              const productId =
-                                                                editedItem.productId !==
-                                                                undefined
-                                                                  ? editedItem.productId
-                                                                  : item.productId ||
-                                                                    0;
-
-                                                              const product =
-                                                                products.find(
-                                                                  (p: any) =>
-                                                                    p.id ===
-                                                                    productId,
-                                                                );
-
-                                                              const priceIncludeTax =
-                                                                selectedInvoice?.priceIncludeTax ??
-                                                                storeSettings?.priceIncludesTax ??
-                                                                false;
-
-                                                              // Get all field values - prioritize edited values
-                                                              const sku =
-                                                                editedItem.sku !==
-                                                                undefined
-                                                                  ? editedItem.sku
-                                                                  : item.sku ||
-                                                                    item.productSku ||
-                                                                    product?.sku ||
-                                                                    "";
-
-                                                              const productName =
-                                                                editedItem.productName !==
-                                                                undefined
-                                                                  ? editedItem.productName
-                                                                  : item.productName ||
-                                                                    "";
-
-                                                              const unitPrice =
-                                                                parseFloat(
-                                                                  editedItem.unitPrice !==
-                                                                    undefined
-                                                                    ? editedItem.unitPrice
-                                                                    : item.unitPrice ||
-                                                                        "0",
-                                                                );
-                                                              const quantity =
-                                                                parseFloat(
-                                                                  editedItem.quantity !==
-                                                                    undefined
-                                                                    ? editedItem.quantity
-                                                                    : item.quantity ||
-                                                                        "0",
-                                                                );
-
-                                                              const orderDiscount =
-                                                                parseFloat(
-                                                                  selectedInvoice?.discount ||
-                                                                    "0",
-                                                                );
-
-                                                              // Get discount from editedOrderItems if available, otherwise calculate
-                                                              let itemDiscountAmount =
-                                                                Number(
-                                                                  item.discount ||
-                                                                    "0",
-                                                                );
-
-                                                              if (
-                                                                editedItem.discount !==
-                                                                undefined
-                                                              ) {
-                                                                // Use the allocated discount from editedOrderItems
-                                                                itemDiscountAmount =
-                                                                  parseFloat(
-                                                                    editedItem.discount,
-                                                                  );
-                                                              } else if (
-                                                                orderDiscount >
+                                                            if (
+                                                              !visibleItems ||
+                                                              visibleItems.length ===
                                                                 0
-                                                              ) {
-                                                                // Calculate total before discount for proportional distribution
-                                                                const totalBeforeDiscount =
-                                                                  visibleItems.reduce(
-                                                                    (
-                                                                      sum: number,
-                                                                      item: any,
-                                                                    ) => {
-                                                                      const edited =
-                                                                        editedOrderItems[
-                                                                          item
-                                                                            .id
-                                                                        ] || {};
-                                                                      const unitPrice =
-                                                                        parseFloat(
-                                                                          edited.unitPrice !==
-                                                                            undefined
-                                                                            ? edited.unitPrice
-                                                                            : item.unitPrice ||
-                                                                                "0",
-                                                                        );
-                                                                      const quantity =
-                                                                        parseFloat(
-                                                                          edited.quantity !==
-                                                                            undefined
-                                                                            ? edited.quantity
-                                                                            : item.quantity ||
-                                                                                "0",
-                                                                        );
-                                                                      const subtotal =
-                                                                        unitPrice *
-                                                                        quantity;
-                                                                      return (
-                                                                        sum +
-                                                                        subtotal
-                                                                      );
-                                                                    },
-                                                                    0,
+                                                            ) {
+                                                              return (
+                                                                <tr className="border-t">
+                                                                  <td
+                                                                    colSpan={11}
+                                                                    className="text-center py-4 text-gray-500"
+                                                                  >
+                                                                    {t(
+                                                                      "common.noItems",
+                                                                    )}
+                                                                  </td>
+                                                                </tr>
+                                                              );
+                                                            }
+                                                            return visibleItems.map(
+                                                              (
+                                                                item: any,
+                                                                index: number,
+                                                              ) => {
+                                                                // Get edited values or use original
+                                                                const editedItem =
+                                                                  editedOrderItems[
+                                                                    item.id
+                                                                  ] || {};
+
+                                                                // For new items, prioritize edited values
+                                                                const isNewItem =
+                                                                  editedItem._isNew ||
+                                                                  item._isNew;
+
+                                                                // Get product info - prioritize edited productId
+                                                                const productId =
+                                                                  editedItem.productId !==
+                                                                  undefined
+                                                                    ? editedItem.productId
+                                                                    : item.productId ||
+                                                                      0;
+
+                                                                const product =
+                                                                  products.find(
+                                                                    (p: any) =>
+                                                                      p.id ===
+                                                                      productId,
+                                                                  );
+
+                                                                const priceIncludeTax =
+                                                                  selectedInvoice?.priceIncludeTax ??
+                                                                  storeSettings?.priceIncludesTax ??
+                                                                  false;
+
+                                                                // Get all field values - prioritize edited values
+                                                                const sku =
+                                                                  editedItem.sku !==
+                                                                  undefined
+                                                                    ? editedItem.sku
+                                                                    : item.sku ||
+                                                                      item.productSku ||
+                                                                      product?.sku ||
+                                                                      "";
+
+                                                                const productName =
+                                                                  editedItem.productName !==
+                                                                  undefined
+                                                                    ? editedItem.productName
+                                                                    : item.productName ||
+                                                                      "";
+
+                                                                const unitPrice =
+                                                                  parseFloat(
+                                                                    editedItem.unitPrice !==
+                                                                      undefined
+                                                                      ? editedItem.unitPrice
+                                                                      : item.unitPrice ||
+                                                                          "0",
+                                                                  );
+                                                                const quantity =
+                                                                  parseFloat(
+                                                                    editedItem.quantity !==
+                                                                      undefined
+                                                                      ? editedItem.quantity
+                                                                      : item.quantity ||
+                                                                          "0",
+                                                                  );
+
+                                                                const orderDiscount =
+                                                                  parseFloat(
+                                                                    selectedInvoice?.discount ||
+                                                                      "0",
+                                                                  );
+
+                                                                // Get discount from editedOrderItems if available, otherwise calculate
+                                                                let itemDiscountAmount =
+                                                                  Number(
+                                                                    item.discount ||
+                                                                      "0",
                                                                   );
 
                                                                 if (
-                                                                  totalBeforeDiscount >
+                                                                  editedItem.discount !==
+                                                                  undefined
+                                                                ) {
+                                                                  // Use the allocated discount from editedOrderItems
+                                                                  itemDiscountAmount =
+                                                                    parseFloat(
+                                                                      editedItem.discount,
+                                                                    );
+                                                                } else if (
+                                                                  orderDiscount >
                                                                   0
                                                                 ) {
-                                                                  const isLastItem =
-                                                                    index ===
-                                                                    visibleItems.length -
-                                                                      1;
+                                                                  // Calculate total before discount for proportional distribution
+                                                                  const totalBeforeDiscount =
+                                                                    visibleItems.reduce(
+                                                                      (
+                                                                        sum: number,
+                                                                        item: any,
+                                                                      ) => {
+                                                                        const edited =
+                                                                          editedOrderItems[
+                                                                            item
+                                                                              .id
+                                                                          ] ||
+                                                                          {};
+                                                                        const unitPrice =
+                                                                          parseFloat(
+                                                                            edited.unitPrice !==
+                                                                              undefined
+                                                                              ? edited.unitPrice
+                                                                              : item.unitPrice ||
+                                                                                  "0",
+                                                                          );
+                                                                        const quantity =
+                                                                          parseFloat(
+                                                                            edited.quantity !==
+                                                                              undefined
+                                                                              ? edited.quantity
+                                                                              : item.quantity ||
+                                                                                  "0",
+                                                                          );
+                                                                        const subtotal =
+                                                                          unitPrice *
+                                                                          quantity;
+                                                                        return (
+                                                                          sum +
+                                                                          subtotal
+                                                                        );
+                                                                      },
+                                                                      0,
+                                                                    );
+
+                                                                  if (
+                                                                    totalBeforeDiscount >
+                                                                    0
+                                                                  ) {
+                                                                    const isLastItem =
+                                                                      index ===
+                                                                      visibleItems.length -
+                                                                        1;
+                                                                    const itemSubtotal =
+                                                                      unitPrice *
+                                                                      quantity;
+
+                                                                    if (
+                                                                      isLastItem
+                                                                    ) {
+                                                                      // Last item gets remaining discount
+                                                                      const previousDiscounts =
+                                                                        visibleItems
+                                                                          .slice(
+                                                                            0,
+                                                                            -1,
+                                                                          )
+                                                                          .reduce(
+                                                                            (
+                                                                              sum,
+                                                                              it,
+                                                                            ) => {
+                                                                              const editedIt =
+                                                                                editedOrderItems[
+                                                                                  it
+                                                                                    .id
+                                                                                ] ||
+                                                                                {};
+                                                                              const itPrice =
+                                                                                parseFloat(
+                                                                                  editedIt.unitPrice !==
+                                                                                    undefined
+                                                                                    ? editedIt.unitPrice
+                                                                                    : it.unitPrice ||
+                                                                                        "0",
+                                                                                );
+                                                                              const itQty =
+                                                                                parseFloat(
+                                                                                  editedIt.quantity !==
+                                                                                    undefined
+                                                                                    ? editedIt.quantity
+                                                                                    : it.quantity ||
+                                                                                        "0",
+                                                                                );
+                                                                              const itSubtotal =
+                                                                                itPrice *
+                                                                                itQty;
+                                                                              return (
+                                                                                sum +
+                                                                                Math.floor(
+                                                                                  (orderDiscount *
+                                                                                    itSubtotal) /
+                                                                                    totalBeforeDiscount,
+                                                                                )
+                                                                              );
+                                                                            },
+                                                                            0,
+                                                                          );
+                                                                      itemDiscountAmount =
+                                                                        Math.max(
+                                                                          0,
+                                                                          orderDiscount -
+                                                                            previousDiscounts,
+                                                                        );
+                                                                    } else {
+                                                                      itemDiscountAmount =
+                                                                        Math.floor(
+                                                                          (orderDiscount *
+                                                                            itemSubtotal) /
+                                                                            totalBeforeDiscount,
+                                                                        );
+                                                                    }
+                                                                  }
+                                                                }
+
+                                                                // Calculate tax based on priceIncludeTax setting
+                                                                const taxRate =
+                                                                  product?.taxRate
+                                                                    ? parseFloat(
+                                                                        product.taxRate,
+                                                                      ) / 100
+                                                                    : 0;
+                                                                let itemTax = 0;
+                                                                let priceBeforeTax = 0;
+                                                                let itemTotal = 0;
+
+                                                                if (
+                                                                  priceIncludeTax &&
+                                                                  taxRate > 0
+                                                                ) {
                                                                   const itemSubtotal =
                                                                     unitPrice *
                                                                     quantity;
-
-                                                                  if (
-                                                                    isLastItem
-                                                                  ) {
-                                                                    // Last item gets remaining discount
-                                                                    const previousDiscounts =
-                                                                      visibleItems
-                                                                        .slice(
-                                                                          0,
-                                                                          -1,
-                                                                        )
-                                                                        .reduce(
-                                                                          (
-                                                                            sum,
-                                                                            it,
-                                                                          ) => {
-                                                                            const editedIt =
-                                                                              editedOrderItems[
-                                                                                it
-                                                                                  .id
-                                                                              ] ||
-                                                                              {};
-                                                                            const itPrice =
-                                                                              parseFloat(
-                                                                                editedIt.unitPrice !==
-                                                                                  undefined
-                                                                                  ? editedIt.unitPrice
-                                                                                  : it.unitPrice ||
-                                                                                      "0",
-                                                                              );
-                                                                            const itQty =
-                                                                              parseFloat(
-                                                                                editedIt.quantity !==
-                                                                                  undefined
-                                                                                  ? editedIt.quantity
-                                                                                  : it.quantity ||
-                                                                                      "0",
-                                                                              );
-                                                                            const itSubtotal =
-                                                                              itPrice *
-                                                                              itQty;
-                                                                            return (
-                                                                              sum +
-                                                                              Math.floor(
-                                                                                (orderDiscount *
-                                                                                  itSubtotal) /
-                                                                                  totalBeforeDiscount,
-                                                                              )
-                                                                            );
-                                                                          },
-                                                                          0,
-                                                                        );
-                                                                    itemDiscountAmount =
-                                                                      Math.max(
-                                                                        0,
-                                                                        orderDiscount -
-                                                                          previousDiscounts,
-                                                                      );
-                                                                  } else {
-                                                                    itemDiscountAmount =
-                                                                      Math.floor(
-                                                                        (orderDiscount *
-                                                                          itemSubtotal) /
-                                                                          totalBeforeDiscount,
-                                                                      );
-                                                                  }
+                                                                  const priceBeforeTax =
+                                                                    itemSubtotal /
+                                                                    (1 +
+                                                                      taxRate);
+                                                                  itemTax =
+                                                                    itemSubtotal -
+                                                                    priceBeforeTax;
+                                                                  itemTotal =
+                                                                    itemSubtotal -
+                                                                    itemDiscountAmount;
+                                                                } else {
+                                                                  const itemSubtotal =
+                                                                    unitPrice *
+                                                                    quantity;
+                                                                  itemTax =
+                                                                    itemSubtotal *
+                                                                    taxRate;
+                                                                  itemTotal =
+                                                                    itemSubtotal +
+                                                                    itemTax -
+                                                                    itemDiscountAmount;
                                                                 }
-                                                              }
 
-                                                              // Calculate tax based on priceIncludeTax setting
-                                                              const taxRate =
-                                                                product?.taxRate
-                                                                  ? parseFloat(
-                                                                      product.taxRate,
-                                                                    ) / 100
-                                                                  : 0;
-                                                              let itemTax = 0;
-                                                              let itemTotal = 0;
+                                                                // Calculate visible row number (only count non-deleted items before this one)
+                                                                const visibleRowNumber =
+                                                                  visibleItems
+                                                                    .slice(
+                                                                      0,
+                                                                      index + 1,
+                                                                    )
+                                                                    .filter(
+                                                                      (
+                                                                        it: any,
+                                                                      ) =>
+                                                                        !editedOrderItems[
+                                                                          it.id
+                                                                        ]
+                                                                          ?._deleted,
+                                                                    ).length;
 
-                                                              if (
-                                                                priceIncludeTax &&
-                                                                taxRate > 0
-                                                              ) {
-                                                                const itemSubtotal =
-                                                                  unitPrice *
-                                                                  quantity;
-                                                                const priceBeforeTax =
-                                                                  itemSubtotal /
-                                                                  (1 + taxRate);
-                                                                itemTax =
-                                                                  itemSubtotal -
-                                                                  priceBeforeTax;
-                                                                itemTotal =
-                                                                  itemSubtotal -
-                                                                  itemDiscountAmount;
-                                                              } else {
-                                                                const itemSubtotal =
-                                                                  unitPrice *
-                                                                  quantity;
-                                                                itemTax =
-                                                                  itemSubtotal *
-                                                                  taxRate;
-                                                                itemTotal =
-                                                                  itemSubtotal +
-                                                                  itemTax -
-                                                                  itemDiscountAmount;
-                                                              }
-
-                                                              return (
-                                                                <tr
-                                                                  key={item.id}
-                                                                  className="border-b hover:bg-gray-50"
-                                                                >
-                                                                  <td className="text-center py-2 px-3 border-r text-sm w-[50px]">
-                                                                    {index + 1}
-                                                                  </td>
-                                                                  <td className="text-left py-2 px-3 border-r text-base w-[120px]">
-                                                                    {isEditing ? (
-                                                                      <div className="relative">
-                                                                        <Input
-                                                                          list={`product-sku-list-${item.id}`}
-                                                                          value={
-                                                                            sku
-                                                                          }
-                                                                          disabled={
-                                                                            selectedInvoice.displayStatus ===
-                                                                            1
-                                                                          }
-                                                                          data-field={`orderitem-sku-${index}`}
-                                                                          onFocus={(
-                                                                            e,
-                                                                          ) =>
-                                                                            e.target.select()
-                                                                          }
-                                                                          onChange={(
-                                                                            e,
-                                                                          ) => {
-                                                                            const inputValue =
-                                                                              e
-                                                                                .target
-                                                                                .value;
-
-                                                                            // Trích xuất chỉ SKU từ giá trị datalist (phần trước " - ")
-                                                                            const selectedSku =
-                                                                              inputValue.includes(
-                                                                                " - ",
-                                                                              )
-                                                                                ? inputValue
-                                                                                    .split(
-                                                                                      " - ",
-                                                                                    )[0]
-                                                                                    .trim()
-                                                                                : inputValue;
-
-                                                                            updateOrderItemField(
-                                                                              item.id,
-                                                                              "sku",
-                                                                              selectedSku,
-                                                                            );
-
-                                                                            // Tìm sản phẩm theo SKU
-                                                                            const selectedProduct =
-                                                                              products.find(
-                                                                                (
-                                                                                  p: any,
-                                                                                ) =>
-                                                                                  p.sku ===
-                                                                                  selectedSku,
-                                                                              );
-
-                                                                            if (
-                                                                              selectedProduct
-                                                                            ) {
-                                                                              // Cập nhật thông tin sản phẩm
-                                                                              updateOrderItemField(
-                                                                                item.id,
-                                                                                "productId",
-                                                                                selectedProduct.id,
-                                                                              );
-                                                                              updateOrderItemField(
-                                                                                item.id,
-                                                                                "productName",
-                                                                                selectedProduct.name,
-                                                                              );
-                                                                              updateOrderItemField(
-                                                                                item.id,
-                                                                                "unitPrice",
-                                                                                selectedProduct.price,
-                                                                              );
+                                                                return (
+                                                                  <tr
+                                                                    key={
+                                                                      item.id
+                                                                    }
+                                                                    className="border-b hover:bg-gray-50"
+                                                                  >
+                                                                    <td className="text-center py-2 px-3 border-r text-sm w-[50px]">
+                                                                      {
+                                                                        visibleRowNumber
+                                                                      }
+                                                                    </td>
+                                                                    <td className="text-left py-2 px-3 border-r text-base w-[120px]">
+                                                                      {isEditing ? (
+                                                                        <div className="relative">
+                                                                          <Input
+                                                                            list={`product-sku-list-${item.id}`}
+                                                                            value={
+                                                                              sku
                                                                             }
-                                                                          }}
-                                                                          onKeyDown={(
-                                                                            e,
-                                                                          ) =>
-                                                                            handleOrderItemKeyDown(
+                                                                            disabled={
+                                                                              selectedInvoice.displayStatus ===
+                                                                              1
+                                                                            }
+                                                                            data-field={`orderitem-sku-${index}`}
+                                                                            onFocus={(
                                                                               e,
-                                                                              index,
-                                                                              "sku",
-                                                                            )
-                                                                          }
-                                                                          className="w-full h-8 text-base"
-                                                                          placeholder="Chọn mã hàng"
-                                                                        />
-                                                                        <datalist
-                                                                          id={`product-sku-list-${item.id}`}
-                                                                        >
-                                                                          {products
-                                                                            .filter(
-                                                                              (
-                                                                                p: any,
-                                                                              ) =>
-                                                                                p.isActive &&
-                                                                                p.productType !==
-                                                                                  4,
-                                                                            )
-                                                                            .map(
-                                                                              (
-                                                                                p: any,
-                                                                              ) => (
-                                                                                <option
-                                                                                  key={
-                                                                                    p.id
-                                                                                  }
-                                                                                  value={
-                                                                                    p.sku
-                                                                                  }
-                                                                                >
-                                                                                  {
-                                                                                    p.sku
-                                                                                  }{" "}
-                                                                                  -{" "}
-                                                                                  {
-                                                                                    p.name
-                                                                                  }{" "}
-                                                                                  (
-                                                                                  {formatCurrency(
-                                                                                    p.price,
-                                                                                  )}
+                                                                            ) =>
+                                                                              e.target.select()
+                                                                            }
+                                                                            onChange={(
+                                                                              e,
+                                                                            ) => {
+                                                                              const inputValue =
+                                                                                e
+                                                                                  .target
+                                                                                  .value;
 
-                                                                                  )
-                                                                                </option>
-                                                                              ),
-                                                                            )}
-                                                                        </datalist>
-                                                                      </div>
-                                                                    ) : (
-                                                                      <div className="truncate text-base">
-                                                                        {sku ||
-                                                                          "-"}
-                                                                      </div>
-                                                                    )}
-                                                                  </td>
-                                                                  <td className="text-left py-2 px-3 border-r text-base w-[180px] max-w-[220px]">
-                                                                    {isEditing ? (
-                                                                      <div className="relative">
-                                                                        <Input
-                                                                          list={`product-name-list-${item.id}`}
-                                                                          value={
-                                                                            productName
-                                                                          }
-                                                                          disabled={
-                                                                            selectedInvoice.displayStatus ===
-                                                                            1
-                                                                          }
-                                                                          data-field={`orderitem-productName-${index}`}
-                                                                          onFocus={(
-                                                                            e,
-                                                                          ) =>
-                                                                            e.target.select()
-                                                                          }
-                                                                          onChange={(
-                                                                            e,
-                                                                          ) => {
-                                                                            const inputValue =
-                                                                              e
-                                                                                .target
-                                                                                .value;
+                                                                              // Trích xuất chỉ SKU từ giá trị datalist (phần trước " - ")
+                                                                              const selectedSku =
+                                                                                inputValue.includes(
+                                                                                  " - ",
+                                                                                )
+                                                                                  ? inputValue
+                                                                                      .split(
+                                                                                        " - ",
+                                                                                      )[0]
+                                                                                      .trim()
+                                                                                  : inputValue;
 
-                                                                            // Trích xuất chỉ tên sản phẩm từ giá trị datalist
-                                                                            // Format: "Tên - SKU (Giá)" -> lấy phần trước " - "
-                                                                            const selectedName =
-                                                                              inputValue.includes(
-                                                                                " - ",
-                                                                              )
-                                                                                ? inputValue
-                                                                                    .split(
-                                                                                      " - ",
-                                                                                    )[0]
-                                                                                    .trim()
-                                                                                : inputValue;
-
-                                                                            updateOrderItemField(
-                                                                              item.id,
-                                                                              "productName",
-                                                                              selectedName,
-                                                                            );
-
-                                                                            // Tìm sản phẩm theo tên
-                                                                            const selectedProduct =
-                                                                              products.find(
-                                                                                (
-                                                                                  p: any,
-                                                                                ) =>
-                                                                                  p.name ===
-                                                                                  selectedName,
-                                                                              );
-
-                                                                            if (
-                                                                              selectedProduct
-                                                                            ) {
-                                                                              // Cập nhật thông tin sản phẩm
-                                                                              updateOrderItemField(
-                                                                                item.id,
-                                                                                "productId",
-                                                                                selectedProduct.id,
-                                                                              );
                                                                               updateOrderItemField(
                                                                                 item.id,
                                                                                 "sku",
-                                                                                selectedProduct.sku,
+                                                                                selectedSku,
                                                                               );
+
+                                                                              // Tìm sản phẩm theo SKU
+                                                                              const selectedProduct =
+                                                                                products.find(
+                                                                                  (
+                                                                                    p: any,
+                                                                                  ) =>
+                                                                                    p.sku ===
+                                                                                    selectedSku,
+                                                                                );
+
+                                                                              if (
+                                                                                selectedProduct
+                                                                              ) {
+                                                                                // Cập nhật thông tin sản phẩm
+                                                                                updateOrderItemField(
+                                                                                  item.id,
+                                                                                  "productId",
+                                                                                  selectedProduct.id,
+                                                                                );
+                                                                                updateOrderItemField(
+                                                                                  item.id,
+                                                                                  "productName",
+                                                                                  selectedProduct.name,
+                                                                                );
+                                                                                updateOrderItemField(
+                                                                                  item.id,
+                                                                                  "unitPrice",
+                                                                                  selectedProduct.price,
+                                                                                );
+                                                                              }
+                                                                            }}
+                                                                            onKeyDown={(
+                                                                              e,
+                                                                            ) =>
+                                                                              handleOrderItemKeyDown(
+                                                                                e,
+                                                                                index,
+                                                                                "sku",
+                                                                              )
+                                                                            }
+                                                                            className="w-full h-8 text-base"
+                                                                            placeholder="Chọn mã hàng"
+                                                                          />
+                                                                          <datalist
+                                                                            id={`product-sku-list-${item.id}`}
+                                                                          >
+                                                                            {products
+                                                                              .filter(
+                                                                                (
+                                                                                  p: any,
+                                                                                ) =>
+                                                                                  p.isActive &&
+                                                                                  p.productType !==
+                                                                                    4,
+                                                                              )
+                                                                              .map(
+                                                                                (
+                                                                                  p: any,
+                                                                                ) => (
+                                                                                  <option
+                                                                                    key={
+                                                                                      p.id
+                                                                                    }
+                                                                                    value={
+                                                                                      p.sku
+                                                                                    }
+                                                                                  >
+                                                                                    {
+                                                                                      p.sku
+                                                                                    }{" "}
+                                                                                    -{" "}
+                                                                                    {
+                                                                                      p.name
+                                                                                    }{" "}
+                                                                                    (
+                                                                                    {formatCurrency(
+                                                                                      p.price,
+                                                                                    )}
+
+                                                                                    )
+                                                                                  </option>
+                                                                                ),
+                                                                              )}
+                                                                          </datalist>
+                                                                        </div>
+                                                                      ) : (
+                                                                        <div className="truncate text-base">
+                                                                          {sku ||
+                                                                            "-"}
+                                                                        </div>
+                                                                      )}
+                                                                    </td>
+                                                                    <td className="text-left py-2 px-3 border-r text-base w-[180px] max-w-[220px]">
+                                                                      {isEditing ? (
+                                                                        <div className="relative">
+                                                                          <Input
+                                                                            list={`product-name-list-${item.id}`}
+                                                                            value={
+                                                                              productName
+                                                                            }
+                                                                            disabled={
+                                                                              selectedInvoice.displayStatus ===
+                                                                              1
+                                                                            }
+                                                                            data-field={`orderitem-productName-${index}`}
+                                                                            onFocus={(
+                                                                              e,
+                                                                            ) =>
+                                                                              e.target.select()
+                                                                            }
+                                                                            onChange={(
+                                                                              e,
+                                                                            ) => {
+                                                                              const inputValue =
+                                                                                e
+                                                                                  .target
+                                                                                  .value;
+
+                                                                              // Trích xuất chỉ tên sản phẩm từ giá trị datalist
+                                                                              // Format: "Tên - SKU (Giá)" -> lấy phần trước " - "
+                                                                              const selectedName =
+                                                                                inputValue.includes(
+                                                                                  " - ",
+                                                                                )
+                                                                                  ? inputValue
+                                                                                      .split(
+                                                                                        " - ",
+                                                                                      )[0]
+                                                                                      .trim()
+                                                                                  : inputValue;
+
                                                                               updateOrderItemField(
                                                                                 item.id,
-                                                                                "unitPrice",
-                                                                                selectedProduct.price,
+                                                                                "productName",
+                                                                                selectedName,
+                                                                              );
+
+                                                                              // Tìm sản phẩm theo tên
+                                                                              const selectedProduct =
+                                                                                products.find(
+                                                                                  (
+                                                                                    p: any,
+                                                                                  ) =>
+                                                                                    p.name ===
+                                                                                    selectedName,
+                                                                                );
+
+                                                                              if (
+                                                                                selectedProduct
+                                                                              ) {
+                                                                                // Cập nhật thông tin sản phẩm
+                                                                                updateOrderItemField(
+                                                                                  item.id,
+                                                                                  "productId",
+                                                                                  selectedProduct.id,
+                                                                                );
+                                                                                updateOrderItemField(
+                                                                                  item.id,
+                                                                                  "sku",
+                                                                                  selectedProduct.sku,
+                                                                                );
+                                                                                updateOrderItemField(
+                                                                                  item.id,
+                                                                                  "unitPrice",
+                                                                                  selectedProduct.price,
+                                                                                );
+                                                                              }
+                                                                            }}
+                                                                            onKeyDown={(
+                                                                              e,
+                                                                            ) =>
+                                                                              handleOrderItemKeyDown(
+                                                                                e,
+                                                                                index,
+                                                                                "productName",
+                                                                              )
+                                                                            }
+                                                                            className="w-full h-8 text-base"
+                                                                            placeholder="Chọn tên hàng"
+                                                                          />
+                                                                          <datalist
+                                                                            id={`product-name-list-${item.id}`}
+                                                                          >
+                                                                            {products
+                                                                              .filter(
+                                                                                (
+                                                                                  p: any,
+                                                                                ) =>
+                                                                                  p.isActive &&
+                                                                                  p.productType !==
+                                                                                    4,
+                                                                              )
+                                                                              .map(
+                                                                                (
+                                                                                  p: any,
+                                                                                ) => (
+                                                                                  <option
+                                                                                    key={
+                                                                                      p.id
+                                                                                    }
+                                                                                    value={
+                                                                                      p.name
+                                                                                    }
+                                                                                  >
+                                                                                    {
+                                                                                      p.name
+                                                                                    }{" "}
+                                                                                    -{" "}
+                                                                                    {
+                                                                                      p.sku
+                                                                                    }{" "}
+                                                                                    (
+                                                                                    {formatCurrency(
+                                                                                      p.price,
+                                                                                    )}
+
+                                                                                    )
+                                                                                  </option>
+                                                                                ),
+                                                                              )}
+                                                                          </datalist>
+                                                                        </div>
+                                                                      ) : (
+                                                                        <div className="truncate text-base font-semibold">
+                                                                          {productName ||
+                                                                            "-"}
+                                                                        </div>
+                                                                      )}
+                                                                    </td>
+                                                                    <td className="text-center py-2 px-3 border-r text-base w-[60px]">
+                                                                      {product?.unit ||
+                                                                        "pcs"}
+                                                                    </td>
+                                                                    <td className="text-center py-2 px-3 border-r text-base w-[100px]">
+                                                                      {isEditing ? (
+                                                                        <NumericFormat
+                                                                          value={
+                                                                            quantity
+                                                                          }
+                                                                          onValueChange={(
+                                                                            values,
+                                                                          ) => {
+                                                                            const {
+                                                                              floatValue,
+                                                                            } =
+                                                                              values;
+                                                                            if (
+                                                                              floatValue !==
+                                                                                undefined &&
+                                                                              floatValue >
+                                                                                0
+                                                                            ) {
+                                                                              updateOrderItemField(
+                                                                                item.id,
+                                                                                "quantity",
+                                                                                floatValue,
+                                                                              );
+                                                                            }
+                                                                          }}
+                                                                          onBlur={(
+                                                                            e,
+                                                                          ) => {
+                                                                            const rawValue =
+                                                                              e.target.value
+                                                                                .replace(
+                                                                                  /\./g,
+                                                                                  "",
+                                                                                )
+                                                                                .replace(
+                                                                                  ",",
+                                                                                  ".",
+                                                                                );
+                                                                            const value =
+                                                                              parseFloat(
+                                                                                rawValue,
+                                                                              );
+                                                                            if (
+                                                                              !value ||
+                                                                              value <=
+                                                                                0 ||
+                                                                              isNaN(
+                                                                                value,
+                                                                              )
+                                                                            ) {
+                                                                              updateOrderItemField(
+                                                                                item.id,
+                                                                                "quantity",
+                                                                                1,
                                                                               );
                                                                             }
                                                                           }}
@@ -5193,283 +5418,155 @@ export default function SalesOrders() {
                                                                             handleOrderItemKeyDown(
                                                                               e,
                                                                               index,
-                                                                              "productName",
+                                                                              "quantity",
                                                                             )
                                                                           }
-                                                                          className="w-full h-8 text-base"
-                                                                          placeholder="Chọn tên hàng"
+                                                                          data-field={`orderitem-quantity-${index}`}
+                                                                          customInput={
+                                                                            Input
+                                                                          }
+                                                                          decimalScale={
+                                                                            4
+                                                                          }
+                                                                          fixedDecimalScale={
+                                                                            false
+                                                                          }
+                                                                          allowNegative={
+                                                                            false
+                                                                          }
+                                                                          decimalSeparator=","
+                                                                          thousandSeparator="."
+                                                                          disabled={
+                                                                            selectedInvoice.displayStatus ===
+                                                                            1
+                                                                          }
+                                                                          className="w-full h-8 text-base text-center"
                                                                         />
-                                                                        <datalist
-                                                                          id={`product-name-list-${item.id}`}
-                                                                        >
-                                                                          {products
-                                                                            .filter(
-                                                                              (
-                                                                                p: any,
-                                                                              ) =>
-                                                                                p.isActive &&
-                                                                                p.productType !==
-                                                                                  4,
-                                                                            )
-                                                                            .map(
-                                                                              (
-                                                                                p: any,
-                                                                              ) => (
-                                                                                <option
-                                                                                  key={
-                                                                                    p.id
-                                                                                  }
-                                                                                  value={
-                                                                                    p.name
-                                                                                  }
-                                                                                >
-                                                                                  {
-                                                                                    p.name
-                                                                                  }{" "}
-                                                                                  -{" "}
-                                                                                  {
-                                                                                    p.sku
-                                                                                  }{" "}
-                                                                                  (
-                                                                                  {formatCurrency(
-                                                                                    p.price,
-                                                                                  )}
-
-                                                                                  )
-                                                                                </option>
-                                                                              ),
-                                                                            )}
-                                                                        </datalist>
-                                                                      </div>
-                                                                    ) : (
-                                                                      <div className="truncate text-base font-semibold">
-                                                                        {productName ||
-                                                                          "-"}
-                                                                      </div>
-                                                                    )}
-                                                                  </td>
-                                                                  <td className="text-center py-2 px-3 border-r text-base w-[60px]">
-                                                                    {product?.unit ||
-                                                                      "pcs"}
-                                                                  </td>
-                                                                  <td className="text-center py-2 px-3 border-r text-base w-[100px]">
-                                                                    {isEditing ? (
-                                                                      <NumericFormat
-                                                                        value={
-                                                                          quantity
-                                                                        }
-                                                                        onValueChange={(
-                                                                          values,
-                                                                        ) => {
-                                                                          const {
-                                                                            floatValue,
-                                                                          } =
-                                                                            values;
-                                                                          if (
-                                                                            floatValue !==
-                                                                              undefined &&
-                                                                            floatValue >
-                                                                              0
-                                                                          ) {
-                                                                            updateOrderItemField(
-                                                                              item.id,
-                                                                              "quantity",
-                                                                              floatValue,
-                                                                            );
+                                                                      ) : (
+                                                                        quantity.toLocaleString(
+                                                                          "vi-VN",
+                                                                          {
+                                                                            minimumFractionDigits: 0,
+                                                                            maximumFractionDigits: 4,
+                                                                          },
+                                                                        )
+                                                                      )}
+                                                                    </td>
+                                                                    <td className="text-right py-2 px-3 border-r text-base w-[120px]">
+                                                                      {isEditing ? (
+                                                                        <Input
+                                                                          type="text"
+                                                                          value={Math.floor(
+                                                                            unitPrice,
+                                                                          ).toLocaleString(
+                                                                            "vi-VN",
+                                                                          )}
+                                                                          disabled={
+                                                                            selectedInvoice.displayStatus ===
+                                                                            1
                                                                           }
-                                                                        }}
-                                                                        onBlur={(
-                                                                          e,
-                                                                        ) => {
-                                                                          const rawValue =
-                                                                            e.target.value
-                                                                              .replace(
-                                                                                /\./g,
-                                                                                "",
-                                                                              )
-                                                                              .replace(
-                                                                                ",",
-                                                                                ".",
-                                                                              );
-                                                                          const value =
-                                                                            parseFloat(
-                                                                              rawValue,
-                                                                            );
-                                                                          if (
-                                                                            !value ||
-                                                                            value <=
-                                                                              0 ||
-                                                                            isNaN(
-                                                                              value,
-                                                                            )
-                                                                          ) {
-                                                                            updateOrderItemField(
-                                                                              item.id,
-                                                                              "quantity",
-                                                                              1,
-                                                                            );
-                                                                          }
-                                                                        }}
-                                                                        onKeyDown={(
-                                                                          e,
-                                                                        ) =>
-                                                                          handleOrderItemKeyDown(
+                                                                          data-field={`orderitem-unitPrice-${index}`}
+                                                                          onChange={(
                                                                             e,
-                                                                            index,
-                                                                            "quantity",
-                                                                          )
-                                                                        }
-                                                                        data-field={`orderitem-quantity-${index}`}
-                                                                        customInput={
-                                                                          Input
-                                                                        }
-                                                                        decimalScale={
-                                                                          4
-                                                                        }
-                                                                        fixedDecimalScale={
-                                                                          false
-                                                                        }
-                                                                        allowNegative={
-                                                                          false
-                                                                        }
-                                                                        decimalSeparator=","
-                                                                        thousandSeparator="."
-                                                                        disabled={
-                                                                          selectedInvoice.displayStatus ===
-                                                                          1
-                                                                        }
-                                                                        className="w-full h-8 text-base text-center"
-                                                                      />
-                                                                    ) : (
-                                                                      quantity.toLocaleString(
-                                                                        "vi-VN",
-                                                                        {
-                                                                          minimumFractionDigits: 0,
-                                                                          maximumFractionDigits: 4,
-                                                                        },
-                                                                      )
-                                                                    )}
-                                                                  </td>
-                                                                  <td className="text-right py-2 px-3 border-r text-base w-[120px]">
-                                                                    {isEditing ? (
-                                                                      <Input
-                                                                        type="text"
-                                                                        value={Math.floor(
+                                                                          ) => {
+                                                                            const value =
+                                                                              e.target.value.replace(
+                                                                                /[^\d]/g,
+                                                                                "",
+                                                                              );
+                                                                            const newPrice =
+                                                                              parseFloat(
+                                                                                value,
+                                                                              ) ||
+                                                                              0;
+                                                                            updateOrderItemField(
+                                                                              item.id,
+                                                                              "unitPrice",
+                                                                              newPrice.toString(),
+                                                                            );
+                                                                          }}
+                                                                          onKeyDown={(
+                                                                            e,
+                                                                          ) =>
+                                                                            handleOrderItemKeyDown(
+                                                                              e,
+                                                                              index,
+                                                                              "unitPrice",
+                                                                            )
+                                                                          }
+                                                                          className="w-full text-right h-8"
+                                                                        />
+                                                                      ) : (
+                                                                        Math.floor(
                                                                           unitPrice,
                                                                         ).toLocaleString(
                                                                           "vi-VN",
-                                                                        )}
-                                                                        disabled={
-                                                                          selectedInvoice.displayStatus ===
-                                                                          1
-                                                                        }
-                                                                        data-field={`orderitem-unitPrice-${index}`}
-                                                                        onChange={(
-                                                                          e,
-                                                                        ) => {
-                                                                          const value =
-                                                                            e.target.value.replace(
-                                                                              /[^\d]/g,
-                                                                              "",
-                                                                            );
-                                                                          const newPrice =
-                                                                            parseFloat(
-                                                                              value,
-                                                                            ) ||
-                                                                            0;
-                                                                          updateOrderItemField(
-                                                                            item.id,
-                                                                            "unitPrice",
-                                                                            newPrice.toString(),
-                                                                          );
-                                                                        }}
-                                                                        onKeyDown={(
-                                                                          e,
-                                                                        ) =>
-                                                                          handleOrderItemKeyDown(
-                                                                            e,
-                                                                            index,
-                                                                            "unitPrice",
-                                                                          )
-                                                                        }
-                                                                        className="w-full text-right h-8"
-                                                                      />
-                                                                    ) : (
-                                                                      Math.floor(
-                                                                        unitPrice,
+                                                                        )
+                                                                      )}
+                                                                    </td>
+                                                                    <td className="text-right py-2 px-3 border-r text-base w-[120px]">
+                                                                      {Math.floor(
+                                                                        unitPrice *
+                                                                          quantity,
                                                                       ).toLocaleString(
                                                                         "vi-VN",
-                                                                      )
-                                                                    )}
-                                                                  </td>
-                                                                  <td className="text-right py-2 px-3 border-r text-base w-[120px]">
-                                                                    {Math.floor(
-                                                                      unitPrice *
-                                                                        quantity,
-                                                                    ).toLocaleString(
-                                                                      "vi-VN",
-                                                                    )}
-                                                                  </td>
-                                                                  <td className="text-red-600 text-right py-2 px-3 border-r text-base w-[100px]">
-                                                                    {Math.floor(
-                                                                      itemDiscountAmount,
-                                                                    ).toLocaleString(
-                                                                      "vi-VN",
-                                                                    )}
-                                                                  </td>
-                                                                  <td className="text-right py-2 px-3 border-r text-base w-[100px]">
-                                                                    {(() => {
-                                                                      // ALWAYS use edited tax if available from state
-                                                                      const editedItem =
-                                                                        editedOrderItems[
-                                                                          item
-                                                                            .id
-                                                                        ] || {};
-                                                                      if (
-                                                                        editedItem.tax !==
-                                                                        undefined
-                                                                      ) {
+                                                                      )}
+                                                                    </td>
+                                                                    <td className="text-red-600 text-right py-2 px-3 border-r text-base w-[100px]">
+                                                                      {Math.floor(
+                                                                        itemDiscountAmount,
+                                                                      ).toLocaleString(
+                                                                        "vi-VN",
+                                                                      )}
+                                                                    </td>
+                                                                    <td className="text-right py-2 px-3 border-r text-base w-[100px]">
+                                                                      {(() => {
+                                                                        // ALWAYS use edited tax if available from state
+                                                                        const editedItem =
+                                                                          editedOrderItems[
+                                                                            item
+                                                                              .id
+                                                                          ] ||
+                                                                          {};
+                                                                        if (
+                                                                          editedItem.tax !==
+                                                                          undefined
+                                                                        ) {
+                                                                          return Math.floor(
+                                                                            parseFloat(
+                                                                              editedItem.tax,
+                                                                            ),
+                                                                          ).toLocaleString(
+                                                                            "vi-VN",
+                                                                          );
+                                                                        }
+                                                                        // Fallback to calculated itemTax
                                                                         return Math.floor(
-                                                                          parseFloat(
-                                                                            editedItem.tax,
-                                                                          ),
+                                                                          itemTax,
                                                                         ).toLocaleString(
                                                                           "vi-VN",
                                                                         );
-                                                                      }
-                                                                      // Fallback to calculated itemTax
-                                                                      return Math.floor(
-                                                                        itemTax,
-                                                                      ).toLocaleString(
-                                                                        "vi-VN",
-                                                                      );
-                                                                    })()}
-                                                                  </td>
-                                                                  <td className="text-right py-2 px-3 border-r text-base w-[100px]">
-                                                                    {(() => {
-                                                                      const editedItem =
-                                                                        editedOrderItems[
-                                                                          item
-                                                                            .id
-                                                                        ] || {};
+                                                                      })()}
+                                                                    </td>
+                                                                    <td className="text-right py-2 px-3 border-r text-base w-[100px]">
+                                                                      {(() => {
+                                                                        // Tổng cộng = Thành tiền - Chiết khấu
+                                                                        const thanhTien =
+                                                                          unitPrice *
+                                                                          quantity;
+                                                                        const tongCong =
+                                                                          thanhTien -
+                                                                          itemDiscountAmount;
 
-                                                                      // Tổng cộng = Thành tiền - Chiết khấu
-                                                                      const thanhTien =
-                                                                        unitPrice *
-                                                                        quantity;
-                                                                      const tongCong =
-                                                                        thanhTien -
-                                                                        itemDiscountAmount;
-
-                                                                      return Math.floor(
-                                                                        tongCong,
-                                                                      ).toLocaleString(
-                                                                        "vi-VN",
-                                                                      );
-                                                                    })()}
-                                                                  </td>
-                                                                  <td className="text-center py-2 px-3 text-sm w-[80px]">
-                                                                    {isEditing &&
+                                                                        return Math.floor(
+                                                                          tongCong,
+                                                                        ).toLocaleString(
+                                                                          "vi-VN",
+                                                                        );
+                                                                      })()}
+                                                                    </td>
+                                                                    <td className="text-center py-2 px-3 text-sm w-[80px]">
+                                                                      {isEditing &&
                                                                       selectedInvoice.displayStatus !==
                                                                         1 && (
                                                                         <Button
@@ -5504,105 +5601,150 @@ export default function SalesOrders() {
                                                                           <X className="h-4 w-4" />
                                                                         </Button>
                                                                       )}
-                                                                  </td>
-                                                                </tr>
-                                                              );
-                                                            },
-                                                          );
-                                                        })()}
-                                                      </tbody>
-                                                    </table>
-                                                  </div>
-                                                )}
-                                              </div>
+                                                                    </td>
+                                                                  </tr>
+                                                                );
+                                                              },
+                                                            );
+                                                          })()}
+                                                        </tbody>
+                                                      </table>
+                                                    </div>
+                                                  )}
+                                                </div>
 
-                                              <div>
-                                                <h4 className="font-semibold text-lg mb-3">
-                                                  {t("orders.summary")}
-                                                </h4>
-                                                <div className="bg-blue-50 p-4 rounded-lg">
-                                                  <div className="grid grid-cols-2 gap-8">
-                                                    {/* Cột trái - Các trường cũ */}
-                                                    <div className="space-y-2 text-sm">
-                                                      <div className="flex justify-between items-center">
-                                                        <span>
-                                                          {t(
-                                                            "common.totalPayment",
-                                                          )}
-                                                          :
-                                                        </span>
-                                                        <span className="font-bold">
-                                                          {formatCurrency(
-                                                            Math.floor(
-                                                              displayTotals.total,
-                                                            ),
-                                                          )}
-                                                        </span>
-                                                      </div>
-                                                      <div className="flex justify-between items-center">
-                                                        <span>
-                                                          {t(
-                                                            "common.subtotalAmount",
-                                                          )}
-                                                          :
-                                                        </span>
-                                                        <span className="font-bold">
-                                                          {formatCurrency(
-                                                            Math.floor(
-                                                              displayTotals.subtotal,
-                                                            ),
-                                                          )}
-                                                        </span>
-                                                      </div>
-                                                      <div className="flex justify-between text-red-600">
-                                                        <span>
-                                                          {t("common.discount")}
-                                                          :
-                                                        </span>
-                                                        {isEditing &&
-                                                        editableInvoice ? (
-                                                          <Input
-                                                            {...form.register(
-                                                              "discount",
+                                                <div>
+                                                  <h4 className="font-semibold text-lg mb-3">
+                                                    {t("orders.summary")}
+                                                  </h4>
+                                                  <div className="bg-blue-50 p-4 rounded-lg">
+                                                    <div className="grid grid-cols-2 gap-8">
+                                                      {/* Cột trái - Các trường cũ */}
+                                                      <div className="space-y-2 text-sm">
+                                                        <div className="flex justify-between items-center">
+                                                          <span>
+                                                            {t(
+                                                              "common.totalPayment",
                                                             )}
-                                                            type="text"
-                                                            min="0"
-                                                            step="1000"
-                                                            value={
-                                                              editableInvoice.discount ||
-                                                              "0"
-                                                            }
-                                                            onChange={(e) => {
-                                                              const newDiscount =
-                                                                e.target.value;
-                                                              updateEditableInvoiceField(
+                                                            :
+                                                          </span>
+                                                          <span className="font-bold">
+                                                            {formatCurrency(
+                                                              Math.floor(
+                                                                displayTotals.total,
+                                                              ),
+                                                            )}
+                                                          </span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                          <span>
+                                                            {t(
+                                                              "common.subtotalAmount",
+                                                            )}
+                                                            :
+                                                          </span>
+                                                          <span className="font-bold">
+                                                            {formatCurrency(
+                                                              Math.floor(
+                                                                displayTotals.subtotal,
+                                                              ),
+                                                            )}
+                                                          </span>
+                                                        </div>
+                                                        <div className="flex justify-between text-red-600">
+                                                          <span>
+                                                            {t(
+                                                              "common.discount",
+                                                            )}
+                                                            :
+                                                          </span>
+                                                          {isEditing &&
+                                                          editableInvoice ? (
+                                                            <Input
+                                                              {...form.register(
                                                                 "discount",
-                                                                newDiscount,
-                                                              );
-
-                                                              // Force recalculation by updating editedOrderItems
-                                                              const orderDiscount =
-                                                                parseFloat(
-                                                                  newDiscount ||
-                                                                    "0",
+                                                              )}
+                                                              type="text"
+                                                              min="0"
+                                                              step="1000"
+                                                              value={
+                                                                editableInvoice.discount ||
+                                                                "0"
+                                                              }
+                                                              onChange={(e) => {
+                                                                const newDiscount =
+                                                                  e.target
+                                                                    .value;
+                                                                updateEditableInvoiceField(
+                                                                  "discount",
+                                                                  newDiscount,
                                                                 );
-                                                              const visibleItems =
-                                                                orderItems.filter(
-                                                                  (item: any) =>
-                                                                    !editedOrderItems[
-                                                                      item.id
-                                                                    ]?._deleted,
-                                                                );
 
-                                                              if (
-                                                                visibleItems.length >
-                                                                0
-                                                              ) {
-                                                                const totalBeforeDiscount =
-                                                                  visibleItems.reduce(
+                                                                // Force recalculation by updating editedOrderItems
+                                                                const orderDiscount =
+                                                                  parseFloat(
+                                                                    newDiscount ||
+                                                                      "0",
+                                                                  );
+                                                                const visibleItems =
+                                                                  orderItems.filter(
                                                                     (
-                                                                      sum: number,
                                                                       item: any,
+                                                                    ) =>
+                                                                      !editedOrderItems[
+                                                                        item.id
+                                                                      ]
+                                                                        ?._deleted,
+                                                                  );
+
+                                                                if (
+                                                                  visibleItems.length >
+                                                                  0
+                                                                ) {
+                                                                  const totalBeforeDiscount =
+                                                                    visibleItems.reduce(
+                                                                      (
+                                                                        sum: number,
+                                                                        item: any,
+                                                                      ) => {
+                                                                        const edited =
+                                                                          editedOrderItems[
+                                                                            item
+                                                                              .id
+                                                                          ] ||
+                                                                          {};
+                                                                        const unitPrice =
+                                                                          parseFloat(
+                                                                            edited.unitPrice !==
+                                                                              undefined
+                                                                              ? edited.unitPrice
+                                                                              : item.unitPrice ||
+                                                                                  "0",
+                                                                          );
+                                                                        const quantity =
+                                                                          parseFloat(
+                                                                            edited.quantity !==
+                                                                              undefined
+                                                                              ? edited.quantity
+                                                                              : item.quantity ||
+                                                                                  "0",
+                                                                          );
+                                                                        return (
+                                                                          sum +
+                                                                          unitPrice *
+                                                                            quantity
+                                                                        );
+                                                                      },
+                                                                      0,
+                                                                    );
+
+                                                                  const newEditedItems: typeof editedOrderItems =
+                                                                    {};
+
+                                                                  visibleItems.forEach(
+                                                                    (
+                                                                      item: any,
+                                                                      index: number,
                                                                     ) => {
                                                                       const edited =
                                                                         editedOrderItems[
@@ -5625,739 +5767,770 @@ export default function SalesOrders() {
                                                                             : item.quantity ||
                                                                                 "0",
                                                                         );
-                                                                      return (
-                                                                        sum +
+                                                                      const itemSubtotal =
                                                                         unitPrice *
-                                                                          quantity
-                                                                      );
-                                                                    },
-                                                                    0,
-                                                                  );
+                                                                        quantity;
 
-                                                                const newEditedItems: typeof editedOrderItems =
-                                                                  {};
-
-                                                                visibleItems.forEach(
-                                                                  (
-                                                                    item: any,
-                                                                    index: number,
-                                                                  ) => {
-                                                                    const edited =
-                                                                      editedOrderItems[
-                                                                        item.id
-                                                                      ] || {};
-                                                                    const unitPrice =
-                                                                      parseFloat(
-                                                                        edited.unitPrice !==
-                                                                          undefined
-                                                                          ? edited.unitPrice
-                                                                          : item.unitPrice ||
-                                                                              "0",
-                                                                      );
-                                                                    const quantity =
-                                                                      parseFloat(
-                                                                        edited.quantity !==
-                                                                          undefined
-                                                                          ? edited.quantity
-                                                                          : item.quantity ||
-                                                                              "0",
-                                                                      );
-                                                                    const itemSubtotal =
-                                                                      unitPrice *
-                                                                      quantity;
-
-                                                                    let itemDiscountAmount = 0;
-                                                                    if (
-                                                                      orderDiscount >
-                                                                        0 &&
-                                                                      totalBeforeDiscount >
-                                                                        0
-                                                                    ) {
-                                                                      const isLastItem =
-                                                                        index ===
-                                                                        visibleItems.length -
-                                                                          1;
+                                                                      let itemDiscountAmount = 0;
                                                                       if (
-                                                                        isLastItem
+                                                                        orderDiscount >
+                                                                          0 &&
+                                                                        totalBeforeDiscount >
+                                                                          0
                                                                       ) {
-                                                                        const previousDiscounts =
-                                                                          visibleItems
-                                                                            .slice(
-                                                                              0,
-                                                                              -1,
-                                                                            )
-                                                                            .reduce(
-                                                                              (
-                                                                                sum,
-                                                                                it,
-                                                                              ) => {
-                                                                                const editedIt =
-                                                                                  editedOrderItems[
-                                                                                    it
-                                                                                      .id
-                                                                                  ] ||
-                                                                                  {};
-                                                                                const itPrice =
-                                                                                  parseFloat(
-                                                                                    editedIt.unitPrice !==
-                                                                                      undefined
-                                                                                      ? editedIt.unitPrice
-                                                                                      : it.unitPrice ||
-                                                                                          "0",
+                                                                        const isLastItem =
+                                                                          index ===
+                                                                          visibleItems.length -
+                                                                            1;
+                                                                        if (
+                                                                          isLastItem
+                                                                        ) {
+                                                                          const previousDiscounts =
+                                                                            visibleItems
+                                                                              .slice(
+                                                                                0,
+                                                                                -1,
+                                                                              )
+                                                                              .reduce(
+                                                                                (
+                                                                                  sum,
+                                                                                  it,
+                                                                                ) => {
+                                                                                  const editedIt =
+                                                                                    editedOrderItems[
+                                                                                      it
+                                                                                        .id
+                                                                                    ] ||
+                                                                                    {};
+                                                                                  const itPrice =
+                                                                                    parseFloat(
+                                                                                      editedIt.unitPrice !==
+                                                                                        undefined
+                                                                                        ? editedIt.unitPrice
+                                                                                        : it.unitPrice ||
+                                                                                            "0",
+                                                                                    );
+                                                                                  const itQty =
+                                                                                    parseFloat(
+                                                                                      editedIt.quantity !==
+                                                                                        undefined
+                                                                                        ? editedIt.quantity
+                                                                                        : it.quantity ||
+                                                                                            "0",
+                                                                                    );
+                                                                                  const itSubtotal =
+                                                                                    itPrice *
+                                                                                    itQty;
+                                                                                  return (
+                                                                                    sum +
+                                                                                    Math.floor(
+                                                                                      (orderDiscount *
+                                                                                        itSubtotal) /
+                                                                                        totalBeforeDiscount,
+                                                                                    )
                                                                                   );
-                                                                                const itQty =
-                                                                                  parseFloat(
-                                                                                    editedIt.quantity !==
-                                                                                      undefined
-                                                                                      ? editedIt.quantity
-                                                                                      : it.quantity ||
-                                                                                          "0",
-                                                                                  );
-                                                                                const itSubtotal =
-                                                                                  itPrice *
-                                                                                  itQty;
-                                                                                return (
-                                                                                  sum +
-                                                                                  Math.floor(
-                                                                                    (orderDiscount *
-                                                                                      itSubtotal) /
-                                                                                      totalBeforeDiscount,
-                                                                                  )
-                                                                                );
-                                                                              },
+                                                                                },
+                                                                                0,
+                                                                              );
+                                                                          itemDiscountAmount =
+                                                                            Math.max(
                                                                               0,
+                                                                              orderDiscount -
+                                                                                previousDiscounts,
                                                                             );
-                                                                        itemDiscountAmount =
-                                                                          Math.max(
-                                                                            0,
-                                                                            orderDiscount -
-                                                                              previousDiscounts,
-                                                                          );
-                                                                      } else {
-                                                                        itemDiscountAmount =
-                                                                          Math.floor(
-                                                                            (orderDiscount *
-                                                                              itemSubtotal) /
-                                                                              totalBeforeDiscount,
-                                                                          );
+                                                                        } else {
+                                                                          itemDiscountAmount =
+                                                                            Math.floor(
+                                                                              (orderDiscount *
+                                                                                itemSubtotal) /
+                                                                                totalBeforeDiscount,
+                                                                            );
+                                                                        }
                                                                       }
-                                                                    }
 
-                                                                    const product =
-                                                                      products.find(
-                                                                        (
-                                                                          p: any,
-                                                                        ) =>
-                                                                          p.id ===
-                                                                          item.productId,
-                                                                      );
-                                                                    const taxRate =
-                                                                      product?.taxRate
-                                                                        ? parseFloat(
-                                                                            product.taxRate,
-                                                                          ) /
-                                                                          100
-                                                                        : 0;
-                                                                    const priceIncludeTax =
-                                                                      editableInvoice?.priceIncludeTax ??
-                                                                      storeSettings?.priceIncludesTax ??
-                                                                      false;
+                                                                      const product =
+                                                                        products.find(
+                                                                          (
+                                                                            p: any,
+                                                                          ) =>
+                                                                            p.id ===
+                                                                            item.productId,
+                                                                        );
+                                                                      const taxRate =
+                                                                        product?.taxRate
+                                                                          ? parseFloat(
+                                                                              product.taxRate,
+                                                                            ) /
+                                                                            100
+                                                                          : 0;
+                                                                      const priceIncludeTax =
+                                                                        editableInvoice?.priceIncludeTax ??
+                                                                        storeSettings?.priceIncludesTax ??
+                                                                        false;
 
-                                                                    let itemTax = 0;
-                                                                    let priceBeforeTax = 0;
+                                                                      let itemTax = 0;
+                                                                      let priceBeforeTax = 0;
 
-                                                                    if (
-                                                                      taxRate >
-                                                                      0
-                                                                    ) {
                                                                       if (
-                                                                        priceIncludeTax
+                                                                        taxRate >
+                                                                        0
                                                                       ) {
-                                                                        const discountPerUnit =
-                                                                          itemDiscountAmount /
-                                                                          quantity;
-                                                                        const adjustedPrice =
-                                                                          Math.max(
-                                                                            0,
-                                                                            unitPrice -
-                                                                              discountPerUnit,
-                                                                          );
-                                                                        const giaGomThue =
-                                                                          adjustedPrice *
-                                                                          quantity;
-                                                                        priceBeforeTax =
-                                                                          Math.round(
-                                                                            giaGomThue /
-                                                                              (1 +
-                                                                                taxRate),
-                                                                          );
-                                                                        itemTax =
-                                                                          giaGomThue -
-                                                                          priceBeforeTax;
+                                                                        if (
+                                                                          priceIncludeTax
+                                                                        ) {
+                                                                          const discountPerUnit =
+                                                                            itemDiscountAmount /
+                                                                            quantity;
+                                                                          const adjustedPrice =
+                                                                            Math.max(
+                                                                              0,
+                                                                              unitPrice -
+                                                                                discountPerUnit,
+                                                                            );
+                                                                          const giaGomThue =
+                                                                            adjustedPrice *
+                                                                            quantity;
+                                                                          priceBeforeTax =
+                                                                            Math.round(
+                                                                              giaGomThue /
+                                                                                (1 +
+                                                                                  taxRate),
+                                                                            );
+                                                                          itemTax =
+                                                                            giaGomThue -
+                                                                            priceBeforeTax;
+                                                                        } else {
+                                                                          priceBeforeTax =
+                                                                            Math.round(
+                                                                              itemSubtotal -
+                                                                                itemDiscountAmount,
+                                                                            );
+                                                                          itemTax =
+                                                                            Math.round(
+                                                                              priceBeforeTax *
+                                                                                taxRate,
+                                                                            );
+                                                                        }
                                                                       } else {
                                                                         priceBeforeTax =
                                                                           Math.round(
                                                                             itemSubtotal -
                                                                               itemDiscountAmount,
                                                                           );
-                                                                        itemTax =
-                                                                          Math.round(
-                                                                            priceBeforeTax *
-                                                                              taxRate,
-                                                                          );
                                                                       }
-                                                                    } else {
-                                                                      priceBeforeTax =
-                                                                        Math.round(
-                                                                          itemSubtotal -
-                                                                            itemDiscountAmount,
-                                                                        );
-                                                                    }
 
-                                                                    const calculatedTotal =
-                                                                      priceBeforeTax +
-                                                                      itemTax;
+                                                                      const calculatedTotal =
+                                                                        priceBeforeTax +
+                                                                        itemTax;
 
-                                                                    newEditedItems[
-                                                                      item.id
-                                                                    ] = {
-                                                                      ...edited,
-                                                                      discount:
-                                                                        itemDiscountAmount.toString(),
-                                                                      tax: Math.round(
-                                                                        itemTax,
-                                                                      ).toString(),
-                                                                      priceBeforeTax:
-                                                                        Math.round(
-                                                                          priceBeforeTax,
+                                                                      newEditedItems[
+                                                                        item.id
+                                                                      ] = {
+                                                                        ...edited,
+                                                                        discount:
+                                                                          itemDiscountAmount.toString(),
+                                                                        tax: Math.round(
+                                                                          itemTax,
                                                                         ).toString(),
-                                                                      total:
-                                                                        calculatedTotal.toString(),
-                                                                    };
-                                                                  },
-                                                                );
+                                                                        priceBeforeTax:
+                                                                          Math.round(
+                                                                            priceBeforeTax,
+                                                                          ).toString(),
+                                                                        total:
+                                                                          calculatedTotal.toString(),
+                                                                        taxRate:
+                                                                          (taxRate *
+                                                                            100)
+                                                                            .toString(),
+                                                                        // Preserve other fields
+                                                                        productId:
+                                                                          edited.productId !==
+                                                                            undefined
+                                                                            ? edited.productId
+                                                                            : item.productId,
+                                                                        productName:
+                                                                          edited.productName !==
+                                                                            undefined
+                                                                            ? edited.productName
+                                                                            : item.productName,
+                                                                        sku:
+                                                                          edited.sku !==
+                                                                            undefined
+                                                                            ? edited.sku
+                                                                            : item.sku ||
+                                                                              item.productSku,
+                                                                        quantity: quantity,
+                                                                        unitPrice:
+                                                                          unitPrice.toString(),
+                                                                      };
+                                                                    },
+                                                                  );
 
-                                                                setEditedOrderItems(
-                                                                  newEditedItems,
-                                                                );
+                                                                  setEditedOrderItems(
+                                                                    newEditedItems,
+                                                                  );
+                                                                }
+                                                              }}
+                                                              className="h-7 text-sm w-32 text-right font-bold text-red-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                              disabled={
+                                                                selectedInvoice.displayStatus ===
+                                                                1
                                                               }
-                                                            }}
-                                                            className="h-7 text-sm w-32 text-right font-bold text-red-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                            disabled={
-                                                              selectedInvoice.displayStatus ===
-                                                              1
-                                                            }
-                                                          />
-                                                        ) : (
-                                                          <span className="font-bold text-red-600">
-                                                            {displayTotals.discount >
-                                                            0 ? (
-                                                              <>
-                                                                -
-                                                                {formatCurrency(
-                                                                  Math.floor(
-                                                                    displayTotals.discount,
-                                                                  ),
-                                                                )}
-                                                              </>
-                                                            ) : (
-                                                              <>
-                                                                -
-                                                                {formatCurrency(
-                                                                  orderItems.reduce(
-                                                                    (
-                                                                      sum: number,
-                                                                      item: any,
-                                                                    ) =>
-                                                                      sum +
-                                                                      parseFloat(
-                                                                        item.discount ||
-                                                                          "0",
-                                                                      ),
-                                                                    0,
-                                                                  ),
-                                                                )}
-                                                              </>
-                                                            )}
-                                                          </span>
-                                                        )}
-                                                      </div>
-                                                      <div className="flex justify-between text-sm">
-                                                        <span className="text-gray-600">
-                                                          {t("common.totalTax")}
-                                                          :
-                                                        </span>
-                                                        <span className="font-bold">
-                                                          {formatCurrency(
-                                                            Math.floor(
-                                                              displayTotals.tax,
-                                                            ),
+                                                            />
+                                                          ) : (
+                                                            <span className="font-bold text-red-600">
+                                                              {displayTotals.discount >
+                                                              0 ? (
+                                                                <>
+                                                                  -
+                                                                  {formatCurrency(
+                                                                    Math.floor(
+                                                                      displayTotals.discount,
+                                                                    ),
+                                                                  )}
+                                                                </>
+                                                              ) : (
+                                                                <>
+                                                                  -
+                                                                  {formatCurrency(
+                                                                    orderItems.reduce(
+                                                                      (
+                                                                        sum: number,
+                                                                        item: any,
+                                                                      ) =>
+                                                                        sum +
+                                                                        parseFloat(
+                                                                          item.discount ||
+                                                                            "0",
+                                                                        ),
+                                                                      0,
+                                                                    ),
+                                                                  )}
+                                                                </>
+                                                              )}
+                                                            </span>
                                                           )}
-                                                        </span>
-                                                      </div>
-                                                    </div>
-
-                                                    {/* Cột phải - Khách hàng trả và Phương thức thanh toán */}
-                                                    <div className="space-y-2 text-sm">
-                                                      {storeSettings?.businessType ===
-                                                        "laundry" && (
-                                                        <div className="flex justify-between items-center">
-                                                          <span className="font-semibold text-gray-700">
+                                                        </div>
+                                                        <div className="flex justify-between text-sm">
+                                                          <span className="text-gray-600">
                                                             {t(
-                                                              "common.customerPaid",
+                                                              "common.totalTax",
                                                             )}
                                                             :
                                                           </span>
-                                                          <span className="font-bold text-green-600">
+                                                          <span className="font-bold">
                                                             {formatCurrency(
                                                               Math.floor(
-                                                                displayTotals.total,
+                                                                displayTotals.tax,
                                                               ),
                                                             )}
                                                           </span>
                                                         </div>
-                                                      )}
-                                                      <div className="flex justify-between items-center">
-                                                        <span className="font-semibold text-gray-700">
-                                                          {t(
-                                                            "common.paymentMethodLabel",
-                                                          )}
-                                                          :
-                                                        </span>
-                                                        <span className="font-bold text-blue-600">
-                                                          {isEditing ? (
-                                                            <Select
-                                                              value={
-                                                                editableInvoice.paymentMethod !==
-                                                                  null &&
-                                                                editableInvoice.paymentMethod !==
-                                                                  undefined &&
-                                                                String(
-                                                                  editableInvoice.paymentMethod,
-                                                                ).trim() !== ""
-                                                                  ? String(
-                                                                      editableInvoice.paymentMethod,
-                                                                    )
-                                                                  : "unpaid"
-                                                              }
-                                                              onValueChange={(
-                                                                value,
-                                                              ) => {
-                                                                console.log(
-                                                                  "💳 Payment method changed to:",
-                                                                  value,
-                                                                  "Type:",
-                                                                  typeof value,
-                                                                );
-                                                                // Nếu chọn "unpaid", set về null
-                                                                if (
-                                                                  value ===
-                                                                  "unpaid"
-                                                                ) {
-                                                                  updateEditableInvoiceField(
-                                                                    "paymentMethod",
-                                                                    null,
-                                                                  );
-                                                                } else {
-                                                                  updateEditableInvoiceField(
-                                                                    "paymentMethod",
-                                                                    value,
-                                                                  );
-                                                                }
-                                                              }}
-                                                            >
-                                                              <SelectTrigger className="h-8 w-[180px] text-sm">
-                                                                <SelectValue
-                                                                  placeholder={t(
-                                                                    "common.selectPaymentMethod",
-                                                                  )}
-                                                                />
-                                                              </SelectTrigger>
-                                                              <SelectContent side="top">
-                                                                {/* chưa thanh toán option */}
-                                                                <SelectItem value="unpaid">
-                                                                  {t(
-                                                                    "common.unpaid",
-                                                                  )}
-                                                                </SelectItem>
+                                                      </div>
 
-                                                                {enabledPaymentMethods.map(
-                                                                  (
-                                                                    method: any,
-                                                                  ) => (
-                                                                    <SelectItem
-                                                                      key={
-                                                                        method.id
-                                                                      }
-                                                                      value={
-                                                                        method.nameKey
-                                                                      }
-                                                                    >
-                                                                      {
-                                                                        method.icon
-                                                                      }{" "}
-                                                                      {getPaymentMethodName(
-                                                                        method.nameKey,
-                                                                      )}
-                                                                    </SelectItem>
-                                                                  ),
-                                                                )}
-                                                              </SelectContent>
-                                                            </Select>
-                                                          ) : (
-                                                            <span className="font-bold text-blue-600">
-                                                              {(() => {
-                                                                const paymentMethod =
-                                                                  selectedInvoice.paymentMethod;
-                                                                try {
-                                                                  if (
-                                                                    paymentMethod &&
-                                                                    typeof paymentMethod ===
-                                                                      "string"
-                                                                  ) {
-                                                                    const parsed =
-                                                                      JSON.parse(
-                                                                        paymentMethod,
-                                                                      );
-                                                                    if (
-                                                                      Array.isArray(
-                                                                        parsed,
-                                                                      ) &&
-                                                                      parsed.length >
-                                                                        0
-                                                                    ) {
-                                                                      return t(
-                                                                        "common.multiplePaymentMethods",
-                                                                      );
-                                                                    }
-                                                                  }
-                                                                } catch (e) {}
-                                                                return getPaymentMethodName(
-                                                                  selectedInvoice.paymentMethod,
-                                                                );
-                                                              })()}
+                                                      {/* Cột phải - Khách hàng trả và Phương thức thanh toán */}
+                                                      <div className="space-y-2 text-sm">
+                                                        {storeSettings?.businessType ===
+                                                          "laundry" && (
+                                                          <div className="flex justify-between items-center">
+                                                            <span className="font-semibold text-gray-700">
+                                                              {t(
+                                                                "common.customerPaid",
+                                                              )}
+                                                              :
                                                             </span>
-                                                          )}
-                                                        </span>
+                                                            <span className="font-bold text-green-600">
+                                                              {formatCurrency(
+                                                                Math.floor(
+                                                                  displayTotals.total,
+                                                                ),
+                                                              )}
+                                                            </span>
+                                                          </div>
+                                                        )}
+                                                        <div className="flex justify-between items-center">
+                                                          <span className="font-semibold text-gray-700">
+                                                            {t(
+                                                              "common.paymentMethodLabel",
+                                                            )}
+                                                            :
+                                                          </span>
+                                                          <span className="font-bold text-blue-600">
+                                                            {isEditing ? (
+                                                              <Select
+                                                                value={
+                                                                  editableInvoice.paymentMethod !==
+                                                                    null &&
+                                                                  editableInvoice.paymentMethod !==
+                                                                    undefined &&
+                                                                  String(
+                                                                    editableInvoice.paymentMethod,
+                                                                  ).trim() !==
+                                                                    ""
+                                                                    ? String(
+                                                                        editableInvoice.paymentMethod,
+                                                                      )
+                                                                    : "unpaid"
+                                                                }
+                                                                onValueChange={(
+                                                                  value,
+                                                                ) => {
+                                                                  console.log(
+                                                                    "💳 Payment method changed to:",
+                                                                    value,
+                                                                    "Type:",
+                                                                    typeof value,
+                                                                  );
+                                                                  // Nếu chọn "unpaid", set về null
+                                                                  if (
+                                                                    value ===
+                                                                    "unpaid"
+                                                                  ) {
+                                                                    updateEditableInvoiceField(
+                                                                      "paymentMethod",
+                                                                      null,
+                                                                    );
+                                                                  } else {
+                                                                    updateEditableInvoiceField(
+                                                                      "paymentMethod",
+                                                                      value,
+                                                                    );
+                                                                  }
+                                                                }}
+                                                              >
+                                                                <SelectTrigger className="h-8 w-[180px] text-sm">
+                                                                  <SelectValue
+                                                                    placeholder={t(
+                                                                      "common.selectPaymentMethod",
+                                                                    )}
+                                                                  />
+                                                                </SelectTrigger>
+                                                                <SelectContent side="top">
+                                                                  {/* chưa thanh toán option */}
+                                                                  <SelectItem value="unpaid">
+                                                                    {t(
+                                                                      "common.unpaid",
+                                                                    )}
+                                                                  </SelectItem>
+
+                                                                  {enabledPaymentMethods.map(
+                                                                    (
+                                                                      method: any,
+                                                                    ) => (
+                                                                      <SelectItem
+                                                                        key={
+                                                                          method.id
+                                                                        }
+                                                                        value={
+                                                                          method.nameKey
+                                                                        }
+                                                                      >
+                                                                        {
+                                                                          method.icon
+                                                                        }{" "}
+                                                                        {getPaymentMethodName(
+                                                                          method.nameKey,
+                                                                        )}
+                                                                      </SelectItem>
+                                                                    ),
+                                                                  )}
+                                                                </SelectContent>
+                                                              </Select>
+                                                            ) : (
+                                                              <span className="font-bold text-blue-600">
+                                                                {(() => {
+                                                                  const paymentMethod =
+                                                                    selectedInvoice.paymentMethod;
+                                                                  try {
+                                                                    if (
+                                                                      paymentMethod &&
+                                                                      typeof paymentMethod ===
+                                                                        "string"
+                                                                    ) {
+                                                                      const parsed =
+                                                                        JSON.parse(
+                                                                          paymentMethod,
+                                                                        );
+                                                                      if (
+                                                                        Array.isArray(
+                                                                          parsed,
+                                                                        ) &&
+                                                                        parsed.length >
+                                                                          0
+                                                                      ) {
+                                                                        return t(
+                                                                          "common.multiplePaymentMethods",
+                                                                        );
+                                                                      }
+                                                                    }
+                                                                  } catch (e) {}
+                                                                  return getPaymentMethodName(
+                                                                    selectedInvoice.paymentMethod,
+                                                                  );
+                                                                })()}
+                                                              </span>
+                                                            )}
+                                                          </span>
+                                                        </div>
                                                       </div>
                                                     </div>
                                                   </div>
                                                 </div>
-                                              </div>
 
-                                              <div>
-                                                <label className="block text-sm font-medium mb-2">
-                                                  {t("common.notes")}
-                                                </label>
-                                                {isEditing &&
-                                                editableInvoice ? (
-                                                  <textarea
-                                                    {...form.register("notes")}
-                                                    value={
-                                                      editableInvoice.notes ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) => {
-                                                      updateEditableInvoiceField(
+                                                <div>
+                                                  <label className="block text-sm font-medium mb-2">
+                                                    {t("common.notes")}
+                                                  </label>
+                                                  {isEditing &&
+                                                  editableInvoice ? (
+                                                    <textarea
+                                                      {...form.register(
                                                         "notes",
-                                                        e.target.value,
-                                                      );
-                                                      form.setValue(
-                                                        "notes",
-                                                        e.target.value,
-                                                      );
-                                                    }}
-                                                    className="w-full p-3 border rounded min-h-[80px] resize-none"
-                                                    placeholder={t(
-                                                      "common.enterNotes",
-                                                    )}
-                                                    disabled={
-                                                      selectedInvoice.displayStatus ===
-                                                      1
-                                                    }
-                                                  />
-                                                ) : (
-                                                  <div className="p-3 bg-gray-50 rounded border min-h-[80px]">
-                                                    {selectedInvoice.notes ||
-                                                      t("common.noNotes")}
-                                                  </div>
-                                                )}
-                                              </div>
-
-                                              <div className="flex gap-2 pt-4 border-t">
-                                                {!isEditing ? (
-                                                  <>
-                                                    {/* Nút Hủy đơn: hiển thị khi order.status != 'cancelled' && order.status != 'paid' */}
-                                                    {selectedInvoice.status !==
-                                                      "cancelled" &&
-                                                      selectedInvoice.status !==
-                                                        "paid" &&
-                                                      storeSettings?.businessType !==
-                                                        "laundry" && (
-                                                        <Button
-                                                          variant="destructive"
-                                                          size="sm"
-                                                          onClick={() =>
-                                                            setShowCancelDialog(
-                                                              true,
-                                                            )
-                                                          }
-                                                        >
-                                                          <X className="w-4 h-4 mr-2" />
-                                                          {t(
-                                                            "common.cancelOrder",
-                                                          )}
-                                                        </Button>
                                                       )}
-
-                                                    {/* Nút Sửa đơn: logic phức tạp dựa vào businessType và isPaid */}
-                                                    {(() => {
-                                                      const canEdit =
-                                                        selectedInvoice.status !==
-                                                          "cancelled" &&
-                                                        selectedInvoice.status !==
-                                                          "paid";
-                                                      const isLaundry =
-                                                        storeSettings?.businessType ===
-                                                        "laundry";
-                                                      const canEditLaundry =
-                                                        selectedInvoice.status !==
-                                                        "cancelled";
-
-                                                      if (isLaundry) {
-                                                        // Với laundry: cho phép sửa nếu chưa cancelled và chưa paid
-                                                        if (canEditLaundry) {
-                                                          return (
-                                                            <Button
-                                                              onClick={() =>
-                                                                handleEditOrder(
-                                                                  selectedInvoice,
-                                                                )
-                                                              }
-                                                              size="sm"
-                                                            >
-                                                              {t(
-                                                                "orders.editOrder",
-                                                              )}
-                                                            </Button>
-                                                          );
-                                                        }
-                                                      } else {
-                                                        // Với business khác: chỉ cho sửa khi canEdit
-                                                        if (canEdit) {
-                                                          return (
-                                                            <Button
-                                                              onClick={() =>
-                                                                handleEditOrder(
-                                                                  selectedInvoice,
-                                                                )
-                                                              }
-                                                              size="sm"
-                                                            >
-                                                              {t(
-                                                                "orders.editOrder",
-                                                              )}
-                                                            </Button>
-                                                          );
-                                                        }
+                                                      value={
+                                                        editableInvoice.notes ||
+                                                        ""
                                                       }
-                                                      return null;
-                                                    })()}
+                                                      onChange={(e) => {
+                                                        updateEditableInvoiceField(
+                                                          "notes",
+                                                          e.target.value,
+                                                        );
+                                                        form.setValue(
+                                                          "notes",
+                                                          e.target.value,
+                                                        );
+                                                      }}
+                                                      className="w-full p-3 border rounded min-h-[80px] resize-none"
+                                                      placeholder={t(
+                                                        "common.enterNotes",
+                                                      )}
+                                                      disabled={
+                                                        selectedInvoice.displayStatus ===
+                                                        1
+                                                      }
+                                                    />
+                                                  ) : (
+                                                    <div className="p-3 bg-gray-50 rounded border min-h-[80px]">
+                                                      {selectedInvoice.notes ||
+                                                        t("common.noNotes")}
+                                                    </div>
+                                                  )}
+                                                </div>
 
-                                                    {/* Nút Thanh toán: hiển thị khi order.status != 'cancelled' && order.status != 'paid' */}
-                                                    {selectedInvoice.status !==
-                                                      "cancelled" &&
-                                                      selectedInvoice.status !==
-                                                        "paid" && (
-                                                        <Button
-                                                          onClick={async () => {
-                                                            if (
-                                                              !selectedInvoice
-                                                            ) {
-                                                              toast({
-                                                                title: "Lỗi",
-                                                                description:
-                                                                  "Vui lòng chọn đơn hàng",
-                                                                variant:
-                                                                  "destructive",
-                                                              });
-                                                              return;
-                                                            }
-
-                                                            try {
-                                                              // Fetch fresh order items
-                                                              const itemsResponse =
-                                                                await apiRequest(
-                                                                  "GET",
-                                                                  `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${selectedInvoice.id}`,
-                                                                );
-                                                              const items =
-                                                                await itemsResponse.json();
-
-                                                              // Prepare order data for payment
-                                                              const orderForPayment =
-                                                                {
-                                                                  ...selectedInvoice,
-                                                                  orderItems:
-                                                                    items,
-                                                                  items:
-                                                                    items.map(
-                                                                      (
-                                                                        item: any,
-                                                                      ) => ({
-                                                                        id: item.id,
-                                                                        productId:
-                                                                          item.productId,
-                                                                        productName:
-                                                                          item.productName,
-                                                                        price:
-                                                                          item.unitPrice,
-                                                                        quantity:
-                                                                          item.quantity,
-                                                                        total:
-                                                                          item.total,
-                                                                        discount:
-                                                                          item.discount ||
-                                                                          "0",
-                                                                        sku:
-                                                                          item.productSku ||
-                                                                          item.sku ||
-                                                                          `SKU${item.productId}`,
-                                                                        taxRate:
-                                                                          parseFloat(
-                                                                            item.taxRate ||
-                                                                              "0",
-                                                                          ),
-                                                                      }),
-                                                                    ),
-                                                                  exactSubtotal:
-                                                                    parseFloat(
-                                                                      selectedInvoice.subtotal ||
-                                                                        "0",
-                                                                    ),
-                                                                  exactTax:
-                                                                    parseFloat(
-                                                                      selectedInvoice.tax ||
-                                                                        "0",
-                                                                    ),
-                                                                  exactDiscount:
-                                                                    parseFloat(
-                                                                      selectedInvoice.discount ||
-                                                                        "0",
-                                                                    ),
-                                                                  exactTotal:
-                                                                    parseFloat(
-                                                                      selectedInvoice.total ||
-                                                                        "0",
-                                                                    ),
-                                                                };
-
-                                                              // Open payment method modal first
-                                                              setOrderForPayment(
-                                                                orderForPayment,
-                                                              );
-                                                              setShowPaymentMethodModal(
+                                                <div className="flex gap-2 pt-4 border-t">
+                                                  {!isEditing ? (
+                                                    <>
+                                                      {/* Nút Hủy đơn: hiển thị khi order.status != 'cancelled' && order.status != 'paid' */}
+                                                      {selectedInvoice.status !==
+                                                        "cancelled" &&
+                                                        selectedInvoice.status !==
+                                                          "paid" &&
+                                                        storeSettings?.businessType !==
+                                                          "laundry" && (
+                                                          <Button
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                              setShowCancelDialog(
                                                                 true,
-                                                              );
-                                                            } catch (error) {
-                                                              console.error(
-                                                                "  Error preparing payment:",
-                                                                error,
-                                                              );
-                                                              toast({
-                                                                title: "Lỗi",
-                                                                description:
-                                                                  "Không thể tải thông tin đơn hàng",
-                                                                variant:
-                                                                  "destructive",
-                                                              });
+                                                              )
                                                             }
-                                                          }}
-                                                          className="bg-green-600 hover:bg-green-700 text-white"
-                                                        >
-                                                          <CreditCard className="w-4 h-4 mr-2" />
-                                                          {t("common.payment")}
-                                                        </Button>
-                                                      )}
+                                                          >
+                                                            <X className="w-4 h-4 mr-2" />
+                                                            {t(
+                                                              "common.cancelOrder",
+                                                            )}
+                                                          </Button>
+                                                        )}
 
-                                                    {/* Nút Phát hành hóa đơn: hiển thị khi order.status != 'paid' */}
-                                                    {selectedInvoice.status ===
-                                                      "paid" &&
-                                                      selectedInvoice.einvoiceStatus ===
-                                                        0 &&
-                                                      storeSettings?.businessType !==
-                                                        "laundry" && (
-                                                        <Button
-                                                          onClick={() =>
-                                                            setShowEInvoiceModal(
-                                                              true,
-                                                            )
+                                                      {/* Nút Sửa đơn: logic phức tạp dựa vào businessType và isPaid */}
+                                                      {(() => {
+                                                        const canEdit =
+                                                          selectedInvoice.status !==
+                                                            "cancelled" &&
+                                                          selectedInvoice.status !==
+                                                            "paid";
+                                                        const isLaundry =
+                                                          storeSettings?.businessType ===
+                                                          "laundry";
+                                                        const canEditLaundry =
+                                                          selectedInvoice.status !==
+                                                          "cancelled";
+
+                                                        if (isLaundry) {
+                                                          // Với laundry: cho phép sửa nếu                         chưa cancelled và chưa paid
+                                                          if (canEditLaundry) {
+                                                            return (
+                                                              <Button
+                                                                onClick={() =>
+                                                                  handleEditOrder(
+                                                                    selectedInvoice,
+                                                                  )
+                                                                }
+                                                                size="sm"
+                                                              >
+                                                                {t(
+                                                                  "orders.editOrder",
+                                                                )}
+                                                              </Button>
+                                                            );
                                                           }
-                                                          variant="outline"
+                                                        } else {
+                                                          // Với business khác: chỉ cho sửa khi canEdit
+                                                          if (canEdit) {
+                                                            return (
+                                                              <Button
+                                                                onClick={() =>
+                                                                  handleEditOrder(
+                                                                    selectedInvoice,
+                                                                  )
+                                                                }
+                                                                size="sm"
+                                                              >
+                                                                {t(
+                                                                  "orders.editOrder",
+                                                                )}
+                                                              </Button>
+                                                            );
+                                                          }
+                                                        }
+                                                        return null;
+                                                      })()}
+
+                                                      {/* Nút Thanh toán: hiển thị khi order.status != 'cancelled' && order.status != 'paid' */}
+                                                      {selectedInvoice.status !==
+                                                        "cancelled" &&
+                                                        selectedInvoice.status !==
+                                                          "paid" && (
+                                                          <Button
+                                                            onClick={async () => {
+                                                              if (
+                                                                !selectedInvoice
+                                                              ) {
+                                                                toast({
+                                                                  title: "Lỗi",
+                                                                  description:
+                                                                    "Vui lòng chọn đơn hàng",
+                                                                  variant:
+                                                                    "destructive",
+                                                                });
+                                                                return;
+                                                              }
+
+                                                              try {
+                                                                // Fetch fresh order items
+                                                                const itemsResponse =
+                                                                  await apiRequest(
+                                                                    "GET",
+                                                                    `/api/order-items/${selectedInvoice.id}`,
+                                                                  );
+                                                                const items =
+                                                                  await itemsResponse.json();
+
+                                                                // Prepare order data for payment
+                                                                const orderForPayment =
+                                                                  {
+                                                                    ...selectedInvoice,
+                                                                    orderItems:
+                                                                      items,
+                                                                    items:
+                                                                      items.map(
+                                                                        (
+                                                                          item: any,
+                                                                        ) => ({
+                                                                          id: item.id,
+                                                                          productId:
+                                                                            item.productId,
+                                                                          productName:
+                                                                            item.productName,
+                                                                          price:
+                                                                            item.unitPrice,
+                                                                          quantity:
+                                                                            item.quantity,
+                                                                          total:
+                                                                            item.total,
+                                                                          discount:
+                                                                            item.discount ||
+                                                                            "0",
+                                                                          sku:
+                                                                            item.productSku ||
+                                                                            item.sku ||
+                                                                            `SKU${item.productId}`,
+                                                                          taxRate:
+                                                                            parseFloat(
+                                                                              item.taxRate ||
+                                                                                "0",
+                                                                            ),
+                                                                        }),
+                                                                      ),
+                                                                    exactSubtotal:
+                                                                      parseFloat(
+                                                                        selectedInvoice.subtotal ||
+                                                                          "0",
+                                                                      ),
+                                                                    exactTax:
+                                                                      parseFloat(
+                                                                        selectedInvoice.tax ||
+                                                                          "0",
+                                                                      ),
+                                                                    exactDiscount:
+                                                                      parseFloat(
+                                                                        selectedInvoice.discount ||
+                                                                          "0",
+                                                                      ),
+                                                                    exactTotal:
+                                                                      parseFloat(
+                                                                        selectedInvoice.total ||
+                                                                          "0",
+                                                                      ),
+                                                                  };
+
+                                                                // Open payment method modal first
+                                                                setOrderForPayment(
+                                                                  orderForPayment,
+                                                                );
+                                                                setShowPaymentMethodModal(
+                                                                  true,
+                                                                );
+                                                              } catch (error) {
+                                                                console.error(
+                                                                  "  Error preparing payment:",
+                                                                  error,
+                                                                );
+                                                                toast({
+                                                                  title: "Lỗi",
+                                                                  description:
+                                                                    "Không thể tải thông tin đơn hàng",
+                                                                  variant:
+                                                                    "destructive",
+                                                                });
+                                                              }
+                                                            }}
+                                                            className="bg-green-600 hover:bg-green-700 text-white"
+                                                          >
+                                                            <CreditCard className="w-4 h-4 mr-2" />
+                                                            {t(
+                                                              "common.payment",
+                                                            )}
+                                                          </Button>
+                                                        )}
+
+                                                      {/* Nút Phát hành hóa đơn: hiển thị khi order.status != 'paid' */}
+                                                      {selectedInvoice.status ===
+                                                        "paid" &&
+                                                        selectedInvoice.einvoiceStatus ===
+                                                          0 &&
+                                                        storeSettings?.businessType !==
+                                                          "laundry" && (
+                                                          <Button
+                                                            onClick={() =>
+                                                              setShowEInvoiceModal(
+                                                                true,
+                                                              )
+                                                            }
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="border-green-500 text-green-600 hover:bg-green-50"
+                                                          >
+                                                            {t(
+                                                              "orders.issueInvoice",
+                                                            )}
+                                                          </Button>
+                                                        )}
+
+                                                      {/* Nút In hóa đơn: hiển thị khi order.status != 'paid' */}
+                                                      {selectedInvoice.status !==
+                                                        "cancelled" && (
+                                                        <Button
                                                           size="sm"
-                                                          className="border-green-500 text-green-600 hover:bg-green-50"
+                                                          variant="outline"
+                                                          onClick={() => {
+                                                            setSelectedReceipt({
+                                                              ...selectedInvoice,
+                                                              items: orderItems,
+                                                            });
+                                                            setIsTitle(
+                                                              selectedInvoice.status ===
+                                                                "paid"
+                                                                ? true
+                                                                : false,
+                                                            );
+                                                            setShowReceiptModal(
+                                                              true,
+                                                            );
+                                                          }}
+                                                          className="border-blue-500 text-blue-600 hover:bg-blue-50"
                                                         >
-                                                          {t(
-                                                            "orders.issueInvoice",
-                                                          )}
+                                                          <Printer className="w-4 h-4 mr-2" />
+                                                          {t("common.print")}
                                                         </Button>
                                                       )}
 
-                                                    {/* Nút In hóa đơn: hiển thị khi order.status != 'paid' */}
-                                                    {selectedInvoice.status !==
-                                                      "cancelled" && (
+                                                      {/* Nút Đóng: luôn hiển thị */}
                                                       <Button
-                                                        size="sm"
                                                         variant="outline"
-                                                        onClick={() => {
-                                                          setSelectedReceipt({
-                                                            ...selectedInvoice,
-                                                            items: orderItems,
-                                                          });
-                                                          setIsTitle(
-                                                            selectedInvoice.status ===
-                                                              "paid"
-                                                              ? true
-                                                              : false,
-                                                          );
-                                                          setShowReceiptModal(
-                                                            true,
-                                                          );
-                                                        }}
-                                                        className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                          setSelectedInvoice(
+                                                            null,
+                                                          )
+                                                        }
                                                       >
-                                                        <Printer className="w-4 h-4 mr-2" />
-                                                        {t("common.print")}
+                                                        {t("common.close")}
                                                       </Button>
-                                                    )}
+                                                    </>
+                                                  ) : (
+                                                    <>
+                                                      {/* Chế độ editing: chỉ hiển thị Lưu và Hủy */}
+                                                      {(() => {
+                                                        const isLaundry =
+                                                          storeSettings?.businessType ===
+                                                          "laundry";
+                                                        const isPaidOrder =
+                                                          selectedInvoice.status ===
+                                                          "paid";
 
-                                                    {/* Nút Đóng: luôn hiển thị */}
-                                                    <Button
-                                                      variant="outline"
-                                                      size="sm"
-                                                      onClick={() =>
-                                                        setSelectedInvoice(null)
-                                                      }
-                                                    >
-                                                      {t("common.close")}
-                                                    </Button>
-                                                  </>
-                                                ) : (
-                                                  <>
-                                                    {/* Chế độ editing: chỉ hiển thị Lưu và Hủy */}
-                                                    {(() => {
-                                                      const isLaundry =
-                                                        storeSettings?.businessType ===
-                                                        "laundry";
-                                                      const isPaidOrder =
-                                                        selectedInvoice.status ===
-                                                        "paid";
+                                                        // Nếu là laundry và đơn đã paid, chỉ cho phép sửa isPaid
+                                                        if (
+                                                          isLaundry &&
+                                                          isPaidOrder
+                                                        ) {
+                                                          return (
+                                                            <>
+                                                              <Button
+                                                                onClick={
+                                                                  handleSaveOrder
+                                                                }
+                                                                size="sm"
+                                                                disabled={
+                                                                  updateOrderMutation.isPending
+                                                                }
+                                                              >
+                                                                {updateOrderMutation.isPending
+                                                                  ? t(
+                                                                      "common.saving",
+                                                                    )
+                                                                  : t(
+                                                                      "common.save",
+                                                                    )}
+                                                              </Button>
+                                                              <Button
+                                                                onClick={
+                                                                  handleCancelEdit
+                                                                }
+                                                                variant="outline"
+                                                                size="sm"
+                                                              >
+                                                                {t(
+                                                                  "common.cancel",
+                                                                )}
+                                                              </Button>
+                                                            </>
+                                                          );
+                                                        }
 
-                                                      // Nếu là laundry và đơn đã paid, chỉ cho phép sửa isPaid
-                                                      if (
-                                                        isLaundry &&
-                                                        isPaidOrder
-                                                      ) {
+                                                        // Trường hợp bình thường: hiển thị Lưu và Hủy
                                                         return (
                                                           <>
                                                             <Button
@@ -6390,52 +6563,19 @@ export default function SalesOrders() {
                                                             </Button>
                                                           </>
                                                         );
-                                                      }
-
-                                                      // Trường hợp bình thường: hiển thị Lưu và Hủy
-                                                      return (
-                                                        <>
-                                                          <Button
-                                                            onClick={
-                                                              handleSaveOrder
-                                                            }
-                                                            size="sm"
-                                                            disabled={
-                                                              updateOrderMutation.isPending
-                                                            }
-                                                          >
-                                                            {updateOrderMutation.isPending
-                                                              ? t(
-                                                                  "common.saving",
-                                                                )
-                                                              : t(
-                                                                  "common.save",
-                                                                )}
-                                                          </Button>
-                                                          <Button
-                                                            onClick={
-                                                              handleCancelEdit
-                                                            }
-                                                            variant="outline"
-                                                            size="sm"
-                                                          >
-                                                            {t("common.cancel")}
-                                                          </Button>
-                                                        </>
-                                                      );
-                                                    })()}
-                                                  </>
-                                                )}
-                                              </div>
-                                            </CardContent>
-                                          </Card>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  )}
-                              </>
-                            );
-                          })
+                                                      })()}
+                                                    </>
+                                                  )}
+                                                </div>
+                                              </CardContent>
+                                            </Card>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    )}
+                                </>
+                              );
+                            })
                         )}
                       </tbody>
                     </table>

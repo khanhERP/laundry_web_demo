@@ -39,7 +39,7 @@ export function PinAuth({ onAuthSuccess }: PinAuthProps) {
       localStorage.removeItem("authToken");
       localStorage.removeItem("storeInfo");
       localStorage.removeItem("currentDomain");
-      
+
       // Force reload to ensure clean state
       console.log("✅ Auth data cleared - forcing page reload");
       window.location.reload();
@@ -103,9 +103,9 @@ export function PinAuth({ onAuthSuccess }: PinAuthProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           pinCode: pin,
-          domain: currentDomain 
+          domain: currentDomain
         }),
       });
 
@@ -126,12 +126,9 @@ export function PinAuth({ onAuthSuccess }: PinAuthProps) {
         // Lưu trạng thái đăng nhập vào sessionStorage
         sessionStorage.setItem("pinAuthenticated", "true");
 
-        toast({
-          title: "Đăng nhập thành công",
-          description: `Chào mừng đến với ${result.data.store.storeName || "hệ thống POS"}`,
-        });
-
-        onAuthSuccess();
+        // Reload page để đảm bảo token được sử dụng đúng cách
+        console.log("✅ Login successful - reloading page to apply token");
+        window.location.reload();
       } else {
         toast({
           title: "Mã PIN không đúng",

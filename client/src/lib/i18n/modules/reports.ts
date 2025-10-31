@@ -18,10 +18,13 @@ export const reportsTranslations: { [key: string]: ReportsTranslations } = {
     endDate: "Đến ngày",
     refresh: "Làm mới",
     toDay: "Hôm nay",
+    yesterday: "Hôm qua",
     thisWeek: "Tuần này",
     lastWeek: "Tuần trước",
     thisMonth: "Tháng này",
     lastMonth: "Tháng trước",
+    thisQuarter: "Quý này",
+    thisYear: "Năm nay",
     custom: "Tùy chỉnh",
 
     // Dashboard metrics
@@ -598,10 +601,13 @@ export const reportsTranslations: { [key: string]: ReportsTranslations } = {
     endDate: "종료일",
     refresh: "새로고침",
     toDay: "오늘",
+    yesterday: "어제",
     thisWeek: "이번 주",
     lastWeek: "지난주",
     thisMonth: "이번 달",
     lastMonth: "지난 달",
+    thisQuarter: "이번 분기",
+    thisYear: "올해",
     custom: "사용자 정의",
 
     // Dashboard metrics
@@ -1145,10 +1151,13 @@ export const reportsTranslations: { [key: string]: ReportsTranslations } = {
     endDate: "End Date",
     refresh: "Refresh",
     toDay: "Today",
+    yesterday: "Yesterday",
     thisWeek: "This Week",
     lastWeek: "Last Week",
     thisMonth: "This Month",
     lastMonth: "Last Month",
+    thisQuarter: "This Quarter",
+    thisYear: "This Year",
     custom: "Custom",
 
     // Dashboard metrics

@@ -174,15 +174,17 @@ function App() {
 
     // Check if domain has changed - MUST clear everything
     if (storedDomain && storedDomain !== currentDomain) {
-      console.log(`🔄 Domain changed from ${storedDomain} to ${currentDomain} - forcing complete logout`);
-      
+      console.log(
+        `🔄 Domain changed from ${storedDomain} to ${currentDomain} - forcing complete logout`,
+      );
+
       // Clear ALL storage to ensure clean state
       sessionStorage.clear();
       localStorage.clear();
-      
+
       // Force re-authentication
       setIsAuthenticated(false);
-      
+
       console.log("✅ All auth data cleared - user must login again");
       return;
     }

@@ -135,7 +135,7 @@ export function ReceiptModal({
       // First get the order to find tableId
       const orderResponse = await apiRequest(
         "GET",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${receipt.id}`,
+        `/api/orders/${receipt.id}`,
       );
       const order = await orderResponse.json();
       receipt.orderNumber = order.orderNumber;
@@ -145,7 +145,7 @@ export function ReceiptModal({
       // Then get the table info
       const tableResponse = await apiRequest(
         "GET",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${order.tableId}`,
+        `/api/tables/${order.tableId}`,
       );
       const table = await tableResponse.json();
 
@@ -240,7 +240,7 @@ export function ReceiptModal({
         let tableFloor = null;
         if (receipt?.tableId) {
           try {
-            const tableResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${receipt.tableId}`);
+            const tableResponse = await fetch(`/api/tables/${receipt.tableId}`);
             if (tableResponse.ok) {
               const tableData = await tableResponse.json();
               tableFloor = tableData.floor;

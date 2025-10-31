@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "@/lib/i18n";
 import * as XLSX from "xlsx";
+import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Table,
   TableBody,
@@ -31,10 +38,10 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
-  Calendar,
   FileText,
   Plus,
   Minus,
+  Calendar,
 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -45,6 +52,7 @@ interface CashBookPageProps {
 interface CashTransaction {
   id: string;
   date: string;
+  createdAt?: string;
   description: string;
   source: string;
   type: "thu" | "chi";
@@ -67,6 +75,8 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
   const [filterType, setFilterType] = useState("all"); // "all", "thu", "chi"
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("all"); // "all" or specific payment method
   const [voucherTypeFilter, setVoucherTypeFilter] = useState("all"); // "all", "income_voucher", "expense_voucher", "purchase_receipt", "sales_order"
+  const [voucherNumberFilter, setVoucherNumberFilter] = useState(""); // Filter by voucher number
+  const [dateRange, setDateRange] = useState("thisMonth"); // "today", "thisWeek", "thisMonth", "lastMonth", "custom"
   const [startDate, setStartDate] = useState(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -75,10 +85,85 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
   const [endDate, setEndDate] = useState(() => {
     return new Date().toISOString().split("T")[0];
   });
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  // Handle date range change
+  const handleDateRangeChange = (value: string) => {
+    setDateRange(value);
+    const today = new Date();
+
+    switch (value) {
+      case "today":
+        setStartDate(today.toISOString().split("T")[0]);
+        setEndDate(today.toISOString().split("T")[0]);
+        break;
+      case "yesterday":
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        setStartDate(yesterday.toISOString().split("T")[0]);
+        setEndDate(yesterday.toISOString().split("T")[0]);
+        break;
+      case "thisWeek":
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        setStartDate(startOfWeek.toISOString().split("T")[0]);
+        setEndDate(today.toISOString().split("T")[0]);
+        break;
+      case "lastWeek":
+        const startOfLastWeek = new Date(today);
+        startOfLastWeek.setDate(today.getDate() - today.getDay() - 7);
+        const endOfLastWeek = new Date(startOfLastWeek);
+        endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
+        setStartDate(startOfLastWeek.toISOString().split("T")[0]);
+        setEndDate(endOfLastWeek.toISOString().split("T")[0]);
+        break;
+      case "thisMonth":
+        const firstDayOfMonth = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          1,
+        );
+        setStartDate(firstDayOfMonth.toISOString().split("T")[0]);
+        setEndDate(today.toISOString().split("T")[0]);
+        break;
+      case "lastMonth":
+        const firstDayOfLastMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() - 1,
+          1,
+        );
+        const lastDayOfLastMonth = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          0,
+        );
+        setStartDate(firstDayOfLastMonth.toISOString().split("T")[0]);
+        setEndDate(lastDayOfLastMonth.toISOString().split("T")[0]);
+        break;
+      case "thisQuarter":
+        const currentQuarter = Math.floor(today.getMonth() / 3);
+        const firstDayOfQuarter = new Date(
+          today.getFullYear(),
+          currentQuarter * 3,
+          1,
+        );
+        setStartDate(firstDayOfQuarter.toISOString().split("T")[0]);
+        setEndDate(today.toISOString().split("T")[0]);
+        break;
+      case "thisYear":
+        const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+        setStartDate(firstDayOfYear.toISOString().split("T")[0]);
+        setEndDate(today.toISOString().split("T")[0]);
+        break;
+      case "custom":
+        // Do nothing - user can use date inputs if needed
+        break;
+    }
+  };
 
   // Query orders (thu - income from sales)
   const { data: orders = [] } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", startDate, endDate],
     queryFn: async () => {
       try {
         const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders");
@@ -95,7 +180,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
 
   // Query purchase receipts (chi - expenses from purchases)
   const { data: purchaseReceipts = [] } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts", startDate, endDate],
     queryFn: async () => {
       try {
         const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts");
@@ -112,7 +197,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
 
   // Query income vouchers (thu - manual income entries)
   const { data: incomeVouchers = [] } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers", startDate, endDate],
     queryFn: async () => {
       try {
         const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers");
@@ -129,7 +214,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
 
   // Query expense vouchers (chi - manual expense entries)
   const { data: expenseVouchers = [] } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers", startDate, endDate],
     queryFn: async () => {
       try {
         const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers");
@@ -212,7 +297,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
         return true;
       })
       .forEach((order) => {
-        const orderDate = new Date(order.orderedAt || order.paidAt);
+        const orderDate = new Date(order.updatedAt);
 
         // Calculate amount based on payment method filter
         let transactionAmount = parseFloat(order.total || "0");
@@ -240,6 +325,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
         transactions.push({
           id: order.orderNumber || `ORDER-${order.id}`, // Use actual order number
           date: orderDate.toISOString().split("T")[0],
+          createdAt: order.createdAt,
           description:
             order.salesChannel === "table"
               ? "tableSalesTransaction"
@@ -270,6 +356,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
           transactions.push({
             id: voucher.voucherNumber, // Use actual voucher number instead of internal ID
             date: voucher.date || new Date().toISOString().split("T")[0],
+            createdAt: voucher.createdAt,
             description: voucher.category || "orther",
             source: voucher.recipient || "",
             type: "thu",
@@ -308,6 +395,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
           transactions.push({
             id: voucher.voucherNumber, // Use actual voucher number instead of internal ID
             date: voucher.date || new Date().toISOString().split("T")[0],
+            createdAt: voucher.createdAt,
             description: voucher.category || "other",
             source: voucher.recipient || "Không rõ",
             type: "chi",
@@ -432,6 +520,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
             transactions.push({
               id: receipt.receiptNumber || `PURCHASE-${receipt.id}`, // Use actual receipt number
               date: receiptDate.toISOString().split("T")[0],
+              updatedAt: receipt.updatedAt,
               description: "purchaseTransaction",
               source: supplier?.name || t("common.supplier"),
               type: "chi",
@@ -520,6 +609,13 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
       filtered = filtered.filter((t) => t.voucherType === voucherTypeFilter);
     }
 
+    // Filter by voucher number
+    if (voucherNumberFilter.trim() !== "") {
+      filtered = filtered.filter((t) =>
+        t.id.toLowerCase().includes(voucherNumberFilter.toLowerCase().trim()),
+      );
+    }
+
     // Recalculate summaries based on filtered transactions
     const totalIncome = filtered
       .filter((t) => t.type === "thu")
@@ -543,6 +639,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
     cashBookData.openingBalance,
     filterType,
     voucherTypeFilter,
+    voucherNumberFilter,
   ]);
 
   const formatCurrency = (amount: number) => {
@@ -627,7 +724,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
           {/* Filters */}
           <Card className="mb-8 border-green-200">
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
                 {/* Filter Type */}
                 <div>
                   <Label className="text-sm font-bold text-gray-800 mb-3 block">
@@ -657,6 +754,19 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
                       </Label>
                     </div>
                   </RadioGroup>
+                </div>
+
+                {/* Voucher Number Filter */}
+                <div>
+                  <Label className="text-sm font-bold text-gray-800 mb-3 block">
+                    {t("common.voucherCode")}
+                  </Label>
+                  <Input
+                    type="text"
+                    value={voucherNumberFilter}
+                    onChange={(e) => setVoucherNumberFilter(e.target.value)}
+                    placeholder={t("common.search")}
+                  />
                 </div>
 
                 {/* Payment Method Filter */}
@@ -718,28 +828,191 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
                   </Select>
                 </div>
 
-                {/* Start Date */}
-                <div>
+                {/* Quick Date Range Filter */}
+                <div className="relative">
                   <Label className="text-sm font-bold text-gray-800 mb-3 block">
-                    {t("common.fromDate")}
+                    {t("common.dateRange")}
                   </Label>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                </div>
+                  <div className="flex gap-2">
+                    <Select
+                      value={dateRange}
+                      onValueChange={handleDateRangeChange}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue>
+                          {dateRange === "custom"
+                            ? t("reports.custom")
+                            : dateRange === "today"
+                              ? t("reports.toDay")
+                              : dateRange === "yesterday"
+                                ? t("reports.yesterday")
+                                : dateRange === "thisWeek"
+                                  ? t("reports.thisWeek")
+                                  : dateRange === "lastWeek"
+                                    ? t("reports.lastWeek")
+                                    : dateRange === "thisMonth"
+                                      ? t("reports.thisMonth")
+                                      : dateRange === "lastMonth"
+                                        ? t("reports.lastMonth")
+                                        : dateRange === "thisQuarter"
+                                          ? t("reports.thisQuarter")
+                                          : dateRange === "thisYear"
+                                            ? t("reports.thisYear")
+                                            : t("common.dateRange")}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="today">
+                          {t("reports.toDay")}
+                        </SelectItem>
+                        <SelectItem value="yesterday">
+                          {t("reports.yesterday")}
+                        </SelectItem>
+                        <SelectItem value="thisWeek">
+                          {t("reports.thisWeek")}
+                        </SelectItem>
+                        <SelectItem value="lastWeek">
+                          {t("reports.lastWeek")}
+                        </SelectItem>
+                        <SelectItem value="thisMonth">
+                          {t("reports.thisMonth")}
+                        </SelectItem>
+                        <SelectItem value="lastMonth">
+                          {t("reports.lastMonth")}
+                        </SelectItem>
+                        <SelectItem value="thisQuarter">
+                          {t("reports.thisQuarter")}
+                        </SelectItem>
+                        <SelectItem value="thisYear">
+                          {t("reports.thisYear")}
+                        </SelectItem>
+                        <SelectItem value="custom">
+                          {t("reports.custom")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                {/* End Date */}
-                <div>
-                  <Label className="text-sm font-bold text-gray-800 mb-3 block">
-                    {t("common.toDate")}
-                  </Label>
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
+                    {dateRange === "custom" && (
+                      <Popover
+                        open={isCalendarOpen}
+                        onOpenChange={setIsCalendarOpen}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="whitespace-nowrap"
+                            onClick={() => setIsCalendarOpen(true)}
+                          >
+                            <Calendar className="w-4 h-4 mr-2" />
+                            {formatDate(startDate)} - {formatDate(endDate)}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto p-0"
+                          align="start"
+                          side="bottom"
+                          sideOffset={5}
+                        >
+                          <div className="p-4">
+                            <div className="text-sm font-medium mb-4">
+                              Từ ngày: {formatDate(startDate)} - Đến ngày:{" "}
+                              {formatDate(endDate)}
+                            </div>
+                            <div className="flex gap-4">
+                              <div>
+                                <p className="text-xs text-gray-500 mb-2">
+                                  Từ ngày
+                                </p>
+                                <CalendarComponent
+                                  mode="single"
+                                  selected={
+                                    startDate
+                                      ? new Date(startDate + "T00:00:00")
+                                      : undefined
+                                  }
+                                  onSelect={(date) => {
+                                    if (date) {
+                                      const year = date.getFullYear();
+                                      const month = String(
+                                        date.getMonth() + 1,
+                                      ).padStart(2, "0");
+                                      const day = String(
+                                        date.getDate(),
+                                      ).padStart(2, "0");
+                                      const newStartDate = `${year}-${month}-${day}`;
+                                      setStartDate(newStartDate);
+                                      if (newStartDate > endDate) {
+                                        setEndDate(newStartDate);
+                                      }
+                                    }
+                                  }}
+                                  initialFocus
+                                />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 mb-2">
+                                  Đến ngày
+                                </p>
+                                <CalendarComponent
+                                  mode="single"
+                                  selected={
+                                    endDate
+                                      ? new Date(endDate + "T00:00:00")
+                                      : undefined
+                                  }
+                                  onSelect={(date) => {
+                                    if (date) {
+                                      const year = date.getFullYear();
+                                      const month = String(
+                                        date.getMonth() + 1,
+                                      ).padStart(2, "0");
+                                      const day = String(
+                                        date.getDate(),
+                                      ).padStart(2, "0");
+                                      const newEndDate = `${year}-${month}-${day}`;
+                                      if (newEndDate >= startDate) {
+                                        setEndDate(newEndDate);
+                                      }
+                                    }
+                                  }}
+                                  disabled={(date) => {
+                                    if (!startDate) return false;
+                                    const compareDate = new Date(
+                                      startDate + "T00:00:00",
+                                    );
+                                    compareDate.setHours(0, 0, 0, 0);
+                                    const checkDate = new Date(date);
+                                    checkDate.setHours(0, 0, 0, 0);
+                                    return checkDate < compareDate;
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-4 border-t mt-4">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setIsCalendarOpen(false);
+                                  setDateRange("thisMonth");
+                                  handleDateRangeChange("thisMonth");
+                                }}
+                              >
+                                Hủy
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => setIsCalendarOpen(false)}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                Xác nhận
+                              </Button>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -1132,6 +1405,9 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
                           {t("common.voucherCode")}
                         </TableHead>
                         <TableHead className="w-[110px] font-bold">
+                          {t("common.ngaychungtu")}
+                        </TableHead>
+                        <TableHead className="w-[110px] font-bold">
                           {t("common.dateTime")}
                         </TableHead>
                         <TableHead className="w-[150px] font-bold">
@@ -1166,6 +1442,18 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
                           <TableCell className="font-medium w-[140px]">
                             <div className="truncate" title={transaction.id}>
                               {transaction.id}
+                            </div>
+                          </TableCell>
+                          <TableCell className="w-[110px]">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                              <span className="text-sm">
+                                {transaction.createdAt
+                                  ? formatDate(
+                                      transaction.createdAt.split("T")[0],
+                                    )
+                                  : "-"}
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell className="w-[110px]">

@@ -174,7 +174,9 @@ export function ShoppingCart({
       const discountValue = parseFloat(itemDiscountConfig.value) || 0;
       if (itemDiscountConfig.type === "percent") {
         // Calculate percentage discount
-        perItemDiscount = Math.round((unitPrice * quantity * discountValue) / 100);
+        perItemDiscount = Math.round(
+          (unitPrice * quantity * discountValue) / 100,
+        );
       } else {
         // Direct amount discount
         perItemDiscount = discountValue;
@@ -254,7 +256,9 @@ export function ShoppingCart({
         const discountValue = parseFloat(itemDiscountConfig.value) || 0;
         if (itemDiscountConfig.type === "percent") {
           // Calculate percentage discount
-          perItemDiscount = Math.round((originalPrice * quantity * discountValue) / 100);
+          perItemDiscount = Math.round(
+            (originalPrice * quantity * discountValue) / 100,
+          );
         } else {
           // Direct amount discount
           perItemDiscount = discountValue;
@@ -482,7 +486,7 @@ export function ShoppingCart({
     try {
       setIsSearching(true);
       const response = await fetch(
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers?search=${encodeURIComponent(searchTerm)}`,
+        `/api/customers?search=${encodeURIComponent(searchTerm)}`,
         {
           method: "GET",
           headers: {
@@ -1003,13 +1007,15 @@ export function ShoppingCart({
       userInfo?.storeCode || storeSettings?.storeCode || "STORE001";
 
     // Use the EXACT same calculation logic as checkout
-    const calculatedSubtotal = subtotal;
     const calculatedTax = tax;
-    const baseTotal = Math.round(calculatedSubtotal + calculatedTax);
     const finalDiscount = parseFloat(
       activeOrderId
         ? orderDiscounts[activeOrderId] || "0"
         : discountAmount || "0",
+    );
+    const calculatedSubtotal = subtotal + finalDiscount;
+    const baseTotal = Math.round(
+      calculatedSubtotal - finalDiscount + calculatedTax,
     );
     const finalTotal = Math.max(0, baseTotal);
 
@@ -1054,7 +1060,9 @@ export function ShoppingCart({
         const discountValue = parseFloat(itemDiscountConfig.value) || 0;
         if (itemDiscountConfig.type === "percent") {
           // Calculate percentage discount
-          perItemDiscount = Math.round((unitPrice * quantity * discountValue) / 100);
+          perItemDiscount = Math.round(
+            (unitPrice * quantity * discountValue) / 100,
+          );
         } else {
           // Direct amount discount
           perItemDiscount = discountValue;
@@ -1337,7 +1345,9 @@ export function ShoppingCart({
         const discountValue = parseFloat(itemDiscountConfig.value) || 0;
         if (itemDiscountConfig.type === "percent") {
           // Calculate percentage discount
-          perItemDiscount = Math.round((unitPrice * quantity * discountValue) / 100);
+          perItemDiscount = Math.round(
+            (unitPrice * quantity * discountValue) / 100,
+          );
         } else {
           // Direct amount discount
           perItemDiscount = discountValue;
@@ -2305,14 +2315,20 @@ export function ShoppingCart({
                         type="text"
                         value={
                           itemDiscounts[item.id]?.value
-                            ? parseFloat(itemDiscounts[item.id].value).toLocaleString("vi-VN")
+                            ? parseFloat(
+                                itemDiscounts[item.id].value,
+                              ).toLocaleString("vi-VN")
                             : ""
                         }
                         onChange={(e) => {
                           const rawValue = e.target.value.replace(/[^\d]/g, "");
-                          const inputValue = Math.max(0, parseFloat(rawValue) || 0);
+                          const inputValue = Math.max(
+                            0,
+                            parseFloat(rawValue) || 0,
+                          );
 
-                          const discountType = itemDiscounts[item.id]?.type || "amount";
+                          const discountType =
+                            itemDiscounts[item.id]?.type || "amount";
 
                           if (discountType === "percent") {
                             // Limit percentage to 100%
@@ -2357,7 +2373,8 @@ export function ShoppingCart({
                         }}
                         className="h-6 w-24 text-xs text-right px-3 py-2 rounded-md border border-input bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                         placeholder={
-                          (itemDiscounts[item.id]?.type || "amount") === "percent"
+                          (itemDiscounts[item.id]?.type || "amount") ===
+                          "percent"
                             ? "% giảm"
                             : "Giảm giá"
                         }
@@ -2367,7 +2384,8 @@ export function ShoppingCart({
                           type="button"
                           size="sm"
                           variant={
-                            (itemDiscounts[item.id]?.type || "amount") === "amount"
+                            (itemDiscounts[item.id]?.type || "amount") ===
+                            "amount"
                               ? "default"
                               : "outline"
                           }
@@ -2389,7 +2407,8 @@ export function ShoppingCart({
                           type="button"
                           size="sm"
                           variant={
-                            (itemDiscounts[item.id]?.type || "amount") === "percent"
+                            (itemDiscounts[item.id]?.type || "amount") ===
+                            "percent"
                               ? "default"
                               : "outline"
                           }
@@ -2516,9 +2535,12 @@ export function ShoppingCart({
                       let perItemDiscount = 0;
                       const itemDiscountConfig = itemDiscounts[item.id];
                       if (itemDiscountConfig && itemDiscountConfig.value) {
-                        const discountValue = parseFloat(itemDiscountConfig.value) || 0;
+                        const discountValue =
+                          parseFloat(itemDiscountConfig.value) || 0;
                         if (itemDiscountConfig.type === "percent") {
-                          perItemDiscount = Math.round((originalPrice * quantity * discountValue) / 100);
+                          perItemDiscount = Math.round(
+                            (originalPrice * quantity * discountValue) / 100,
+                          );
                         } else {
                           perItemDiscount = discountValue;
                         }
@@ -2527,12 +2549,9 @@ export function ShoppingCart({
                       // Calculate order-level discount
                       let orderLevelDiscount = 0;
                       if (orderDiscount > 0) {
-                        const totalBeforeDiscount = cart.reduce(
-                          (sum, itm) => {
-                            return sum + parseFloat(itm.price) * itm.quantity;
-                          },
-                          0,
-                        );
+                        const totalBeforeDiscount = cart.reduce((sum, itm) => {
+                          return sum + parseFloat(itm.price) * itm.quantity;
+                        }, 0);
 
                         const currentIndex = cart.findIndex(
                           (cartItem) => cartItem.id === item.id,
@@ -2554,7 +2573,8 @@ export function ShoppingCart({
                                 : 0;
                             previousDiscounts += prevItemDiscount;
                           }
-                          orderLevelDiscount = orderDiscount - previousDiscounts;
+                          orderLevelDiscount =
+                            orderDiscount - previousDiscounts;
                         } else {
                           const itemTotal = originalPrice * quantity;
                           orderLevelDiscount =
@@ -2567,7 +2587,8 @@ export function ShoppingCart({
                         }
                       }
 
-                      const totalDiscount = perItemDiscount + orderLevelDiscount;
+                      const totalDiscount =
+                        perItemDiscount + orderLevelDiscount;
 
                       return totalDiscount > 0 ? (
                         <p className="text-xs text-red-600">
@@ -2575,8 +2596,15 @@ export function ShoppingCart({
                           {Math.floor(totalDiscount).toLocaleString("vi-VN")} ₫
                           {perItemDiscount > 0 && orderLevelDiscount > 0 && (
                             <span className="text-xs text-gray-500 ml-1">
-                              (SP: {Math.floor(perItemDiscount).toLocaleString("vi-VN")} + 
-                              ĐH: {Math.floor(orderLevelDiscount).toLocaleString("vi-VN")})
+                              (SP:{" "}
+                              {Math.floor(perItemDiscount).toLocaleString(
+                                "vi-VN",
+                              )}{" "}
+                              + ĐH:{" "}
+                              {Math.floor(orderLevelDiscount).toLocaleString(
+                                "vi-VN",
+                              )}
+                              )
                             </span>
                           )}
                         </p>
@@ -2738,7 +2766,9 @@ export function ShoppingCart({
                       // Show amount value
                       return currentOrderDiscount &&
                         parseFloat(currentOrderDiscount) > 0
-                        ? parseFloat(currentOrderDiscount).toLocaleString("vi-VN")
+                        ? parseFloat(currentOrderDiscount).toLocaleString(
+                            "vi-VN",
+                          )
                         : "";
                     }
                   })()}
@@ -2905,11 +2935,15 @@ export function ShoppingCart({
                 const totalPerItemDiscount = cart.reduce((sum, item) => {
                   const itemDiscountConfig = itemDiscounts[item.id];
                   if (itemDiscountConfig && itemDiscountConfig.value) {
-                    const discountValue = parseFloat(itemDiscountConfig.value) || 0;
+                    const discountValue =
+                      parseFloat(itemDiscountConfig.value) || 0;
                     if (itemDiscountConfig.type === "percent") {
                       const unitPrice = parseFloat(item.price);
                       const quantity = item.quantity;
-                      return sum + Math.round((unitPrice * quantity * discountValue) / 100);
+                      return (
+                        sum +
+                        Math.round((unitPrice * quantity * discountValue) / 100)
+                      );
                     } else {
                       return sum + discountValue;
                     }
@@ -2917,7 +2951,9 @@ export function ShoppingCart({
                   return sum;
                 }, 0);
 
-                const orderLevelDiscount = parseFloat(currentOrderDiscount || "0");
+                const orderLevelDiscount = parseFloat(
+                  currentOrderDiscount || "0",
+                );
                 const totalDiscount = totalPerItemDiscount + orderLevelDiscount;
 
                 if (totalDiscount > 0) {
@@ -3379,8 +3415,7 @@ export function ShoppingCart({
                     source: "shopping_cart_receipt_close",
                     success: true,
                     action: "receipt_modal_closed",
-                    showSuccessNotification: true,
-                    message: "Thanh toán hoàn tất. Dữ liệu đã được cập nhật.",
+                    showSuccessNotification: false,
                     timestamp: new Date().toISOString(),
                   },
                 }),

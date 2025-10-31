@@ -5,14 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-const BASE_URL = "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev"; // 👈 đổi theo domain backend của bạn
+const BASE_URL = "https://bad07204-3e0d-445f-a72e-497c63c9083a-00-3i4fcyhnilzoc.pike.replit.dev"; // 👈 đổi theo domain backend của bạn
 
 export async function defaultFetcher({ queryKey }) {
   const [path] = queryKey;
 
   // Cho phép truyền cả path hoặc URL đầy đủ
   const url = path.startsWith("http") ? path : `${BASE_URL}${path}`;
-  const token = localStorage.getItem("authToken");
+  const token = localStorage.getItem("token");
 
   const res = await fetch(url, {
     headers: {
@@ -25,7 +25,7 @@ export async function defaultFetcher({ queryKey }) {
   // Xử lý token hết hạn hoặc lỗi xác thực
   if (res.status === 401) {
     console.warn("Token hết hạn hoặc không hợp lệ");
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
     window.location.href = "/";
     return;
   }

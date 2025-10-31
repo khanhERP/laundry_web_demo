@@ -94,7 +94,7 @@ export function MembershipModal({ isOpen, onClose }: MembershipModalProps) {
   // Update customer membership
   const updateMembershipMutation = useMutation({
     mutationFn: async ({ customerId, membershipLevel }: { customerId: number; membershipLevel: string }) => {
-      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers/${customerId}`, {
+      const response = await fetch(`/api/customers/${customerId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

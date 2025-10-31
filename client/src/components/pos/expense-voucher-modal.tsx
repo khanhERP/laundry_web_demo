@@ -228,7 +228,7 @@ export default function ExpenseVoucherModal({
   const updateVoucherMutation = useMutation({
     mutationFn: async (data: ExpenseVoucher) => {
       console.log("Updating expense voucher with data:", data);
-      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers/${data.id}`, {
+      const response = await fetch(`/api/expense-vouchers/${data.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -265,7 +265,7 @@ export default function ExpenseVoucherModal({
 
   const deleteVoucherMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers/${id}`, {
+      const response = await fetch(`/api/expense-vouchers/${id}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to delete expense voucher");
