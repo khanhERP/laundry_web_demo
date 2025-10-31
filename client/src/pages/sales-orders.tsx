@@ -384,7 +384,7 @@ export default function SalesOrders() {
           params.append("einvoiceStatus", einvoiceStatusFilter);
         }
         if (returnStatusFilter && returnStatusFilter !== "all") {
-          // Map returnStatus to isPaid
+          // Map returnStatus to isPaid - only add filter if not "all"
           params.append("isPaid", returnStatusFilter);
         }
         params.append("page", currentPage.toString());
@@ -1568,14 +1568,17 @@ export default function SalesOrders() {
           sku: item.sku || product?.sku || `SKU${item.productId}`,
           quantity: quantity,
           unitPrice: unitPrice.toFixed(2),
-          total: totalAmount.toFixed(2),
+          total: totalAmount.toFixed(2), // Tổng tiền (bao gồm thuế)
           discount: itemDiscountAmount.toFixed(2),
           tax: Math.round(itemTax).toFixed(2),
-          priceBeforeTax: Math.round(priceBeforeTax).toFixed(2),
+          priceBeforeTax: Math.round(priceBeforeTax).toFixed(2), // Thành tiền (chưa bao gồm thuế)
           notes: item.notes || null,
         };
 
-        console.log(`📝 Creating order item with payload:`, payload);
+        console.log(
+          `📝 [INSERT] Creating new item - Thành tiền: ${payload.priceBeforeTax}, Tổng tiền: ${payload.total}`,
+          payload,
+        );
 
         const response = await apiRequest(
           "POST",
@@ -1600,35 +1603,6 @@ export default function SalesOrders() {
         );
         const originalItem = orderItems.find((oi) => oi.id === item.id);
 
-        // Build complete payload with all calculated fields
-        const payload: any = {
-          quantity:
-            item.quantity !== undefined
-              ? item.quantity
-              : originalItem?.quantity,
-          unitPrice:
-            item.unitPrice !== undefined
-              ? item.unitPrice
-              : originalItem?.unitPrice,
-          total: item.total !== undefined ? item.total : originalItem?.total,
-          discount:
-            item.discount !== undefined
-              ? item.discount
-              : originalItem?.discount || "0.00",
-          tax: item.tax !== undefined ? item.tax : originalItem?.tax || "0.00",
-          priceBeforeTax:
-            item.priceBeforeTax !== undefined
-              ? item.priceBeforeTax
-              : originalItem?.priceBeforeTax || "0.00",
-        };
-
-        // Include optional fields if provided
-        if (item.notes !== undefined) payload.notes = item.notes;
-        if (item.productId !== undefined) payload.productId = item.productId;
-        if (item.sku !== undefined) payload.sku = item.sku;
-        if (item.productName !== undefined)
-          payload.productName = item.productName;
-
         // Get values for calculation (use edited values if available, otherwise original)
         const product = products.find(
           (p: any) =>
@@ -1651,8 +1625,14 @@ export default function SalesOrders() {
 
         const quantity =
           item.quantity !== undefined
-            ? parseInt(item.quantity)
-            : parseInt(originalItem?.quantity || "0");
+            ? parseFloat(item.quantity)
+            : parseFloat(originalItem?.quantity || "0");
+
+        // Get item discount from edited values
+        const itemDiscountAmount =
+          item.discount !== undefined
+            ? parseFloat(item.discount)
+            : parseFloat(originalItem?.discount || "0");
 
         // Calculate totals
         let itemSubtotal = unitPrice * quantity;
@@ -1665,22 +1645,41 @@ export default function SalesOrders() {
           false;
 
         if (priceIncludeTax && taxRate > 0) {
-          const giaGomThue = itemSubtotal;
+          // Price includes tax
+          const discountPerUnit = itemDiscountAmount / quantity;
+          const adjustedPrice = Math.max(0, unitPrice - discountPerUnit);
+          const giaGomThue = adjustedPrice * quantity;
           priceBeforeTax = Math.round(giaGomThue / (1 + taxRate));
-          itemTax = itemSubtotal - priceBeforeTax;
+          itemTax = giaGomThue - priceBeforeTax;
         } else {
-          priceBeforeTax = Math.round(itemSubtotal);
+          // Price excludes tax
+          priceBeforeTax = Math.round(itemSubtotal - itemDiscountAmount);
           itemTax = Math.round(priceBeforeTax * taxRate);
         }
 
         const totalAmount = priceBeforeTax + itemTax;
 
-        // Always set calculated values
-        payload.total = totalAmount.toString();
-        payload.tax = Math.round(itemTax).toString();
-        payload.priceBeforeTax = Math.round(priceBeforeTax).toString();
+        // Build payload with calculated values - ENSURE priceBeforeTax (thành tiền) is saved
+        const payload: any = {
+          quantity: quantity,
+          unitPrice: unitPrice.toFixed(2),
+          total: totalAmount.toFixed(2), // Tổng tiền (bao gồm thuế)
+          discount: itemDiscountAmount.toFixed(2),
+          tax: Math.round(itemTax).toFixed(2),
+          priceBeforeTax: Math.round(priceBeforeTax).toFixed(2), // Thành tiền (chưa bao gồm thuế)
+        };
 
-        console.log(`📝 Updating order item ${item.id}:`, payload);
+        // Include optional fields if provided
+        if (item.notes !== undefined) payload.notes = item.notes;
+        if (item.productId !== undefined) payload.productId = item.productId;
+        if (item.sku !== undefined) payload.sku = item.sku;
+        if (item.productName !== undefined)
+          payload.productName = item.productName;
+
+        console.log(
+          `📝 [UPDATE] Saving item ${item.id} - Thành tiền: ${payload.priceBeforeTax}, Tổng tiền: ${payload.total}`,
+          payload,
+        );
 
         // Update the item
         const response = await apiRequest(
@@ -1710,39 +1709,53 @@ export default function SalesOrders() {
         "items",
       );
 
-      const priceIncludeTax =
-        editableInvoice.priceIncludeTax ??
-        storeSettings?.priceIncludesTax ??
-        false;
-      const orderDiscount = parseFloat(editableInvoice.discount || "0");
-
+      // Sum up from item-level values (which already include discount allocation)
       let exactSubtotal = 0;
       let exactTax = 0;
+      let totalItemDiscount = 0;
 
       allCurrentItems.forEach((item: any) => {
-        const product = products.find((p: any) => p.id === item.productId);
-        const taxRate = product?.taxRate
-          ? parseFloat(product.taxRate) / 100
-          : 0;
+        const priceBeforeTax = parseFloat(item.priceBeforeTax || "0");
         const unitPrice = parseFloat(item.unitPrice || "0");
-        const quantity = parseInt(item.quantity || "0");
+        const itemTax = parseFloat(item.tax || "0");
+        const itemDiscount = parseFloat(item.discount || "0");
 
-        if (priceIncludeTax && taxRate > 0) {
-          const itemSubtotalIncludingTax = unitPrice * quantity;
-          const priceBeforeTax = itemSubtotalIncludingTax / (1 + taxRate);
-          const itemTax = itemSubtotalIncludingTax - priceBeforeTax;
-          exactSubtotal += priceBeforeTax;
-          exactTax += itemTax;
-        } else {
-          const itemSubtotal = unitPrice * quantity;
-          exactSubtotal += itemSubtotal;
-          exactTax += itemSubtotal * taxRate;
-        }
+        exactSubtotal += unitPrice;
+        exactTax += itemTax;
+        totalItemDiscount += itemDiscount;
       });
 
-      const exactTotal = exactSubtotal + exactTax - orderDiscount;
+      // Total = sum of (priceBeforeTax + tax) for all items
+      const exactTotal = exactSubtotal - totalItemDiscount + exactTax;
 
-      // Step 6: Log order change history
+      console.log("📊 Order totals calculated:", {
+        subtotal: exactSubtotal,
+        tax: exactTax,
+        totalItemDiscount: totalItemDiscount,
+        total: exactTotal,
+      });
+
+      // Step 6: Update order totals in database
+      const orderUpdatePayload = {
+        subtotal: Math.round(exactSubtotal).toString(),
+        tax: Math.round(exactTax).toString(),
+        total: Math.round(exactTotal).toString(),
+        discount: totalItemDiscount.toFixed(2),
+      };
+
+      console.log("💾 Updating order with totals:", orderUpdatePayload);
+
+      const orderUpdateResponse = await apiRequest(
+        "PUT",
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${editableInvoice.id}`,
+        orderUpdatePayload,
+      );
+
+      if (!orderUpdateResponse.ok) {
+        throw new Error("Failed to update order totals");
+      }
+
+      // Step 7: Log order change history
       try {
         const changeDetails = {
           itemsCreated: itemsToCreate.length,
@@ -1777,7 +1790,7 @@ export default function SalesOrders() {
         // Don't fail the whole operation if history logging fails
       }
 
-      // Step 7: Force immediate refresh after ALL operations complete
+      // Step 8: Force immediate refresh after ALL operations complete
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] }),
         queryClient.refetchQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] }),
@@ -2215,13 +2228,29 @@ export default function SalesOrders() {
 
           const calculatedTotal = priceBeforeTax + itemTax;
 
-          // Update edited items with recalculated values
+          // Store ALL calculated values in editedOrderItems for accurate saving
           newEditedItems[item.id] = {
             ...edited,
             discount: itemDiscountAmount.toString(),
             tax: Math.round(itemTax).toString(),
             priceBeforeTax: Math.round(priceBeforeTax).toString(),
             total: calculatedTotal.toString(),
+            taxRate: (taxRate * 100).toString(),
+            // Preserve other fields
+            productId:
+              edited.productId !== undefined
+                ? edited.productId
+                : item.productId,
+            productName:
+              edited.productName !== undefined
+                ? edited.productName
+                : item.productName,
+            sku:
+              edited.sku !== undefined
+                ? edited.sku
+                : item.sku || item.productSku,
+            quantity: quantity,
+            unitPrice: unitPrice.toString(),
           };
         });
 
