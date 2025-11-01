@@ -229,7 +229,7 @@ export function RightSidebar() {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-green-200 bg-green-50">
           <div className="text-sm text-gray-500 text-center">
             <div className="font-medium">EDPOS System</div>
-            <div className="text-xs opacity-75">v1.0.0</div>
+            <div className="text-xs opacity-75">31/10/2025</div>
           </div>
         </div>
       )}

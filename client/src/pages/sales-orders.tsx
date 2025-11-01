@@ -265,20 +265,10 @@ export default function SalesOrders() {
   const urlParams = new URLSearchParams(window.location.search);
   const orderParam = urlParams.get("order");
 
-  // Set default dates - startDate is first day of current month, endDate is today
-  const today = new Date();
-  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  
-  // Format dates in local timezone to avoid UTC conversion issues
-  const formatLocalDate = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  
-  const [startDate, setStartDate] = useState(formatLocalDate(firstDayOfMonth));
-  const [endDate, setEndDate] = useState(formatLocalDate(today));
+  // Set default dates to today
+  const today = new Date().toISOString().split("T")[0];
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerDropdownSearch, setCustomerDropdownSearch] = useState(""); // Separate state for dropdown search
   const [orderNumberSearch, setOrderNumberSearch] = useState(orderParam || "");
@@ -3182,63 +3172,13 @@ export default function SalesOrders() {
       if (updateResponse.ok) {
         console.log("✅ Order payment status updated successfully");
 
-        // Clear ALL cache completely to force fresh data
-        queryClient.clear();
-        
-        // Wait a bit for database to finish updating
-        await new Promise(resolve => setTimeout(resolve, 200));
-
-        // Force fresh fetch from database
-        await Promise.all([
-          queryClient.refetchQueries({ 
-            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"],
-            type: 'active'
-          }),
-          queryClient.refetchQueries({ 
-            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items", order.id],
-            type: 'active'
-          }),
-          queryClient.refetchQueries({ 
-            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"],
-            type: 'active'
-          }),
-        ]);
-        
-        console.log("✅ All caches cleared and data refetched after payment");
-
-        // Update selected invoice with new status immediately
-        if (selectedInvoice && selectedInvoice.id === order.id) {
-          const updatedInvoice = {
-            ...selectedInvoice,
-            status: "paid",
-            paymentStatus: "paid",
-            displayStatus: 1, // Completed
-            invoiceStatus: 1, // Completed
-            updatedAt: new Date().toISOString(),
-          };
-          setSelectedInvoice(updatedInvoice);
-          console.log("✅ Updated selected invoice status to completed:", updatedInvoice);
-        }
-
-        // Dispatch custom event to force UI refresh
-        window.dispatchEvent(new CustomEvent("orderStatusUpdated", { 
-          detail: { orderId: order.id, status: "paid" } 
-        }));
-
-        // Force immediate refresh of the orders list in the table - WAIT for completion
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        await queryClient.refetchQueries({ 
-          queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"],
-          exact: false,
-          type: 'active'
-        });
-        
-        console.log("✅ Orders list refreshed after payment");
+        // Refresh orders list
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"] });
 
         toast({
           title: "Thanh toán thành công",
-          description: "Đơn hàng đã được cập nhật trạng thái thanh toán",
+          description: "Đơn hàng đã được cập nhật trạng thái thanh to n",
         });
 
         // For laundry business, show receipt modal after payment
