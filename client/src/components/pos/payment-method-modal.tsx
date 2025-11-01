@@ -394,7 +394,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+              const wsUrl = `${protocol}//${window.location.host}/ws`;
               console.log(
                 "🎯 QR Payment: Connecting to WebSocket for customer display:",
                 wsUrl,
@@ -529,7 +529,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+              const wsUrl = `${protocol}//${window.location.host}/ws`;
               console.log(
                 "Fallback QR Payment: Attempting to connect to WebSocket:",
                 wsUrl,
@@ -697,7 +697,7 @@ export function PaymentMethodModal({
         try {
           const protocol =
             window.location.protocol === "https:" ? "wss:" : "ws:";
-          const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+          const wsUrl = `${protocol}//${window.location.host}/ws`;
           const ws = new WebSocket(wsUrl);
 
           ws.onopen = () => {
@@ -1058,7 +1058,7 @@ export function PaymentMethodModal({
                   try {
                     const protocol =
                       window.location.protocol === "https:" ? "wss:" : "ws:";
-                    const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                    const wsUrl = `${protocol}//${window.location.host}/ws`;
                     const ws = new WebSocket(wsUrl);
 
                     ws.onopen = () => {
@@ -1489,7 +1489,7 @@ export function PaymentMethodModal({
                     try {
                       const protocol =
                         window.location.protocol === "https:" ? "wss:" : "ws:";
-                      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                      const wsUrl = `${protocol}//${window.location.host}/ws`;
                       const ws = new WebSocket(wsUrl);
 
                       ws.onopen = () => {
@@ -1601,7 +1601,7 @@ export function PaymentMethodModal({
     // Send message to customer display to clear QR payment
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
@@ -1832,7 +1832,7 @@ export function PaymentMethodModal({
               try {
                 const protocol =
                   window.location.protocol === "https:" ? "wss:" : "ws:";
-                const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                const wsUrl = `${protocol}//${window.location.host}/ws`;
                 const ws = new WebSocket(wsUrl);
 
                 ws.onopen = () => {
@@ -2291,7 +2291,7 @@ export function PaymentMethodModal({
                 try {
                   const protocol =
                     window.location.protocol === "https:" ? "wss:" : "ws:";
-                  const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                  const wsUrl = `${protocol}//${window.location.host}/ws`;
                   const ws = new WebSocket(wsUrl);
 
                   ws.onopen = () => {
@@ -2593,7 +2593,7 @@ export function PaymentMethodModal({
         try {
           const protocol =
             window.location.protocol === "https:" ? "wss:" : "ws:";
-          const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+          const wsUrl = `${protocol}//${window.location.host}/ws`;
           const ws = new WebSocket(wsUrl);
 
           ws.onopen = () => {
@@ -2698,7 +2698,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+              const wsUrl = `${protocol}//${window.location.host}/ws`;
               const ws = new WebSocket(wsUrl);
 
               ws.onopen = () => {
@@ -2837,7 +2837,7 @@ export function PaymentMethodModal({
                     try {
                       const protocol =
                         window.location.protocol === "https:" ? "wss:" : "ws:";
-                      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                      const wsUrl = `${protocol}//${window.location.host}/ws`;
                       const ws = new WebSocket(wsUrl);
 
                       ws.onopen = () => {
@@ -3073,7 +3073,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                        const wsUrl = `${protocol}//${window.location.host}/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3119,7 +3119,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                        const wsUrl = `${protocol}//${window.location.host}/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3305,7 +3305,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                        const wsUrl = `${protocol}//${window.location.host}/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3342,7 +3342,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
+                        const wsUrl = `${protocol}//${window.location.host}/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
