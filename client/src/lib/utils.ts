@@ -7,6 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 const BASE_URL = "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev"; // 👈 đổi theo domain backend của bạn
 
+
 export async function defaultFetcher({ queryKey }) {
   const [path] = queryKey;
 
