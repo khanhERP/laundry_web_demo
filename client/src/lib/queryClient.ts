@@ -92,25 +92,25 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
- export const queryClient = new QueryClient({
-	  defaultOptions: {
-		queries: {
-		  queryFn: defaultFetcher, // 👈 set mặc định ở đây
-		  // queryFn: getQueryFn({ on401: "throw" }),
-		  refetchInterval: false,
-		  refetchOnWindowFocus: true,
-		  staleTime: 0, // No cache
-		  gcTime: 0, // Don't keep in memory
-		  retry: 1,
-		  refetchOnMount: true,
-		  refetchOnReconnect: true,
-		  networkMode: "online",
-		},
-		mutations: {
-		  retry: false,
-		  onError: (error) => {
-			console.error("Mutation error:", error);
-		  },
-		},
-	  },
-	});
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+       queryFn: defaultFetcher, // 👈 set mặc định ở đây
+      //queryFn: getQueryFn({ on401: "throw" }),
+      refetchInterval: false,
+      refetchOnWindowFocus: true,
+      staleTime: 0, // No cache
+      gcTime: 0, // Don't keep in memory
+      retry: 1,
+      refetchOnMount: true,
+      refetchOnReconnect: true,
+      networkMode: "online",
+    },
+    mutations: {
+      retry: false,
+      onError: (error) => {
+        console.error("Mutation error:", error);
+      },
+    },
+  },
+});
