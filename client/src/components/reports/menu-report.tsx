@@ -133,7 +133,7 @@ function MenuReport() {
           : "";
         const response = await apiRequest(
           "GET",
-          `/api/products/${selectedCategory}/${productType}/${searchParam}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products/${selectedCategory}/${productType}/${searchParam}`,
         );
         if (!response.ok) throw new Error("Failed to fetch products");
         const data = await response.json();
@@ -173,7 +173,7 @@ function MenuReport() {
 
         const response = await apiRequest(
           "GET",
-          `/api/menu-analysis?${params.toString()}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/menu-analysis?${params.toString()}`,
         );
         if (!response.ok) {
           console.error(

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UserCheck, Users, CreditCard, Plus, Edit, Trash2, Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { UserCheck, Users, CreditCard, Plus, Edit, Trash2, Search, ShoppingCart, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/lib/i18n";
@@ -17,6 +17,7 @@ import { CustomerPointsModal } from "@/components/customers/customer-points-moda
 import { MembershipModal } from "@/components/membership/membership-modal";
 import { PointsManagementModal } from "@/components/customers/points-management-modal";
 import { Link } from "wouter";
+import * as XLSX from "xlsx";
 
 interface CustomersPageProps {
   onLogout: () => void;
@@ -83,6 +84,57 @@ export default function CustomersPage({ onLogout }: CustomersPageProps) {
   const handleCloseCustomerForm = () => {
     setShowCustomerForm(false);
     setEditingCustomer(null);
+  };
+
+  const exportToExcel = () => {
+    const exportData = filteredCustomers.map((customer) => ({
+      "Mã khách hàng": customer.customerId,
+      "Tên khách hàng": customer.name,
+      "Số điện thoại": customer.phone || "",
+      "Email": customer.email || "",
+      "Địa chỉ": customer.address || "",
+      "Số lần ghé thăm": customer.visitCount || 0,
+      "Tổng chi tiêu": parseFloat(customer.totalSpent || "0"),
+      "Điểm tích lũy": customer.points || 0,
+      "Hạng thành viên": customer.membershipLevel === "VIP"
+        ? t("customers.vip")
+        : customer.membershipLevel === "GOLD"
+          ? t("customers.gold")
+          : customer.membershipLevel === "SILVER"
+            ? t("customers.silver")
+            : customer.membershipLevel,
+      "Trạng thái": customer.status === "active" ? "Hoạt động" : "Không hoạt động",
+      "Ngày tạo": customer.createdAt ? new Date(customer.createdAt).toLocaleDateString("vi-VN") : "",
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Danh sách khách hàng");
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 15 }, // Mã khách hàng
+      { wch: 25 }, // Tên khách hàng
+      { wch: 15 }, // Số điện thoại
+      { wch: 25 }, // Email
+      { wch: 30 }, // Địa chỉ
+      { wch: 15 }, // Số lần ghé thăm
+      { wch: 15 }, // Tổng chi tiêu
+      { wch: 15 }, // Điểm tích lũy
+      { wch: 15 }, // Hạng thành viên
+      { wch: 15 }, // Trạng thái
+      { wch: 15 }, // Ngày tạo
+    ];
+
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, "-");
+    const filename = `danh-sach-khach-hang_${timestamp}.xlsx`;
+
+    XLSX.writeFile(wb, filename);
+
+    toast({
+      title: t("common.success"),
+      description: `Đã xuất ${filteredCustomers.length} khách hàng ra file Excel`,
+    });
   };
 
   // Filter customers based on search term
@@ -234,6 +286,15 @@ export default function CustomersPage({ onLogout }: CustomersPageProps) {
                     {t("common.search")}
                   </Button>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportToExcel}
+                  className="border-green-600 text-green-600 hover:bg-green-50"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {t("common.exportExcel")}
+                </Button>
               </div>
 
               {customersLoading ? (

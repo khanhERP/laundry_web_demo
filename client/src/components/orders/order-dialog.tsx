@@ -83,7 +83,7 @@ export function OrderDialog({
       console.log("Fetching existing order items for order:", existingOrder.id);
       const response = await apiRequest(
         "GET",
-        `/api/order-items/${existingOrder.id}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${existingOrder.id}`,
       );
       const data = await response.json();
       console.log("Existing order items response:", data);
@@ -124,7 +124,7 @@ export function OrderDialog({
             );
             const addItemsResponse = await apiRequest(
               "POST",
-              `/api/orders/${existingOrder.id}/items`,
+              `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${existingOrder.id}/items`,
               {
                 items: orderData.items,
               },
@@ -152,7 +152,7 @@ export function OrderDialog({
             try {
               const recalcResponse = await apiRequest(
                 "POST",
-                `/api/orders/${existingOrder.id}/recalculate`,
+                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${existingOrder.id}/recalculate`,
               );
               const recalcResult = await recalcResponse.json();
               console.log("✅ Order totals recalculated:", recalcResult);
@@ -263,7 +263,7 @@ export function OrderDialog({
 
                 const updateResponse = await apiRequest(
                   "PUT",
-                  `/api/order-items/${item.id}`,
+                  `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
                   updatePayload,
                 );
 
@@ -321,7 +321,7 @@ export function OrderDialog({
 
           const updateResponse = await apiRequest(
             "PUT",
-            `/api/orders/${existingOrder.id}`,
+            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${existingOrder.id}`,
             {
               customerName: orderData.order.customerName,
               customerCount: orderData.order.customerCount,
@@ -392,7 +392,7 @@ export function OrderDialog({
             queryFn: async () => {
               const response = await apiRequest(
                 "GET",
-                `/api/order-items/${existingOrder.id}`,
+                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${existingOrder.id}`,
               );
               const data = await response.json();
               console.log("🔄 Fresh order items fetched:", data);
@@ -1631,7 +1631,7 @@ export function OrderDialog({
                                       // Call API to delete the order item
                                       apiRequest(
                                         "DELETE",
-                                        `/api/order-items/${item.id}`,
+                                        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
                                       )
                                         .then(async () => {
                                           console.log(
@@ -1655,7 +1655,7 @@ export function OrderDialog({
                                               // Fetch current order items after deletion
                                               const response = await apiRequest(
                                                 "GET",
-                                                `/api/order-items/${existingOrder.id}`,
+                                                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${existingOrder.id}`,
                                               );
                                               const remainingItems =
                                                 await response.json();
@@ -1742,7 +1742,7 @@ export function OrderDialog({
                                               // Update order with new totals
                                               apiRequest(
                                                 "PUT",
-                                                `/api/orders/${existingOrder.id}`,
+                                                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${existingOrder.id}`,
                                                 {
                                                   subtotal:
                                                     newSubtotal.toString(),

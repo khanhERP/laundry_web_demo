@@ -124,7 +124,7 @@ export function PrinterConfigModal({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const response = await apiRequest(
         "PUT",
-        `/api/printer-configs/${id}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/printer-configs/${id}`,
         data,
       );
       return response.json();
@@ -151,7 +151,7 @@ export function PrinterConfigModal({
   // Delete printer config mutation
   const deleteConfigMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/printer-configs/${id}`);
+      await apiRequest("DELETE", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/printer-configs/${id}`);
     },
     onSuccess: () => {
       // Force refetch data
@@ -173,7 +173,7 @@ export function PrinterConfigModal({
     mutationFn: async (id: number) => {
       const response = await apiRequest(
         "POST",
-        `/api/printer-configs/${id}/test`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/printer-configs/${id}/test`,
       );
       return response.json();
     },

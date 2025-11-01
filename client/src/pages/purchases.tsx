@@ -116,7 +116,7 @@ export default function PurchasesPage({ onLogout }: PurchasesPageProps) {
         console.log("🔍 Adding PO number search:", poNumberFilter.trim());
       }
 
-      const url = `/api/purchase-receipts${params.toString() ? `?${params.toString()}` : ""}`;
+      const url = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts${params.toString() ? `?${params.toString()}` : ""}`;
       console.log("🔍 Fetching purchase receipts with filters:", url);
 
       const response = await fetch(url);

@@ -34,3 +34,22 @@ export async function defaultFetcher({ queryKey }) {
 
   return res.json();
 }
+
+/**
+ * Function to complete the order payment.
+ * @param orderId - The ID of the order to complete payment for.
+ * @param paymentData - The data related to the payment.
+ * @param apiRequest - A function to make API requests.
+ */
+export async function completeOrderPayment(orderId, paymentData, apiRequest) {
+  // Update order with payment completion
+  const response = await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}`, {
+    status: "paid",
+    paymentMethod: paymentData.paymentMethod,
+    paymentStatus: "paid",
+    invoiceStatus: 1, // Set to Completed
+    paidAt: new Date(),
+  });
+
+  return response;
+}
