@@ -954,7 +954,7 @@ export function PaymentMethodModal({
 
         try {
           // First update the payment method and status
-          const updateResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
+          const updateResponse = await fetch(`/api/orders/${orderInfo.id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -1033,7 +1033,7 @@ export function PaymentMethodModal({
                   );
 
                   const tableUpdateResponse = await fetch(
-                    `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
+                    `/api/tables/${updatedOrder.tableId}/status`,
                     {
                       method: "PUT",
                       headers: {
@@ -1407,7 +1407,7 @@ export function PaymentMethodModal({
       try {
         console.log(`🔥 MAKING API CALL: PUT /api/orders/${orderInfo.id}`);
 
-        const statusResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
+        const statusResponse = await fetch(`/api/orders/${orderInfo.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -1468,7 +1468,7 @@ export function PaymentMethodModal({
                 // If no other unpaid orders, update table to available
                 if (otherActiveOrders.length === 0) {
                   const tableUpdateResponse = await fetch(
-                    `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${data.tableId}/status`,
+                    `/api/tables/${data.tableId}/status`,
                     {
                       method: "PUT",
                       headers: {
@@ -1747,7 +1747,7 @@ export function PaymentMethodModal({
       }
     } else {
       // Update existing order
-      const updateResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
+      const updateResponse = await fetch(`/api/orders/${orderInfo.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1811,7 +1811,7 @@ export function PaymentMethodModal({
               );
 
               const tableUpdateResponse = await fetch(
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
+                `/api/tables/${updatedOrder.tableId}/status`,
                 {
                   method: "PUT",
                   headers: { "Content-Type": "application/json" },
@@ -2195,7 +2195,7 @@ export function PaymentMethodModal({
       try {
         console.log(`🔥 MAKING API CALL: PUT /api/orders/${orderInfo.id}`);
 
-        const statusResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
+        const statusResponse = await fetch(`/api/orders/${orderInfo.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -2266,7 +2266,7 @@ export function PaymentMethodModal({
                 );
 
                 const tableUpdateResponse = await fetch(
-                  `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
+                  `/api/tables/${updatedOrder.tableId}/status`,
                   {
                     method: "PUT",
                     headers: {

@@ -358,7 +358,7 @@ export function OrderManagement() {
       try {
         const response = await apiRequest(
           "GET",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${selectedOrder.id}`,
+          `/api/order-items/${selectedOrder.id}`,
         );
         if (!response.ok) {
           console.error(
@@ -377,7 +377,7 @@ export function OrderManagement() {
 
   const updateOrderStatusMutation = useMutation({
     mutationFn: ({ orderId, status }: { orderId: number; status: string }) =>
-      apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`, { status }),
+      apiRequest("PUT", `/api/orders/${orderId}/status`, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"] });
@@ -520,7 +520,7 @@ export function OrderManagement() {
       });
 
       // Then mark order as paid
-      await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`, {
+      await apiRequest("PUT", `/api/orders/${orderId}/status`, {
         status: "paid",
         paymentMethod: paymentMethod || "points",
         customerId,
@@ -569,7 +569,7 @@ export function OrderManagement() {
       });
 
       // Then mark order as paid with mixed payment
-      await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`, {
+      await apiRequest("PUT", `/api/orders/${orderId}/status`, {
         status: "paid",
         paymentMethod: `points + ${paymentMethod}`,
         customerId,
@@ -673,7 +673,7 @@ export function OrderManagement() {
       );
 
       console.log("🔍 API Call Details:", {
-        url: `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
+        url: `/api/orders/${orderId}/status`,
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "paid" }),
@@ -681,7 +681,7 @@ export function OrderManagement() {
 
       const statusResponse = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
+        `/api/orders/${orderId}/status`,
         { status: "paid" },
       );
 
@@ -711,7 +711,7 @@ export function OrderManagement() {
       // Step 2: Update additional payment details
       console.log("📋 Step 2: Updating payment details for order:", orderId);
 
-      const paymentDetailsResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}`, {
+      const paymentDetailsResponse = await fetch(`/api/orders/${orderId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -863,7 +863,7 @@ export function OrderManagement() {
         try {
           const response = await apiRequest(
             "GET",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${currentOrderId}`,
+            `/api/order-items/${currentOrderId}`,
           );
           currentOrderItems = await response.json();
           console.log(
@@ -1164,7 +1164,7 @@ export function OrderManagement() {
       const startTime = Date.now();
       const response = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
+        `/api/orders/${orderId}/status`,
         { status: newStatus },
       );
       const endTime = Date.now();
@@ -1284,7 +1284,7 @@ export function OrderManagement() {
       // Fetch order items
       const orderItemsResponse = await apiRequest(
         "GET",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+        `/api/order-items/${order.id}`,
       );
 
       if (!orderItemsResponse.ok) {
@@ -1959,7 +1959,7 @@ export function OrderManagement() {
           // Fetch order items for calculation
           const response = await apiRequest(
             "GET",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+            `/api/order-items/${order.id}`,
           );
           if (!response.ok) {
             console.warn(

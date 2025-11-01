@@ -520,7 +520,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
             transactions.push({
               id: receipt.receiptNumber || `PURCHASE-${receipt.id}`, // Use actual receipt number
               date: receiptDate.toISOString().split("T")[0],
-              createdAt: receipt.createdAt,
+              updatedAt: receipt.updatedAt,
               description: "purchaseTransaction",
               source: supplier?.name || t("common.supplier"),
               type: "chi",
@@ -1448,7 +1448,11 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3 text-gray-400 flex-shrink-0" />
                               <span className="text-sm">
-                                {transaction.createdAt ? formatDate(transaction.createdAt.split("T")[0]) : "-"}
+                                {transaction.createdAt
+                                  ? formatDate(
+                                      transaction.createdAt.split("T")[0],
+                                    )
+                                  : "-"}
                               </span>
                             </div>
                           </TableCell>

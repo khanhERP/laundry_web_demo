@@ -295,7 +295,7 @@ export default function PurchaseFormPage({
 
   // Fetch existing purchase order for edit mode
   const { data: existingOrder, isLoading: isLoadingOrder } = useQuery({
-    queryKey: [`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-orders/${id}`],
+    queryKey: [`/api/purchase-orders/${id}`],
     enabled: Boolean(id),
     select: (data: any) => {
       console.log("📊 Purchase order API response:", data);
@@ -305,7 +305,7 @@ export default function PurchaseFormPage({
 
   // Fetch existing documents for edit mode
   const { data: existingDocuments } = useQuery({
-    queryKey: [`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-orders/${id}/documents`],
+    queryKey: [`/api/purchase-orders/${id}/documents`],
     enabled: Boolean(id),
     select: (data: any) => data || [],
   });
@@ -1231,7 +1231,7 @@ export default function PurchaseFormPage({
 
       // Submit data
       const response = isEditMode
-        ? await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${id}`, {
+        ? await fetch(`/api/purchase-receipts/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(submissionData),
@@ -1337,7 +1337,7 @@ export default function PurchaseFormPage({
 
             // Send file data as JSON with original filename preserved
             const uploadResponse = await fetch(
-              `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${result.id}/documents`,
+              `/api/purchase-receipts/${result.id}/documents`,
               {
                 method: "POST",
                 headers: {

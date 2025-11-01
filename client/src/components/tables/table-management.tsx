@@ -137,7 +137,7 @@ export function TableManagement() {
 
   const updateTableMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: TableFormData }) =>
-      apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${id}`, data),
+      apiRequest("PUT", `/api/tables/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"] });
       toast({
@@ -156,7 +156,7 @@ export function TableManagement() {
   });
 
   const deleteTableMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${id}`, {}),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/tables/${id}`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"] });
       toast({

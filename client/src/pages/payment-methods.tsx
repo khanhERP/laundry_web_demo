@@ -72,7 +72,7 @@ export default function PaymentMethodsPage({ onLogout }: PaymentMethodsPageProps
   // Mutation to update payment method
   const updatePaymentMethodMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods/${id}`, {
+      const response = await fetch(`/api/payment-methods/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -123,7 +123,7 @@ export default function PaymentMethodsPage({ onLogout }: PaymentMethodsPageProps
   // Mutation to delete payment method
   const deletePaymentMethodMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods/${id}`, {
+      const response = await fetch(`/api/payment-methods/${id}`, {
         method: "DELETE",
       });
       return response.json();

@@ -35,7 +35,7 @@ export default function SuppliersPage({ onLogout }: SuppliersPageProps) {
       if (selectedStatus !== 'all') params.append('status', selectedStatus);
       if (searchQuery) params.append('search', searchQuery);
       
-      const response = await apiRequest('GET', `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers?${params}`);
+      const response = await apiRequest('GET', `/api/suppliers?${params}`);
       return response.json();
     },
   });
@@ -51,7 +51,7 @@ export default function SuppliersPage({ onLogout }: SuppliersPageProps) {
 
   const deleteSupplierMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest('DELETE', `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers/${id}`);
+      const response = await apiRequest('DELETE', `/api/suppliers/${id}`);
       return response.json();
     },
     onSuccess: () => {

@@ -486,7 +486,7 @@ export function ShoppingCart({
     try {
       setIsSearching(true);
       const response = await fetch(
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers?search=${encodeURIComponent(searchTerm)}`,
+        `/api/customers?search=${encodeURIComponent(searchTerm)}`,
         {
           method: "GET",
           headers: {
@@ -2110,7 +2110,7 @@ export function ShoppingCart({
                   {order.name}
                 </span>
                 <span className="ml-1.5 text-xs opacity-90">
-                  ({order.cart.length})
+                  ({order.cart.reduce((total, item) => total + item.quantity, 0)})
                 </span>
                 {orders.length > 1 && (
                   <button

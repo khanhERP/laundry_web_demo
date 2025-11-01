@@ -265,10 +265,20 @@ export default function SalesOrders() {
   const urlParams = new URLSearchParams(window.location.search);
   const orderParam = urlParams.get("order");
 
-  // Set default dates to today
-  const today = new Date().toISOString().split("T")[0];
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(today);
+  // Set default dates - startDate is first day of current month, endDate is today
+  const today = new Date();
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  
+  // Format dates in local timezone to avoid UTC conversion issues
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const [startDate, setStartDate] = useState(formatLocalDate(firstDayOfMonth));
+  const [endDate, setEndDate] = useState(formatLocalDate(today));
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerDropdownSearch, setCustomerDropdownSearch] = useState(""); // Separate state for dropdown search
   const [orderNumberSearch, setOrderNumberSearch] = useState(orderParam || "");
@@ -416,7 +426,7 @@ export default function SalesOrders() {
           params.append("sortOrder", sortOrder);
         }
 
-        const url = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list?${params.toString()}`;
+        const url = `/api/orders/list?${params.toString()}`;
         const response = await apiRequest("GET", url);
 
         if (!response.ok) {
@@ -537,7 +547,7 @@ export default function SalesOrders() {
       try {
         const response = await apiRequest(
           "GET",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${selectedInvoice.id}`,
+          `/api/order-items/${selectedInvoice.id}`,
         );
 
         if (!response.ok) {
@@ -600,7 +610,7 @@ export default function SalesOrders() {
 
       const response = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${updatedOrder.id}`,
+        `/api/orders/${updatedOrder.id}`,
         updatePayload,
       );
 
@@ -656,7 +666,7 @@ export default function SalesOrders() {
           // For orders, update status to 'cancelled'
           const response = await apiRequest(
             "PUT",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
+            `/api/orders/${orderId}/status`,
             {
               status: "cancelled",
             },
@@ -757,7 +767,7 @@ export default function SalesOrders() {
 
           const updateResponse = await apiRequest(
             "PUT",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${selectedInvoice.id}`,
+            `/api/orders/${selectedInvoice.id}`,
             updateData,
           );
           console.log(
@@ -834,7 +844,7 @@ export default function SalesOrders() {
       // Changed to accept orderId
       const response = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
+        `/api/orders/${orderId}/status`,
         {
           status: "cancelled",
         },
@@ -1511,7 +1521,7 @@ export default function SalesOrders() {
         console.log(`🗑️ Deleting order item ${item.id}`);
         const response = await apiRequest(
           "DELETE",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
+          `/api/order-items/${item.id}`,
         );
         if (!response.ok) {
           throw new Error(`Failed to delete order item ${item.id}`);
@@ -1600,7 +1610,7 @@ export default function SalesOrders() {
 
         const response = await apiRequest(
           "POST",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${editableInvoice.id}`,
+          `/api/order-items/${editableInvoice.id}`,
           payload,
         );
 
@@ -1702,7 +1712,7 @@ export default function SalesOrders() {
         // Update the item
         const response = await apiRequest(
           "PATCH",
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
+          `/api/order-items/${item.id}`,
           payload,
         );
 
@@ -1717,7 +1727,7 @@ export default function SalesOrders() {
       // Step 5: Recalculate order totals from fresh data
       const allCurrentItemsResponse = await apiRequest(
         "GET",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${editableInvoice.id}`,
+        `/api/order-items/${editableInvoice.id}`,
       );
       const allCurrentItems = await allCurrentItemsResponse.json();
 
@@ -1776,7 +1786,7 @@ export default function SalesOrders() {
 
       const orderUpdateResponse = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${editableInvoice.id}`,
+        `/api/orders/${editableInvoice.id}`,
         orderUpdatePayload,
       );
 
@@ -3161,7 +3171,7 @@ export default function SalesOrders() {
     try {
       const updateResponse = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${order.id}`,
+        `/api/orders/${order.id}`,
         {
           paymentStatus: "paid",
           status: "paid",
@@ -3172,13 +3182,63 @@ export default function SalesOrders() {
       if (updateResponse.ok) {
         console.log("✅ Order payment status updated successfully");
 
-        // Refresh orders list
-        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
-        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"] });
+        // Clear ALL cache completely to force fresh data
+        queryClient.clear();
+        
+        // Wait a bit for database to finish updating
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        // Force fresh fetch from database
+        await Promise.all([
+          queryClient.refetchQueries({ 
+            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"],
+            type: 'active'
+          }),
+          queryClient.refetchQueries({ 
+            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items", order.id],
+            type: 'active'
+          }),
+          queryClient.refetchQueries({ 
+            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"],
+            type: 'active'
+          }),
+        ]);
+        
+        console.log("✅ All caches cleared and data refetched after payment");
+
+        // Update selected invoice with new status immediately
+        if (selectedInvoice && selectedInvoice.id === order.id) {
+          const updatedInvoice = {
+            ...selectedInvoice,
+            status: "paid",
+            paymentStatus: "paid",
+            displayStatus: 1, // Completed
+            invoiceStatus: 1, // Completed
+            updatedAt: new Date().toISOString(),
+          };
+          setSelectedInvoice(updatedInvoice);
+          console.log("✅ Updated selected invoice status to completed:", updatedInvoice);
+        }
+
+        // Dispatch custom event to force UI refresh
+        window.dispatchEvent(new CustomEvent("orderStatusUpdated", { 
+          detail: { orderId: order.id, status: "paid" } 
+        }));
+
+        // Force immediate refresh of the orders list in the table - WAIT for completion
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        await queryClient.refetchQueries({ 
+          queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"],
+          exact: false,
+          type: 'active'
+        });
+        
+        console.log("✅ Orders list refreshed after payment");
 
         toast({
           title: "Thanh toán thành công",
-          description: "Đơn hàng đã được cập nhật trạng thái thanh to n",
+          description: "Đơn hàng đã được cập nhật trạng thái thanh toán",
         });
 
         // For laundry business, show receipt modal after payment
@@ -3188,7 +3248,7 @@ export default function SalesOrders() {
           // Fetch fresh order items
           const itemsResponse = await apiRequest(
             "GET",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+            `/api/order-items/${order.id}`,
           );
           const items = await itemsResponse.json();
 
@@ -3280,7 +3340,7 @@ export default function SalesOrders() {
       console.log("📄 Sales Orders: Preparing receipt for order:", order.id);
 
       // Fetch order items with tax information
-      const response = await apiRequest("GET", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`);
+      const response = await apiRequest("GET", `/api/order-items/${order.id}`);
       const items = await response.json();
 
       // Enrich items with product information including tax rates
@@ -6323,7 +6383,7 @@ export default function SalesOrders() {
                                                                 const itemsResponse =
                                                                   await apiRequest(
                                                                     "GET",
-                                                                    `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${selectedInvoice.id}`,
+                                                                    `/api/order-items/${selectedInvoice.id}`,
                                                                   );
                                                                 const items =
                                                                   await itemsResponse.json();

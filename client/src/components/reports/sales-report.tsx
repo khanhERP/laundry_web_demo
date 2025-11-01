@@ -58,7 +58,7 @@ export function SalesReport() {
     queryFn: async () => {
       try {
         const response = await fetch(
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/date-range/${startDate}/${endDate}/all`,
+          `/api/orders/date-range/${startDate}/${endDate}/all`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,7 +84,7 @@ export function SalesReport() {
     queryFn: async () => {
       try {
         const response = await fetch(
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${startDate}/${endDate}`,
+          `/api/order-items/${startDate}/${endDate}`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

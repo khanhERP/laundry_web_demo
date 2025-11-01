@@ -182,7 +182,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
       }
 
       try {
-        const response = await apiRequest("GET", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${orderId}`);
+        const response = await apiRequest("GET", `/api/order-items/${orderId}`);
         const data = await response.json();
         return Array.isArray(data) ? data : [];
       } catch (error) {
@@ -358,7 +358,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
                 // Fetch order items for this order
                 const response = await apiRequest(
                   "GET",
-                  `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+                  `/api/order-items/${order.id}`,
                 );
                 const orderItemsData = await response.json();
 
@@ -589,7 +589,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
 
   const updateTableStatusMutation = useMutation({
     mutationFn: ({ tableId, status }: { tableId: number; status: string }) =>
-      apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${tableId}/status`, { status }),
+      apiRequest("PUT", `/api/tables/${tableId}/status`, { status }),
     onSuccess: async (data, variables) => {
       console.log(
         `🔄 Table Grid: Table ${variables.tableId} status updated to ${variables.status}`,
@@ -629,7 +629,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
       orderId: number;
       paymentMethod: string;
     }) =>
-      apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`, {
+      apiRequest("PUT", `/api/orders/${orderId}/status`, {
         status: "paid",
         paymentMethod,
       }),
@@ -679,7 +679,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
             try {
               await apiRequest(
                 "PUT",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${completedOrder.tableId}/status`,
+                `/api/tables/${completedOrder.tableId}/status`,
                 {
                   status: "available",
                 },
@@ -791,7 +791,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
             queryFn: async () => {
               const response = await apiRequest(
                 "GET",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${variables.orderId}`,
+                `/api/orders/${variables.orderId}`,
               );
               return response.json();
             },
@@ -801,7 +801,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
             queryFn: async () => {
               const response = await apiRequest(
                 "GET",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${variables.orderId}`,
+                `/api/order-items/${variables.orderId}`,
               );
               return response.json();
             },
@@ -908,7 +908,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
       });
 
       // Then mark order as paid
-      await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`, {
+      await apiRequest("PUT", `/api/orders/${orderId}/status`, {
         status: "paid",
         paymentMethod: "points",
         customerId,
@@ -953,7 +953,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
             try {
               await apiRequest(
                 "PUT",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${completedOrder.tableId}/status`,
+                `/api/tables/${completedOrder.tableId}/status`,
                 {
                   status: "available",
                 },
@@ -999,7 +999,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
           queryFn: async () => {
             const response = await apiRequest(
               "GET",
-              `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${variables.orderId}`,
+              `/api/orders/${variables.orderId}`,
             );
             return response.json();
           },
@@ -1015,7 +1015,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
             try {
               const orderItemsResponse = await apiRequest(
                 "GET",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${variables.orderId}`,
+                `/api/order-items/${variables.orderId}`,
               );
               const orderItemsData = await orderItemsResponse.json();
 
@@ -1149,7 +1149,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
       });
 
       // Then mark order as paid with mixed payment
-      await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`, {
+      await apiRequest("PUT", `/api/orders/${orderId}/status`, {
         status: "paid",
         paymentMethod: `points + ${paymentMethod}`,
         customerId,
@@ -1194,7 +1194,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
             try {
               await apiRequest(
                 "PUT",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${completedOrder.tableId}/status`,
+                `/api/tables/${completedOrder.tableId}/status`,
                 {
                   status: "available",
                 },
@@ -1242,7 +1242,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
           queryFn: async () => {
             const response = await apiRequest(
               "GET",
-              `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${variables.orderId}`,
+              `/api/orders/${variables.orderId}`,
             );
             return response.json();
           },
@@ -1258,7 +1258,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
             try {
               const orderItemsResponse = await apiRequest(
                 "GET",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${variables.orderId}`,
+                `/api/order-items/${variables.orderId}`,
               );
               const orderItemsData = await orderItemsResponse.json();
 
@@ -1333,7 +1333,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
       // First cancel the order
       const response = await apiRequest(
         "PUT",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
+        `/api/orders/${orderId}/status`,
         { status: "cancelled" },
       );
 
@@ -1350,7 +1350,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
 
         // If no other active orders, update table status to available
         if (!otherActiveOrders || otherActiveOrders.length === 0) {
-          await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${order.tableId}/status`, {
+          await apiRequest("PUT", `/api/tables/${order.tableId}/status`, {
             status: "available",
           });
         }
@@ -1382,7 +1382,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
   const recalculateOrderTotalMutation = useMutation({
     mutationFn: async (orderId: number) => {
       // Fetch current order items after deletion
-      const response = await apiRequest("GET", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${orderId}`);
+      const response = await apiRequest("GET", `/api/order-items/${orderId}`);
       const remainingItems = await response.json();
 
       console.log(
@@ -1397,7 +1397,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
         );
 
         // Set totals to zero instead of deleting the order
-        const updateResult = await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}`, {
+        const updateResult = await apiRequest("PUT", `/api/orders/${orderId}`, {
           subtotal: "0",
           tax: "0",
           total: "0",
@@ -1441,7 +1441,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
       });
 
       // Update order with new totals
-      const updateResult = await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}`, {
+      const updateResult = await apiRequest("PUT", `/api/orders/${orderId}`, {
         subtotal: newSubtotal.toString(),
         tax: newTax.toString(),
         total: newTotal.toString(),
@@ -1464,7 +1464,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
       Promise.all([
         fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", { cache: "no-store" }).then((r) => r.json()),
         fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables", { cache: "no-store" }).then((r) => r.json()),
-        fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${orderId}`, { cache: "no-store" }).then((r) =>
+        fetch(`/api/order-items/${orderId}`, { cache: "no-store" }).then((r) =>
           r.json(),
         ),
       ])
@@ -2317,7 +2317,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
         try {
           const response = await apiRequest(
             "GET",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${currentOrderId}`,
+            `/api/order-items/${currentOrderId}`,
           );
           currentOrderItems = await response.json();
           console.log(
@@ -2553,11 +2553,11 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
 
     try {
       const orderItems = await queryClient.fetchQuery({
-        queryKey: [`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`],
+        queryKey: [`/api/order-items/${order.id}`],
         queryFn: async () => {
           const response = await apiRequest(
             "GET",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+            `/api/order-items/${order.id}`,
           );
           return response.json();
         },
@@ -2663,11 +2663,11 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
       // Fallback to manual print - try to show receipt modal
       try {
         const orderItems = await queryClient.fetchQuery({
-          queryKey: [`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`],
+          queryKey: [`/api/order-items/${order.id}`],
           queryFn: async () => {
             const response = await apiRequest(
               "GET",
-              `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+              `/api/order-items/${order.id}`,
             );
             return response.json();
           },
@@ -3266,7 +3266,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
                                       // Fetch order items for THIS SPECIFIC order - not any cached data
                                       const response = await apiRequest(
                                         "GET",
-                                        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+                                        `/api/order-items/${order.id}`,
                                       );
                                       const orderItemsData =
                                         await response.json();
@@ -3413,7 +3413,7 @@ export function TableGrid({ onTableSelect, selectedTableId }: TableGridProps) {
                                           // Fetch order items for this specific order
                                           const response = await apiRequest(
                                             "GET",
-                                            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
+                                            `/api/order-items/${order.id}`,
                                           );
                                           const orderItemsData =
                                             await response.json();

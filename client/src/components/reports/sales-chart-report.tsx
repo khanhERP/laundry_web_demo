@@ -167,7 +167,7 @@ export function SalesChartReport() {
           selectedFloor !== "all" ? `/${selectedFloor}` : "/all";
 
         const response = await fetch(
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/date-range/${startDateTimeISO}/${endDateTimeISO}${floorFilter}`,
+          `/api/orders/date-range/${startDateTimeISO}/${endDateTimeISO}${floorFilter}`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -278,7 +278,7 @@ export function SalesChartReport() {
     ],
     queryFn: async () => {
       const response = await fetch(
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products/${selectedCategory}/${productType}/${productSearch || ""}`,
+        `/api/products/${selectedCategory}/${productType}/${productSearch || ""}`,
       );
       if (!response.ok) throw new Error("Failed to fetch products");
       return response.json();
@@ -301,7 +301,7 @@ export function SalesChartReport() {
     ],
     queryFn: async () => {
       const response = await fetch(
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers/${customerSearch || "all"}/${customerStatus}`,
+        `/api/customers/${customerSearch || "all"}/${customerStatus}`,
       );
       if (!response.ok) throw new Error("Failed to fetch customers");
       return response.json();
@@ -347,7 +347,7 @@ export function SalesChartReport() {
           });
 
           const response = await fetch(
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/product-analysis/${encodeURIComponent(startDateTimeLocal)}/${encodeURIComponent(endDateTimeLocal)}${floorFilter}?${params}`,
+            `/api/product-analysis/${encodeURIComponent(startDateTimeLocal)}/${encodeURIComponent(endDateTimeLocal)}${floorFilter}?${params}`,
             {
               method: "GET",
               headers: {

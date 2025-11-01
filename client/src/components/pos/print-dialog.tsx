@@ -220,7 +220,7 @@ export function PrintDialog({
         console.log('🖨️ Print Dialog: Updating order status to paid before printing for order:', receiptData.orderId);
 
         try {
-          const statusResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${receiptData.orderId}/status`, {
+          const statusResponse = await fetch(`/api/orders/${receiptData.orderId}/status`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',

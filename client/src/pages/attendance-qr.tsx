@@ -52,7 +52,7 @@ export default function AttendanceQRPage() {
   });
 
   const clockOutMutation = useMutation({
-    mutationFn: () => apiRequest('POST', `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance/clock-out/${(todayAttendance as AttendanceRecord)?.id}`, {}),
+    mutationFn: () => apiRequest('POST', `/api/attendance/clock-out/${(todayAttendance as AttendanceRecord)?.id}`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance'] });
       refetchTodayAttendance();
@@ -71,7 +71,7 @@ export default function AttendanceQRPage() {
   });
 
   const breakStartMutation = useMutation({
-    mutationFn: () => apiRequest('POST', `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance/break-start/${(todayAttendance as AttendanceRecord)?.id}`, {}),
+    mutationFn: () => apiRequest('POST', `/api/attendance/break-start/${(todayAttendance as AttendanceRecord)?.id}`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance'] });
       refetchTodayAttendance();
@@ -90,7 +90,7 @@ export default function AttendanceQRPage() {
   });
 
   const breakEndMutation = useMutation({
-    mutationFn: () => apiRequest('POST', `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance/break-end/${(todayAttendance as AttendanceRecord)?.id}`, {}),
+    mutationFn: () => apiRequest('POST', `/api/attendance/break-end/${(todayAttendance as AttendanceRecord)?.id}`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance'] });
       refetchTodayAttendance();

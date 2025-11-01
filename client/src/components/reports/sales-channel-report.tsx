@@ -88,7 +88,7 @@ export function SalesChannelReport() {
           salesChannel: selectedSalesChannel,
         }),
       });
-      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/sales-channel-sales?${params}`);
+      const response = await fetch(`/api/sales-channel-sales?${params}`);
       if (!response.ok) {
         throw new Error("Failed to fetch sales channel sales data");
       }
@@ -115,7 +115,7 @@ export function SalesChannelReport() {
           salesChannel: selectedSalesChannel,
         }),
       });
-      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/sales-channel-profit?${params}`);
+      const response = await fetch(`/api/sales-channel-profit?${params}`);
       if (!response.ok) {
         throw new Error("Failed to fetch sales channel profit data");
       }
@@ -149,7 +149,7 @@ export function SalesChannelReport() {
           ...(productType !== "all" && { productType }),
           ...(selectedCategory !== "all" && { categoryId: selectedCategory }),
         });
-        const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/sales-channel-products?${params}`);
+        const response = await fetch(`/api/sales-channel-products?${params}`);
         if (!response.ok) {
           throw new Error("Failed to fetch sales channel products data");
         }

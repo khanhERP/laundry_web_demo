@@ -83,7 +83,7 @@ export function ClockInOut() {
     mutationFn: () =>
       apiRequest(
         "POST",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance/clock-out/${(todayAttendance as AttendanceRecord)?.id}`,
+        `/api/attendance/clock-out/${(todayAttendance as AttendanceRecord)?.id}`,
         {},
       ),
     onSuccess: () => {
@@ -107,7 +107,7 @@ export function ClockInOut() {
     mutationFn: () =>
       apiRequest(
         "POST",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance/break-start/${(todayAttendance as AttendanceRecord)?.id}`,
+        `/api/attendance/break-start/${(todayAttendance as AttendanceRecord)?.id}`,
         {},
       ),
     onSuccess: () => {
@@ -131,7 +131,7 @@ export function ClockInOut() {
     mutationFn: () =>
       apiRequest(
         "POST",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance/break-end/${(todayAttendance as AttendanceRecord)?.id}`,
+        `/api/attendance/break-end/${(todayAttendance as AttendanceRecord)?.id}`,
         {},
       ),
     onSuccess: () => {

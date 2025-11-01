@@ -159,7 +159,7 @@ export function EInvoiceModal({
         orderId,
       );
       // Pass the paymentMethod to the PUT request for status update
-      return apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`, {
+      return apiRequest("PUT", `/api/orders/${orderId}/status`, {
         status: "paid",
         paymentMethod, // Ensure paymentMethod is passed here
       });
@@ -252,7 +252,7 @@ export function EInvoiceModal({
     queryFn: async () => {
       if (!orderId) return null;
       try {
-        const response = await apiRequest("GET", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}`);
+        const response = await apiRequest("GET", `/api/orders/${orderId}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -964,7 +964,7 @@ export function EInvoiceModal({
             paidAt: new Date().toISOString(),
           };
 
-          const updateResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}`, {
+          const updateResponse = await fetch(`/api/orders/${orderId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -1518,7 +1518,7 @@ export function EInvoiceModal({
             paidAt: new Date().toISOString(),
           };
 
-          const updateResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}`, {
+          const updateResponse = await fetch(`/api/orders/${orderId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",

@@ -54,7 +54,7 @@ export function CustomerFormModal({ isOpen, onClose, customer, initialPhone }: C
       if (!customer?.id) return [];
 
       // Fetch all orders and filter by customer ID on client side
-      const response = await apiRequest("GET", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders`);
+      const response = await apiRequest("GET", `/api/orders`);
       const allOrders = await response.json();
 
       // Filter orders that belong to this customer
@@ -179,7 +179,7 @@ export function CustomerFormModal({ isOpen, onClose, customer, initialPhone }: C
         dateOfBirth: data.dateOfBirth?.trim() || undefined,
         notes: data.notes?.trim() || undefined,
       };
-      const response = await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers/${customer.id}`, cleanData);
+      const response = await apiRequest("PUT", `/api/customers/${customer.id}`, cleanData);
       return response.json();
     },
     onSuccess: () => {

@@ -76,7 +76,7 @@ export function InvoiceManagementModal({
     queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-items", selectedInvoice?.id],
     queryFn: async () => {
       if (!selectedInvoice?.id) return [];
-      const response = await apiRequest("GET", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoice-items/${selectedInvoice.id}`);
+      const response = await apiRequest("GET", `/api/invoice-items/${selectedInvoice.id}`);
       return response.json();
     },
     enabled: !!selectedInvoice?.id,
