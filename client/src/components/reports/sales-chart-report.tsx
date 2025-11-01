@@ -4270,7 +4270,7 @@ export function SalesChartReport() {
           discount: 0, // Default discount to 0
           revenue: 0,
           status: t("reports.active"), // Default status
-          customerGroup: t("common.regularCustomer"), // Default group
+          
           orderDetails: [], // Initialize orderDetails array
         };
       }
