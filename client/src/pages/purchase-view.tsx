@@ -152,7 +152,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
       if (!purchaseId) throw new Error("Purchase ID not found");
 
       console.log("🔍 Fetching purchase receipt with ID:", purchaseId);
-      const response = await fetch(`/api/purchase-receipts/${purchaseId}`);
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${purchaseId}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -178,7 +178,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
       if (!purchaseId) throw new Error("Purchase ID not found");
 
       const response = await fetch(
-        `/api/purchase-receipts/${purchaseId}/items`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${purchaseId}/items`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch purchase receipt items");
@@ -198,7 +198,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
       if (!purchaseId) throw new Error("Purchase ID not found");
 
       const response = await fetch(
-        `/api/purchase-receipts/${purchaseId}/documents`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${purchaseId}/documents`,
       );
       if (!response.ok) {
         return [];
@@ -638,7 +638,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
 
         // Upload file with original filename preserved
         const response = await fetch(
-          `/api/purchase-receipts/${purchaseId}/documents`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${purchaseId}/documents`,
           {
             method: "POST",
             headers: {
@@ -691,7 +691,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
       console.log("📥 Starting file download:", document);
 
       const response = await fetch(
-        `/api/purchase-receipts/documents/${document.id}/download`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/documents/${document.id}/download`,
         {
           method: "GET",
           headers: {
@@ -756,7 +756,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
       console.log("🗑️ Deleting document:", documentId);
 
       const response = await fetch(
-        `/api/purchase-receipts/documents/${documentId}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/documents/${documentId}`,
         {
           method: "DELETE",
         },
@@ -1177,7 +1177,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
 
       // Update purchase receipt
       const receiptResponse = await fetch(
-        `/api/purchase-receipts/${purchaseId}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${purchaseId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -1224,7 +1224,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
           try {
             console.log(`🗑️ Deleting old item: ${itemId}`);
             const response = await fetch(
-              `/api/purchase-order-items/${itemId}`,
+              `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-order-items/${itemId}`,
               {
                 method: "DELETE",
               },
@@ -2545,7 +2545,7 @@ export default function PurchaseViewPage({ onLogout }: PurchaseViewPageProps) {
                                         // Assuming valid IDs are smaller than temporary IDs
                                         try {
                                           const response = await fetch(
-                                            `/api/purchase-order-items/${item.id}`,
+                                            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-order-items/${item.id}`,
                                             {
                                               method: "DELETE",
                                             },

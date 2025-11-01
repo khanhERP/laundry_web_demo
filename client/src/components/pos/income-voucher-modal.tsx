@@ -157,7 +157,7 @@ export default function IncomeVoucherModal({
   const updateVoucherMutation = useMutation({
     mutationFn: async (data: IncomeVoucher) => {
       console.log("Updating income voucher with data:", data);
-      const response = await fetch(`/api/income-vouchers/${data.id}`, {
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers/${data.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -196,7 +196,7 @@ export default function IncomeVoucherModal({
 
   const deleteVoucherMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/income-vouchers/${id}`, {
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers/${id}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to delete income voucher");

@@ -91,7 +91,7 @@ export function ProductGrid({
         params.append("search", searchQuery);
       }
 
-      const response = await fetch(`/api/products?${params}`);
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products?${params}`);
       if (!response.ok) throw new Error("Failed to fetch products");
       const allProducts = await response.json();
 

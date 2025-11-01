@@ -54,11 +54,11 @@ export function SpendingReport() {
       console.log("📊 Fetching purchase receipts with date filter:", {
         startDate,
         endDate,
-        url: `/api/purchase-receipts?${params.toString()}`,
+        url: `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts?${params.toString()}`,
       });
 
       const response = await fetch(
-        `/api/purchase-receipts?${params.toString()}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts?${params.toString()}`,
       );
       if (!response.ok) throw new Error("Failed to fetch purchase receipts");
       const result = await response.json();
@@ -105,11 +105,11 @@ export function SpendingReport() {
         console.log("💰 Fetching expense vouchers with date filter:", {
           startDate,
           endDate,
-          url: `/api/expense-vouchers?${params.toString()}`,
+          url: `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers?${params.toString()}`,
         });
 
         const response = await fetch(
-          `/api/expense-vouchers?${params.toString()}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers?${params.toString()}`,
         );
         if (!response.ok) throw new Error("Failed to fetch expense vouchers");
         const result = await response.json();
@@ -128,7 +128,7 @@ export function SpendingReport() {
     queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/date-range", startDate, endDate],
     queryFn: async () => {
       const response = await fetch(
-        `/api/orders/date-range/${startDate}/${endDate}/all`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/date-range/${startDate}/${endDate}/all`,
       );
       if (!response.ok) throw new Error("Failed to fetch orders");
       return response.json();

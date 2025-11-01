@@ -426,7 +426,7 @@ export default function SalesOrders() {
           params.append("sortOrder", sortOrder);
         }
 
-        const url = `/api/orders/list?${params.toString()}`;
+        const url = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list?${params.toString()}`;
         const response = await apiRequest("GET", url);
 
         if (!response.ok) {
@@ -547,7 +547,7 @@ export default function SalesOrders() {
       try {
         const response = await apiRequest(
           "GET",
-          `/api/order-items/${selectedInvoice.id}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${selectedInvoice.id}`,
         );
 
         if (!response.ok) {
@@ -610,7 +610,7 @@ export default function SalesOrders() {
 
       const response = await apiRequest(
         "PUT",
-        `/api/orders/${updatedOrder.id}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${updatedOrder.id}`,
         updatePayload,
       );
 
@@ -666,7 +666,7 @@ export default function SalesOrders() {
           // For orders, update status to 'cancelled'
           const response = await apiRequest(
             "PUT",
-            `/api/orders/${orderId}/status`,
+            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
             {
               status: "cancelled",
             },
@@ -767,7 +767,7 @@ export default function SalesOrders() {
 
           const updateResponse = await apiRequest(
             "PUT",
-            `/api/orders/${selectedInvoice.id}`,
+            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${selectedInvoice.id}`,
             updateData,
           );
           console.log(
@@ -844,7 +844,7 @@ export default function SalesOrders() {
       // Changed to accept orderId
       const response = await apiRequest(
         "PUT",
-        `/api/orders/${orderId}/status`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}/status`,
         {
           status: "cancelled",
         },
@@ -1521,7 +1521,7 @@ export default function SalesOrders() {
         console.log(`🗑️ Deleting order item ${item.id}`);
         const response = await apiRequest(
           "DELETE",
-          `/api/order-items/${item.id}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
         );
         if (!response.ok) {
           throw new Error(`Failed to delete order item ${item.id}`);
@@ -1610,7 +1610,7 @@ export default function SalesOrders() {
 
         const response = await apiRequest(
           "POST",
-          `/api/order-items/${editableInvoice.id}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${editableInvoice.id}`,
           payload,
         );
 
@@ -1712,7 +1712,7 @@ export default function SalesOrders() {
         // Update the item
         const response = await apiRequest(
           "PATCH",
-          `/api/order-items/${item.id}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
           payload,
         );
 
@@ -1727,7 +1727,7 @@ export default function SalesOrders() {
       // Step 5: Recalculate order totals from fresh data
       const allCurrentItemsResponse = await apiRequest(
         "GET",
-        `/api/order-items/${editableInvoice.id}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${editableInvoice.id}`,
       );
       const allCurrentItems = await allCurrentItemsResponse.json();
 
@@ -1786,7 +1786,7 @@ export default function SalesOrders() {
 
       const orderUpdateResponse = await apiRequest(
         "PUT",
-        `/api/orders/${editableInvoice.id}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${editableInvoice.id}`,
         orderUpdatePayload,
       );
 
@@ -3171,7 +3171,7 @@ export default function SalesOrders() {
     try {
       const updateResponse = await apiRequest(
         "PUT",
-        `/api/orders/${order.id}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${order.id}`,
         {
           paymentStatus: "paid",
           status: "paid",
@@ -3248,7 +3248,7 @@ export default function SalesOrders() {
           // Fetch fresh order items
           const itemsResponse = await apiRequest(
             "GET",
-            `/api/order-items/${order.id}`,
+            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`,
           );
           const items = await itemsResponse.json();
 
@@ -3340,7 +3340,7 @@ export default function SalesOrders() {
       console.log("📄 Sales Orders: Preparing receipt for order:", order.id);
 
       // Fetch order items with tax information
-      const response = await apiRequest("GET", `/api/order-items/${order.id}`);
+      const response = await apiRequest("GET", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${order.id}`);
       const items = await response.json();
 
       // Enrich items with product information including tax rates
@@ -6383,7 +6383,7 @@ export default function SalesOrders() {
                                                                 const itemsResponse =
                                                                   await apiRequest(
                                                                     "GET",
-                                                                    `/api/order-items/${selectedInvoice.id}`,
+                                                                    `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${selectedInvoice.id}`,
                                                                   );
                                                                 const items =
                                                                   await itemsResponse.json();

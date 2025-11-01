@@ -153,7 +153,7 @@ export default function InventoryPage({ onLogout }: InventoryPageProps) {
       id: number;
       trackInventory: boolean;
     }) => {
-      const response = await fetch(`/api/products/${id}/track-inventory`, {
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products/${id}/track-inventory`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -236,7 +236,7 @@ export default function InventoryPage({ onLogout }: InventoryPageProps) {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (productId: number) => {
-      const response = await fetch(`/api/products/${productId}`, {
+      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products/${productId}`, {
         method: "DELETE",
       });
       if (!response.ok) {
