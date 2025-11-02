@@ -6262,11 +6262,11 @@ export default function SalesOrders() {
                                                                 </SelectTrigger>
                                                                 <SelectContent side="top">
                                                                   {/* chưa thanh toán option */}
-                                                                  <SelectItem value="unpaid">
+                                                                  {/* <SelectItem value="unpaid">
                                                                     {t(
                                                                       "common.unpaid",
                                                                     )}
-                                                                  </SelectItem>
+                                                                  </SelectItem> */}
 
                                                                   {enabledPaymentMethods.map(
                                                                     (
@@ -6959,7 +6959,10 @@ export default function SalesOrders() {
             setOrderForPayment(null);
 
             // Refresh data after closing
-            // queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+            queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+
+            // Dispatch custom event to force refresh
+            window.dispatchEvent(new CustomEvent("forceRefresh"));
           }}
           onSelectMethod={handlePaymentComplete}
           total={
@@ -7030,6 +7033,9 @@ export default function SalesOrders() {
             setSelectedReceipt(null);
 
             queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+
+            // Dispatch custom event to force refresh
+            window.dispatchEvent(new CustomEvent("forceRefresh"));
           }}
           receipt={selectedReceipt}
           isPreview={false}
