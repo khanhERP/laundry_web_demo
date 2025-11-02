@@ -272,8 +272,8 @@ export default function SalesOrders() {
   // Format dates in local timezone to avoid UTC conversion issues
   const formatLocalDate = (date: Date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -617,9 +617,10 @@ export default function SalesOrders() {
         isPaid: updatedOrder.isPaid ?? false,
         // Fix: Only set paymentMethod if isPaid is true, otherwise set to null
         paymentMethod: updatedOrder.isPaid
-          ? (updatedOrder.paymentMethod === "unpaid" || !updatedOrder.paymentMethod
-              ? null
-              : updatedOrder.paymentMethod)
+          ? updatedOrder.paymentMethod === "unpaid" ||
+            !updatedOrder.paymentMethod
+            ? null
+            : updatedOrder.paymentMethod
           : null,
         customerName: updatedOrder.customerName || "",
         customerPhone: updatedOrder.customerPhone || "",
@@ -650,7 +651,10 @@ export default function SalesOrders() {
       console.log("  - Thuế:", updatePayload.tax);
       console.log("  - Giảm giá:", updatePayload.discount);
       console.log("  - Tổng cộng:", updatePayload.total);
-      console.log("📦 TOÀN BỘ PAYLOAD gửi lên API:", JSON.stringify(updatePayload, null, 2));
+      console.log(
+        "📦 TOÀN BỘ PAYLOAD gửi lên API:",
+        JSON.stringify(updatePayload, null, 2),
+      );
       console.log("🔍 ==========================================");
 
       const response = await apiRequest(
@@ -662,7 +666,10 @@ export default function SalesOrders() {
       console.log("✅ API Response Status:", response.status);
       if (response.ok) {
         const responseData = await response.json();
-        console.log("✅ API Response Data:", JSON.stringify(responseData, null, 2));
+        console.log(
+          "✅ API Response Data:",
+          JSON.stringify(responseData, null, 2),
+        );
         console.log("🔍 Kiểm tra dữ liệu trả về từ API:");
         console.log("  - customerName:", responseData.customerName);
         console.log("  - customerPhone:", responseData.customerPhone);
@@ -1168,102 +1175,102 @@ export default function SalesOrders() {
 
   const filteredInvoices = Array.isArray(combinedData)
     ? combinedData.sort((a: any, b: any) => {
-          // Apply sorting if a field is selected
-          if (sortField) {
-            let aValue: any;
-            let bValue: any;
+        // Apply sorting if a field is selected
+        if (sortField) {
+          let aValue: any;
+          let bValue: any;
 
-            switch (sortField) {
-              case "orderNumber":
-                aValue = a.displayNumber || "";
-                bValue = b.displayNumber || "";
-                break;
-              case "createdAt":
-                aValue = new Date(a.createdAt || 0).getTime();
-                bValue = new Date(b.createdAt || 0).getTime();
-                break;
-              case "updatedAt":
-                aValue = new Date(a.updatedAt || 0).getTime();
-                bValue = new Date(b.updatedAt || 0).getTime();
-                break;
-              case "salesChannel":
-                aValue = a.salesChannel || "";
-                bValue = b.salesChannel || "";
-                break;
-              case "customerCode":
-                aValue = a.customerCode || a.customerTaxCode || "";
-                bValue = b.customerCode || b.customerTaxCode || "";
-                break;
-              case "customerName":
-                aValue = a.customerName || "";
-                bValue = b.customerName || "";
-                break;
-              case "customerPhone": // Added for sorting customer phone
-                aValue = a.customerPhone || "";
-                bValue = b.customerPhone || "";
-                break;
-              case "subtotal":
-                aValue = parseFloat(a.subtotal || "0");
-                bValue = parseFloat(b.subtotal || "0");
-                break;
-              case "discount":
-                aValue = parseFloat(a.discount || "0");
-                bValue = parseFloat(b.discount || "0");
-                break;
-              case "tax":
-                aValue = parseFloat(a.tax || "0");
-                bValue = parseFloat(b.tax || "0");
-                break;
-              case "total":
-                aValue = parseFloat(a.total || "0");
-                bValue = parseFloat(b.total || "0");
-                break;
-              // Removed employeeCode and employeeName from sorting
-              case "symbol":
-                aValue = a.symbol || a.templateNumber || "";
-                bValue = b.symbol || b.templateNumber || "";
-                break;
-              case "invoiceNumber":
-                aValue = a.invoiceNumber || "";
-                bValue = b.invoiceNumber || "";
-                break;
-              case "notes":
-                aValue = a.notes || "";
-                bValue = b.notes || "";
-                break;
-              case "status":
-                aValue = a.displayStatus || 0;
-                bValue = b.displayStatus || 0;
-                break;
-              default:
-                aValue = "";
-                bValue = "";
-            }
-
-            // Compare values
-            if (typeof aValue === "string" && typeof bValue === "string") {
-              const comparison = aValue.localeCompare(bValue, "vi");
-              return sortOrder === "asc" ? comparison : -comparison;
-            } else {
-              const comparison = aValue - bValue;
-              return sortOrder === "asc" ? comparison : -comparison;
-            }
+          switch (sortField) {
+            case "orderNumber":
+              aValue = a.displayNumber || "";
+              bValue = b.displayNumber || "";
+              break;
+            case "createdAt":
+              aValue = new Date(a.createdAt || 0).getTime();
+              bValue = new Date(b.createdAt || 0).getTime();
+              break;
+            case "updatedAt":
+              aValue = new Date(a.updatedAt || 0).getTime();
+              bValue = new Date(b.updatedAt || 0).getTime();
+              break;
+            case "salesChannel":
+              aValue = a.salesChannel || "";
+              bValue = b.salesChannel || "";
+              break;
+            case "customerCode":
+              aValue = a.customerCode || a.customerTaxCode || "";
+              bValue = b.customerCode || b.customerTaxCode || "";
+              break;
+            case "customerName":
+              aValue = a.customerName || "";
+              bValue = b.customerName || "";
+              break;
+            case "customerPhone": // Added for sorting customer phone
+              aValue = a.customerPhone || "";
+              bValue = b.customerPhone || "";
+              break;
+            case "subtotal":
+              aValue = parseFloat(a.subtotal || "0");
+              bValue = parseFloat(b.subtotal || "0");
+              break;
+            case "discount":
+              aValue = parseFloat(a.discount || "0");
+              bValue = parseFloat(b.discount || "0");
+              break;
+            case "tax":
+              aValue = parseFloat(a.tax || "0");
+              bValue = parseFloat(b.tax || "0");
+              break;
+            case "total":
+              aValue = parseFloat(a.total || "0");
+              bValue = parseFloat(b.total || "0");
+              break;
+            // Removed employeeCode and employeeName from sorting
+            case "symbol":
+              aValue = a.symbol || a.templateNumber || "";
+              bValue = b.symbol || b.templateNumber || "";
+              break;
+            case "invoiceNumber":
+              aValue = a.invoiceNumber || "";
+              bValue = b.invoiceNumber || "";
+              break;
+            case "notes":
+              aValue = a.notes || "";
+              bValue = b.notes || "";
+              break;
+            case "status":
+              aValue = a.displayStatus || 0;
+              bValue = b.displayStatus || 0;
+              break;
+            default:
+              aValue = "";
+              bValue = "";
           }
 
-          // Default sort by date (newest first)
-          const dateA = new Date(
-            a.orderedAt || a.createdAt || a.date || a.invoiceDate,
-          );
-          const dateB = new Date(
-            b.orderedAt || b.createdAt || b.date || b.invoiceDate,
-          );
+          // Compare values
+          if (typeof aValue === "string" && typeof bValue === "string") {
+            const comparison = aValue.localeCompare(bValue, "vi");
+            return sortOrder === "asc" ? comparison : -comparison;
+          } else {
+            const comparison = aValue - bValue;
+            return sortOrder === "asc" ? comparison : -comparison;
+          }
+        }
 
-          if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-          if (isNaN(dateA.getTime())) return 1;
-          if (isNaN(dateB.getTime())) return -1;
+        // Default sort by date (newest first)
+        const dateA = new Date(
+          a.orderedAt || a.createdAt || a.date || a.invoiceDate,
+        );
+        const dateB = new Date(
+          b.orderedAt || b.createdAt || b.date || b.invoiceDate,
+        );
 
-          return dateB.getTime() - dateA.getTime();
-        })
+        if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
+        if (isNaN(dateA.getTime())) return 1;
+        if (isNaN(dateB.getTime())) return -1;
+
+        return dateB.getTime() - dateA.getTime();
+      })
     : [];
 
   // Auto-expand matching order when data is available and order param exists
@@ -1388,19 +1395,16 @@ export default function SalesOrders() {
     setEditableInvoice(completeOrder);
     setIsEditing(true);
 
-    console.log(
-      "📝 Edit mode activated with complete order data:",
-      {
-        id: completeOrder.id,
-        customerName: completeOrder.customerName,
-        customerPhone: completeOrder.customerPhone,
-        customerAddress: completeOrder.customerAddress,
-        customerTaxCode: completeOrder.customerTaxCode,
-        symbol: completeOrder.symbol,
-        invoiceNumber: completeOrder.invoiceNumber,
-        templateNumber: completeOrder.templateNumber,
-      }
-    );
+    console.log("📝 Edit mode activated with complete order data:", {
+      id: completeOrder.id,
+      customerName: completeOrder.customerName,
+      customerPhone: completeOrder.customerPhone,
+      customerAddress: completeOrder.customerAddress,
+      customerTaxCode: completeOrder.customerTaxCode,
+      symbol: completeOrder.symbol,
+      invoiceNumber: completeOrder.invoiceNumber,
+      templateNumber: completeOrder.templateNumber,
+    });
   };
 
   // Function to add a new order item row (only in UI, not saved to database yet)
@@ -1857,19 +1861,36 @@ export default function SalesOrders() {
         editableInvoice.isPaid === true;
 
       // Ensure we get the latest values from editableInvoice state
-      const finalCustomerName = editableInvoice?.customerName || selectedInvoice?.customerName || "";
-      const finalCustomerPhone = editableInvoice?.customerPhone || selectedInvoice?.customerPhone || "";
-      const finalCustomerAddress = editableInvoice?.customerAddress || selectedInvoice?.customerAddress || "";
-      const finalCustomerTaxCode = editableInvoice?.customerTaxCode || selectedInvoice?.customerTaxCode || "";
-      const finalCustomerEmail = editableInvoice?.customerEmail || selectedInvoice?.customerEmail || "";
-      const finalSymbol = editableInvoice?.symbol || selectedInvoice?.symbol || "";
-      const finalInvoiceNumber = editableInvoice?.invoiceNumber || selectedInvoice?.invoiceNumber || "";
-      const finalTemplateNumber = editableInvoice?.templateNumber || selectedInvoice?.templateNumber || "";
+      const finalCustomerName =
+        editableInvoice?.customerName || selectedInvoice?.customerName || "";
+      const finalCustomerPhone =
+        editableInvoice?.customerPhone || selectedInvoice?.customerPhone || "";
+      const finalCustomerAddress =
+        editableInvoice?.customerAddress ||
+        selectedInvoice?.customerAddress ||
+        "";
+      const finalCustomerTaxCode = finalCustomerAddress;
+      const finalCustomerEmail =
+        editableInvoice?.customerEmail || selectedInvoice?.customerEmail || "";
+      const finalSymbol =
+        editableInvoice?.symbol || selectedInvoice?.symbol || "";
+      const finalInvoiceNumber =
+        editableInvoice?.invoiceNumber || selectedInvoice?.invoiceNumber || "";
+      const finalTemplateNumber =
+        editableInvoice?.templateNumber ||
+        selectedInvoice?.templateNumber ||
+        "";
       const finalNotes = editableInvoice?.notes || selectedInvoice?.notes || "";
 
       console.log("🔍 ===== TRƯỚC KHI TẠO PAYLOAD =====");
-      console.log("📝 editableInvoice FULL STATE:", JSON.stringify(editableInvoice, null, 2));
-      console.log("📝 selectedInvoice FULL STATE:", JSON.stringify(selectedInvoice, null, 2));
+      console.log(
+        "📝 editableInvoice FULL STATE:",
+        JSON.stringify(editableInvoice, null, 2),
+      );
+      console.log(
+        "📝 selectedInvoice FULL STATE:",
+        JSON.stringify(selectedInvoice, null, 2),
+      );
       console.log("📝 finalCustomerName:", finalCustomerName);
       console.log("📝 finalCustomerPhone:", finalCustomerPhone);
       console.log("📝 finalSymbol:", finalSymbol);
@@ -1921,50 +1942,53 @@ export default function SalesOrders() {
 
       if (originalOrder?.customerName !== editableInvoice.customerName) {
         generalChanges.push(
-          `Khách hàng: từ <${originalOrder?.customerName || ""}> thành <${editableInvoice.customerName || ""}>`
+          `Khách hàng: từ <${originalOrder?.customerName || ""}> thành <${editableInvoice.customerName || ""}>`,
         );
         hasChanges = true;
       }
 
       if (originalOrder?.customerPhone !== editableInvoice.customerPhone) {
         generalChanges.push(
-          `Số điện thoại: từ <${originalOrder?.customerPhone || ""}> thành <${editableInvoice.customerPhone || ""}>`
+          `Số điện thoại: từ <${originalOrder?.customerPhone || ""}> thành <${editableInvoice.customerPhone || ""}>`,
         );
         hasChanges = true;
-      // Check isPaid status change (for laundry business)
-      if (storeSettings?.businessType === "laundry" && originalOrder?.isPaid !== editableInvoice.isPaid) {
-        generalChanges.push(
-          `Đã trả đồ: từ <${originalOrder?.isPaid ? "Đã trả" : "Chưa trả"}> thành <${editableInvoice.isPaid ? "Đã trả" : "Chưa trả"}>`
-        );
-        hasChanges = true;
+        // Check isPaid status change (for laundry business)
+        if (
+          storeSettings?.businessType === "laundry" &&
+          originalOrder?.isPaid !== editableInvoice.isPaid
+        ) {
+          generalChanges.push(
+            `Đã trả đồ: từ <${originalOrder?.isPaid ? "Đã trả" : "Chưa trả"}> thành <${editableInvoice.isPaid ? "Đã trả" : "Chưa trả"}>`,
+          );
+          hasChanges = true;
+        }
+
+        if (originalOrder?.symbol !== editableInvoice.symbol) {
+          generalChanges.push(
+            `Ký hiệu hóa đơn: từ <${originalOrder?.symbol || ""}> thành <${editableInvoice.symbol || ""}>`,
+          );
+          hasChanges = true;
+        }
+
+        if (originalOrder?.invoiceNumber !== editableInvoice.invoiceNumber) {
+          generalChanges.push(
+            `Số hóa đơn: từ <${originalOrder?.invoiceNumber || ""}> thành <${editableInvoice.invoiceNumber || ""}>`,
+          );
+          hasChanges = true;
+        }
       }
-
-      if (originalOrder?.symbol !== editableInvoice.symbol) {
-        generalChanges.push(
-          `Ký hiệu hóa đơn: từ <${originalOrder?.symbol || ""}> thành <${editableInvoice.symbol || ""}>`
-        );
-        hasChanges = true;
-      }
-
-      if (originalOrder?.invoiceNumber !== editableInvoice.invoiceNumber) {
-        generalChanges.push(
-          `Số hóa đơn: từ <${originalOrder?.invoiceNumber || ""}> thành <${editableInvoice.invoiceNumber || ""}>`
-        );
-        hasChanges = true;
-      }}
-
 
       if (originalOrder?.notes !== editableInvoice.notes) {
         generalChanges.push(
-          `Ghi chú: từ <${originalOrder?.notes || ""}> thành <${editableInvoice.notes || ""}>`
+          `Ghi chú: từ <${originalOrder?.notes || ""}> thành <${editableInvoice.notes || ""}>`,
         );
         hasChanges = true;
       }
 
-
-
       if (generalChanges.length > 0) {
-        changeDescriptionParts.push("Thông tin chung: " + generalChanges.join("; "));
+        changeDescriptionParts.push(
+          "Thông tin chung: " + generalChanges.join("; "),
+        );
       }
 
       // Detailed item changes
@@ -1973,10 +1997,12 @@ export default function SalesOrders() {
 
       // Deleted items
       itemsToDelete.forEach((deletedItem) => {
-        const originalItem = originalItems.find((item: any) => item.id === deletedItem.id);
+        const originalItem = originalItems.find(
+          (item: any) => item.id === deletedItem.id,
+        );
         if (originalItem) {
           itemChanges.push(
-            `- STT ${itemIndex}: ĐÃ XÓA - Tên hàng hóa: <${originalItem.productName || originalItem.name}>; Số lượng: <${originalItem.quantity}>; Đơn giá: <${formatCurrency(originalItem.unitPrice)}>`
+            `- STT ${itemIndex}: ĐÃ XÓA - Tên hàng hóa: <${originalItem.productName || originalItem.name}>; Số lượng: <${originalItem.quantity}>; Đơn giá: <${formatCurrency(originalItem.unitPrice)}>`,
           );
           itemIndex++;
           hasChanges = true;
@@ -1985,37 +2011,54 @@ export default function SalesOrders() {
 
       // Updated items
       itemsToUpdate.forEach((updatedItem) => {
-        const originalItem = originalItems.find((item: any) => item.id === updatedItem.id);
+        const originalItem = originalItems.find(
+          (item: any) => item.id === updatedItem.id,
+        );
         if (originalItem) {
           const itemChangeParts: string[] = [];
 
-          if (updatedItem.productName && updatedItem.productName !== originalItem.productName) {
+          if (
+            updatedItem.productName &&
+            updatedItem.productName !== originalItem.productName
+          ) {
             itemChangeParts.push(
-              `Tên hàng hóa: từ <${originalItem.productName || originalItem.name}> thành <${updatedItem.productName}>`
+              `Tên hàng hóa: từ <${originalItem.productName || originalItem.name}> thành <${updatedItem.productName}>`,
             );
           }
 
-          if (updatedItem.quantity !== undefined && parseFloat(updatedItem.quantity) !== parseFloat(originalItem.quantity)) {
+          if (
+            updatedItem.quantity !== undefined &&
+            parseFloat(updatedItem.quantity) !==
+              parseFloat(originalItem.quantity)
+          ) {
             itemChangeParts.push(
-              `Số lượng: từ <${originalItem.quantity}> thành <${updatedItem.quantity}>`
+              `Số lượng: từ <${originalItem.quantity}> thành <${updatedItem.quantity}>`,
             );
           }
 
-          if (updatedItem.unitPrice !== undefined && parseFloat(updatedItem.unitPrice) !== parseFloat(originalItem.unitPrice)) {
+          if (
+            updatedItem.unitPrice !== undefined &&
+            parseFloat(updatedItem.unitPrice) !==
+              parseFloat(originalItem.unitPrice)
+          ) {
             itemChangeParts.push(
-              `Đơn giá: từ <${formatCurrency(originalItem.unitPrice)}> thành <${formatCurrency(updatedItem.unitPrice)}>`
+              `Đơn giá: từ <${formatCurrency(originalItem.unitPrice)}> thành <${formatCurrency(updatedItem.unitPrice)}>`,
             );
           }
 
-          if (updatedItem.discount !== undefined && parseFloat(updatedItem.discount) !== parseFloat(originalItem.discount || "0")) {
+          if (
+            updatedItem.discount !== undefined &&
+            parseFloat(updatedItem.discount) !==
+              parseFloat(originalItem.discount || "0")
+          ) {
             itemChangeParts.push(
-              `Giảm giá: từ <${formatCurrency(originalItem.discount || "0")}> thành <${formatCurrency(updatedItem.discount)}>`
+              `Giảm giá: từ <${formatCurrency(originalItem.discount || "0")}> thành <${formatCurrency(updatedItem.discount)}>`,
             );
           }
 
           if (itemChangeParts.length > 0) {
             itemChanges.push(
-              `- STT ${itemIndex}: ${itemChangeParts.join("; ")}`
+              `- STT ${itemIndex}: ${itemChangeParts.join("; ")}`,
             );
             itemIndex++;
             hasChanges = true;
@@ -2026,21 +2069,24 @@ export default function SalesOrders() {
       // Created items
       itemsToCreate.forEach((newItem) => {
         itemChanges.push(
-          `- STT ${itemIndex}: THÊM MỚI - Tên hàng hóa: <${newItem.productName}>; Số lượng: <${newItem.quantity}>; Đơn giá: <${formatCurrency(newItem.unitPrice)}>`
+          `- STT ${itemIndex}: THÊM MỚI - Tên hàng hóa: <${newItem.productName}>; Số lượng: <${newItem.quantity}>; Đơn giá: <${formatCurrency(newItem.unitPrice)}>`,
         );
         itemIndex++;
         hasChanges = true;
       });
 
       if (itemChanges.length > 0) {
-        changeDescriptionParts.push("Thông tin chi tiết:\n" + itemChanges.join("\n"));
+        changeDescriptionParts.push(
+          "Thông tin chi tiết:\n" + itemChanges.join("\n"),
+        );
       }
 
       // Step 8: Log order change history ONLY if there are actual changes
       if (hasChanges) {
-        const detailedDescription = changeDescriptionParts.length > 0
-          ? changeDescriptionParts.join("\n\n")
-          : "Không có thay đổi";
+        const detailedDescription =
+          changeDescriptionParts.length > 0
+            ? changeDescriptionParts.join("\n\n")
+            : "Không có thay đổi";
 
         try {
           console.log("📝 Logging order change history:", {
@@ -2223,6 +2269,13 @@ export default function SalesOrders() {
               0,
             );
 
+            const sumDiscountItem = visibleItems.reduce(
+              (sum: number, item: any) => {
+                return sum + parseFloat(item.discount || "0");
+              },
+              0,
+            );
+
             // Update each item's discount proportionally
             visibleItems.forEach((item: any, index: number) => {
               const edited = prev[item.id] || {};
@@ -2313,6 +2366,10 @@ export default function SalesOrders() {
               }
 
               const calculatedTotal = priceBeforeTax + itemTax;
+
+              if (discountValue === sumDiscountItem) {
+                itemDiscountAmount = parseFloat(item.discount || "0");
+              }
 
               // Update item with recalculated values
               newState[item.id] = {
@@ -2418,9 +2475,17 @@ export default function SalesOrders() {
         // Preserve deleted items - DON'T recalculate them
         Object.keys(editedOrderItems).forEach((itemId) => {
           if (editedOrderItems[parseInt(itemId)]?._deleted) {
-            newEditedItems[parseInt(itemId)] = editedOrderItems[parseInt(itemId)];
+            newEditedItems[parseInt(itemId)] =
+              editedOrderItems[parseInt(itemId)];
           }
         });
+
+        const sumDiscountItem = visibleItems.reduce(
+          (sum: number, item: any) => {
+            return sum + parseFloat(item.discount || "0");
+          },
+          0,
+        );
 
         visibleItems.forEach((item: any, index: number) => {
           const edited = editedOrderItems[item.id] || {};
@@ -2500,8 +2565,14 @@ export default function SalesOrders() {
           } else {
             // Nếu giá chưa bao gồm thuế: Tổng cộng = Thành tiền - Giảm giá + Thuế
             // Thuế = (Thành tiền - Giảm giá) × Thuế suất
-            itemTax = Math.round((priceBeforeTax - itemDiscountAmount) * taxRate);
+            itemTax = Math.round(
+              (priceBeforeTax - itemDiscountAmount) * taxRate,
+            );
             calculatedTotal = priceBeforeTax - itemDiscountAmount + itemTax;
+          }
+
+          if (orderDiscount === sumDiscountItem) {
+            itemDiscountAmount = parseFloat(item.discount || "0");
           }
 
           // Store ALL calculated values in editedOrderItems for accurate saving
@@ -2910,16 +2981,14 @@ export default function SalesOrders() {
       let nextField = "";
 
       // Logic to find next focusable field
-      const fieldsOrder = [
-        "sku",
-        "productName",
-        "quantity",
-        "unitPrice",
-      ];
+      const fieldsOrder = ["sku", "productName", "quantity", "unitPrice"];
       const currentFieldIndex = fieldsOrder.indexOf(field);
       const nextFieldIndex = (currentFieldIndex + 1) % fieldsOrder.length;
 
-      if (nextFieldIndex === 0 && currentFieldIndex === fieldsOrder.length - 1) {
+      if (
+        nextFieldIndex === 0 &&
+        currentFieldIndex === fieldsOrder.length - 1
+      ) {
         // Moved from last field to first of next row
         nextIndex++;
         nextField = fieldsOrder[nextFieldIndex];
@@ -3058,15 +3127,15 @@ export default function SalesOrders() {
 
         // Get tax from item
         const itemTax = parseFloat(
-          editedItem.tax !== undefined
-            ? editedItem.tax
-            : item.tax || "0",
+          editedItem.tax !== undefined ? editedItem.tax : item.tax || "0",
         );
         calculatedTax += itemTax;
       });
 
       // Total = subtotal - discount + tax
-      const totalPayment = Math.round(calculatedSubtotal - calculatedDiscount + calculatedTax);
+      const totalPayment = Math.round(
+        calculatedSubtotal - calculatedDiscount + calculatedTax,
+      );
 
       console.log("📊 Calculated totals from items:", {
         subtotal: calculatedSubtotal,
@@ -3594,7 +3663,7 @@ export default function SalesOrders() {
     console.log("💳 Payment method changed:", {
       method,
       isPaid,
-      paymentStatus: isPaid ? "paid" : "pending"
+      paymentStatus: isPaid ? "paid" : "pending",
     });
   };
 
@@ -5080,21 +5149,39 @@ export default function SalesOrders() {
 
                                                                 // Get discount directly from API data or edited values
                                                                 const itemDiscountAmount =
-                                                                  editedItem.discount !== undefined
-                                                                    ? parseFloat(editedItem.discount)
-                                                                    : parseFloat(item.discount || "0");
+                                                                  editedItem.discount !==
+                                                                  undefined
+                                                                    ? parseFloat(
+                                                                        editedItem.discount,
+                                                                      )
+                                                                    : parseFloat(
+                                                                        item.discount ||
+                                                                          "0",
+                                                                      );
 
                                                                 // Get tax directly from API data or edited values
                                                                 const itemTax =
-                                                                  editedItem.tax !== undefined
-                                                                    ? parseFloat(editedItem.tax)
-                                                                    : parseFloat(item.tax || "0");
+                                                                  editedItem.tax !==
+                                                                  undefined
+                                                                    ? parseFloat(
+                                                                        editedItem.tax,
+                                                                      )
+                                                                    : parseFloat(
+                                                                        item.tax ||
+                                                                          "0",
+                                                                      );
 
                                                                 // Calculate itemTotal from API data
                                                                 const itemTotal =
-                                                                  editedItem.total !== undefined
-                                                                    ? parseFloat(editedItem.total)
-                                                                    : parseFloat(item.total || "0");
+                                                                  editedItem.total !==
+                                                                  undefined
+                                                                    ? parseFloat(
+                                                                        editedItem.total,
+                                                                      )
+                                                                    : parseFloat(
+                                                                        item.total ||
+                                                                          "0",
+                                                                      );
 
                                                                 // Calculate visible row number (only count non-deleted items before this one)
                                                                 const visibleRowNumber =
@@ -5574,7 +5661,8 @@ export default function SalesOrders() {
                                                                           editedOrderItems[
                                                                             item
                                                                               .id
-                                                                          ] || {};
+                                                                          ] ||
+                                                                          {};
                                                                         if (
                                                                           editedItem.tax !==
                                                                           undefined
@@ -5608,7 +5696,9 @@ export default function SalesOrders() {
                                                                           quantity;
 
                                                                         let totalAmount;
-                                                                        if (priceIncludeTax) {
+                                                                        if (
+                                                                          priceIncludeTax
+                                                                        ) {
                                                                           // priceIncludeTax: true → Tổng cộng = Thành tiền - Giảm giá
                                                                           totalAmount =
                                                                             thanhTien -
@@ -5630,40 +5720,40 @@ export default function SalesOrders() {
                                                                     </td>
                                                                     <td className="text-center py-2 px-3 text-sm w-[80px]">
                                                                       {isEditing &&
-                                                                      selectedInvoice.displayStatus !==
-                                                                        1 && (
-                                                                        <Button
-                                                                          size="sm"
-                                                                          variant="ghost"
-                                                                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                                          onClick={() => {
-                                                                            if (
-                                                                              window.confirm(
-                                                                                `Bạn có chắc chắn muốn xóa "${item.productName}" khỏi đơn hàng?`,
-                                                                              )
-                                                                            ) {
-                                                                              setEditedOrderItems(
-                                                                                (
-                                                                                  prev,
-                                                                                ) => ({
-                                                                                  ...prev,
-                                                                                  [item.id]:
-                                                                                    {
-                                                                                      ...prev[
-                                                                                        item
-                                                                                          .id
-                                                                                      ],
-                                                                                      _deleted:
-                                                                                        true,
-                                                                                    },
-                                                                                }),
-                                                                              );
-                                                                            }
-                                                                          }}
-                                                                        >
-                                                                          <X className="h-4 w-4" />
-                                                                        </Button>
-                                                                      )}
+                                                                        selectedInvoice.displayStatus !==
+                                                                          1 && (
+                                                                          <Button
+                                                                            size="sm"
+                                                                            variant="ghost"
+                                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                            onClick={() => {
+                                                                              if (
+                                                                                window.confirm(
+                                                                                  `Bạn có chắc chắn muốn xóa "${item.productName}" khỏi đơn hàng?`,
+                                                                                )
+                                                                              ) {
+                                                                                setEditedOrderItems(
+                                                                                  (
+                                                                                    prev,
+                                                                                  ) => ({
+                                                                                    ...prev,
+                                                                                    [item.id]:
+                                                                                      {
+                                                                                        ...prev[
+                                                                                          item
+                                                                                            .id
+                                                                                        ],
+                                                                                        _deleted:
+                                                                                          true,
+                                                                                      },
+                                                                                  }),
+                                                                                );
+                                                                              }
+                                                                            }}
+                                                                          >
+                                                                            <X className="h-4 w-4" />
+                                                                          </Button>
+                                                                        )}
                                                                     </td>
                                                                   </tr>
                                                                 );
@@ -5774,7 +5864,8 @@ export default function SalesOrders() {
                                                                           editedOrderItems[
                                                                             item
                                                                               .id
-                                                                          ] || {};
+                                                                          ] ||
+                                                                          {};
                                                                         const unitPrice =
                                                                           parseFloat(
                                                                             edited.unitPrice !==
@@ -5864,7 +5955,8 @@ export default function SalesOrders() {
                                                                                     editedOrderItems[
                                                                                       it
                                                                                         .id
-                                                                                    ] || {};
+                                                                                    ] ||
+                                                                                    {};
                                                                                   const itPrice =
                                                                                     parseFloat(
                                                                                       editedIt.unitPrice !==
@@ -5923,7 +6015,8 @@ export default function SalesOrders() {
                                                                         product?.taxRate
                                                                           ? parseFloat(
                                                                               product.taxRate,
-                                                                            ) / 100
+                                                                            ) /
+                                                                            100
                                                                           : 0;
                                                                       const priceIncludeTax =
                                                                         editableInvoice?.priceIncludeTax ??
@@ -6001,27 +6094,29 @@ export default function SalesOrders() {
                                                                         total:
                                                                           calculatedTotal.toString(),
                                                                         taxRate:
-                                                                          (taxRate *
-                                                                            100)
-                                                                            .toString(),
+                                                                          (
+                                                                            taxRate *
+                                                                            100
+                                                                          ).toString(),
                                                                         // Preserve other fields
                                                                         productId:
                                                                           edited.productId !==
-                                                                            undefined
+                                                                          undefined
                                                                             ? edited.productId
                                                                             : item.productId,
                                                                         productName:
                                                                           edited.productName !==
-                                                                            undefined
+                                                                          undefined
                                                                             ? edited.productName
                                                                             : item.productName,
                                                                         sku:
                                                                           edited.sku !==
-                                                                            undefined
+                                                                          undefined
                                                                             ? edited.sku
                                                                             : item.sku ||
                                                                               item.productSku,
-                                                                        quantity: quantity,
+                                                                        quantity:
+                                                                          quantity,
                                                                         unitPrice:
                                                                           unitPrice.toString(),
                                                                       };

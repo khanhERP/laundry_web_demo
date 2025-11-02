@@ -221,7 +221,7 @@ export default function POS({ onLogout }: POSPageProps) {
         itemTaxRate = parseFloat(itemTaxRate);
       }
       if (isNaN(itemTaxRate)) {
-        itemTaxRate = 10; // Default 10%
+        itemTaxRate = 0; // Default 0%
       }
 
       return {
