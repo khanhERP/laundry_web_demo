@@ -268,7 +268,7 @@ export default function SalesOrders() {
   // Set default dates - startDate is first day of current month, endDate is today
   const today = new Date();
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  
+
   // Format dates in local timezone to avoid UTC conversion issues
   const formatLocalDate = (date: Date) => {
     const year = date.getFullYear();
@@ -276,7 +276,7 @@ export default function SalesOrders() {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
-  
+
   const [startDate, setStartDate] = useState(formatLocalDate(firstDayOfMonth));
   const [endDate, setEndDate] = useState(formatLocalDate(today));
   const [customerSearch, setCustomerSearch] = useState("");
@@ -595,24 +595,55 @@ export default function SalesOrders() {
         tax: updatedOrder.tax,
         total: updatedOrder.total,
         discount: updatedOrder.discount,
-        invoiceNumber: updatedOrder.invoiceNumber,
-        symbol: updatedOrder.symbol,
+        invoiceNumber: updatedOrder.invoiceNumber || "",
+        symbol: updatedOrder.symbol || "",
+        templateNumber: updatedOrder.templateNumber || "",
         einvoiceStatus: updatedOrder.einvoiceStatus,
-        // Add other fields that might be updated
         orderNumber: updatedOrder.orderNumber,
-        date: updatedOrder.date, // If date is editable
-        customerId: updatedOrder.customerId, // If customer selection is implemented
-        priceIncludeTax: updatedOrder.priceIncludeTax, // If this field is editable
-        paymentMethod: updatedOrder.paymentMethod, // Include paymentMethod in update payload
+        customerId: updatedOrder.customerId,
+        priceIncludeTax: updatedOrder.priceIncludeTax,
+        paymentMethod: updatedOrder.paymentMethod,
       };
 
-      console.log("📝 Update payload:", updatePayload);
+      console.log("🔍 ===== GỌI API LƯU THÔNG TIN ĐơN HÀNG =====");
+      console.log("📝 Order ID:", updatedOrder.id);
+      console.log("👤 Thông tin khách hàng trong payload:");
+      console.log("  - Tên khách hàng:", updatePayload.customerName);
+      console.log("  - Số điện thoại:", updatePayload.customerPhone);
+      console.log("  - Địa chỉ:", updatePayload.customerAddress);
+      console.log("  - Mã số thuế:", updatePayload.customerTaxCode);
+      console.log("  - Email:", updatePayload.customerEmail);
+      console.log("📄 Thông tin hóa đơn trong payload:");
+      console.log("  - Ký hiệu hóa đơn:", updatePayload.symbol);
+      console.log("  - Số hóa đơn:", updatePayload.invoiceNumber);
+      console.log("  - Số mẫu hóa đơn:", updatePayload.templateNumber);
+      console.log("💰 Thông tin tài chính:");
+      console.log("  - Tổng tiền hàng:", updatePayload.subtotal);
+      console.log("  - Thuế:", updatePayload.tax);
+      console.log("  - Giảm giá:", updatePayload.discount);
+      console.log("  - Tổng cộng:", updatePayload.total);
+      console.log("📦 TOÀN BỘ PAYLOAD gửi lên API:", JSON.stringify(updatePayload, null, 2));
+      console.log("🔍 ==========================================");
 
       const response = await apiRequest(
         "PUT",
         `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${updatedOrder.id}`,
         updatePayload,
       );
+      
+      console.log("✅ API Response Status:", response.status);
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("✅ API Response Data:", JSON.stringify(responseData, null, 2));
+        console.log("🔍 Kiểm tra dữ liệu trả về từ API:");
+        console.log("  - customerName:", responseData.customerName);
+        console.log("  - customerPhone:", responseData.customerPhone);
+        console.log("  - symbol:", responseData.symbol);
+        console.log("  - invoiceNumber:", responseData.invoiceNumber);
+      } else {
+        const errorText = await response.text();
+        console.error("❌ API Error Response:", errorText);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -1331,7 +1362,16 @@ export default function SalesOrders() {
 
     console.log(
       "📝 Edit mode activated with complete order data:",
-      completeOrder,
+      {
+        id: completeOrder.id,
+        customerName: completeOrder.customerName,
+        customerPhone: completeOrder.customerPhone,
+        customerAddress: completeOrder.customerAddress,
+        customerTaxCode: completeOrder.customerTaxCode,
+        symbol: completeOrder.symbol,
+        invoiceNumber: completeOrder.invoiceNumber,
+        templateNumber: completeOrder.templateNumber,
+      }
     );
   };
 
@@ -1426,6 +1466,13 @@ export default function SalesOrders() {
         editedItemsCount: Object.keys(editedOrderItems).length,
         editedItems: editedOrderItems,
       });
+
+      // Capture original order data for change history
+      const originalOrder = selectedInvoice;
+      const originalItems = orderItems;
+
+      // Track if there are any actual changes
+      let hasChanges = false;
 
       // Step 1: Separate new items from existing items
       const itemsToCreate: any[] = [];
@@ -1753,6 +1800,17 @@ export default function SalesOrders() {
         totalItemDiscount += itemDiscount;
       });
 
+      console.log("📝 Preparing order update with customer info:", {
+        customerName: editableInvoice.customerName,
+        customerPhone: editableInvoice.customerPhone,
+        customerAddress: editableInvoice.customerAddress,
+        customerTaxCode: editableInvoice.customerTaxCode,
+        customerEmail: editableInvoice.customerEmail,
+        symbol: editableInvoice.symbol,
+        invoiceNumber: editableInvoice.invoiceNumber,
+        templateNumber: editableInvoice.templateNumber,
+      });
+
       // Total = sum of (priceBeforeTax + tax) for all items
       const exactTotal = exactSubtotal - totalItemDiscount + exactTax;
 
@@ -1794,42 +1852,160 @@ export default function SalesOrders() {
         throw new Error("Failed to update order totals");
       }
 
-      // Step 7: Log order change history
-      try {
-        const changeDetails = {
-          itemsCreated: itemsToCreate.length,
-          itemsUpdated: itemsToUpdate.length,
-          itemsDeleted: itemsToDelete.length,
-          changes: {
-            created: itemsToCreate.map((item) => ({
-              productName: item.productName,
-              quantity: item.quantity,
-            })),
-            updated: itemsToUpdate.map((item) => ({
-              id: item.id,
-              changes: Object.keys(item).filter((key) => key !== "id"),
-            })),
-            deleted: itemsToDelete.map((item) => ({
-              productName: item.productName,
-            })),
-          },
-        };
+      // Step 7: Build detailed change description
+      const changeDescriptionParts: string[] = [];
 
-        await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-change-history", {
-          orderId: editableInvoice.id,
-          action: "edit",
-          detailedDescription: JSON.stringify(changeDetails),
-          ipAddress: window.location.hostname,
-          userName: "User", // Get from auth context if available
-        });
-
-        console.log("✅ Order change history logged successfully");
-      } catch (historyError) {
-        console.error("❌ Failed to log order change history:", historyError);
-        // Don't fail the whole operation if history logging fails
+      // General information changes
+      const generalChanges: string[] = [];
+      
+      if (originalOrder?.customerName !== editableInvoice.customerName) {
+        generalChanges.push(
+          `Khách hàng: từ <${originalOrder?.customerName || ""}> thành <${editableInvoice.customerName || ""}>`
+        );
+        hasChanges = true;
+      }
+      
+      if (originalOrder?.customerPhone !== editableInvoice.customerPhone) {
+        generalChanges.push(
+          `Số điện thoại: từ <${originalOrder?.customerPhone || ""}> thành <${editableInvoice.customerPhone || ""}>`
+        );
+        hasChanges = true;
+      // Check isPaid status change (for laundry business)
+      if (storeSettings?.businessType === "laundry" && originalOrder?.isPaid !== editableInvoice.isPaid) {
+        generalChanges.push(
+          `Đã trả đồ: từ <${originalOrder?.isPaid ? "Đã trả" : "Chưa trả"}> thành <${editableInvoice.isPaid ? "Đã trả" : "Chưa trả"}>`
+        );
+        hasChanges = true;
       }
 
-      // Step 8: Force immediate refresh after ALL operations complete
+      if (originalOrder?.symbol !== editableInvoice.symbol) {
+        generalChanges.push(
+          `Ký hiệu hóa đơn: từ <${originalOrder?.symbol || ""}> thành <${editableInvoice.symbol || ""}>`
+        );
+        hasChanges = true;
+      }
+
+      if (originalOrder?.invoiceNumber !== editableInvoice.invoiceNumber) {
+        generalChanges.push(
+          `Số hóa đơn: từ <${originalOrder?.invoiceNumber || ""}> thành <${editableInvoice.invoiceNumber || ""}>`
+        );
+        hasChanges = true;
+      }}
+      
+      
+      if (originalOrder?.notes !== editableInvoice.notes) {
+        generalChanges.push(
+          `Ghi chú: từ <${originalOrder?.notes || ""}> thành <${editableInvoice.notes || ""}>`
+        );
+        hasChanges = true;
+      }
+      
+      
+
+      if (generalChanges.length > 0) {
+        changeDescriptionParts.push("Thông tin chung: " + generalChanges.join("; "));
+      }
+
+      // Detailed item changes
+      const itemChanges: string[] = [];
+      let itemIndex = 1;
+
+      // Deleted items
+      itemsToDelete.forEach((deletedItem) => {
+        const originalItem = originalItems.find((item: any) => item.id === deletedItem.id);
+        if (originalItem) {
+          itemChanges.push(
+            `- STT ${itemIndex}: ĐÃ XÓA - Tên hàng hóa: <${originalItem.productName || originalItem.name}>; Số lượng: <${originalItem.quantity}>; Đơn giá: <${formatCurrency(originalItem.unitPrice)}>`
+          );
+          itemIndex++;
+          hasChanges = true;
+        }
+      });
+
+      // Updated items
+      itemsToUpdate.forEach((updatedItem) => {
+        const originalItem = originalItems.find((item: any) => item.id === updatedItem.id);
+        if (originalItem) {
+          const itemChangeParts: string[] = [];
+          
+          if (updatedItem.productName && updatedItem.productName !== originalItem.productName) {
+            itemChangeParts.push(
+              `Tên hàng hóa: từ <${originalItem.productName || originalItem.name}> thành <${updatedItem.productName}>`
+            );
+          }
+          
+          if (updatedItem.quantity !== undefined && parseFloat(updatedItem.quantity) !== parseFloat(originalItem.quantity)) {
+            itemChangeParts.push(
+              `Số lượng: từ <${originalItem.quantity}> thành <${updatedItem.quantity}>`
+            );
+          }
+          
+          if (updatedItem.unitPrice !== undefined && parseFloat(updatedItem.unitPrice) !== parseFloat(originalItem.unitPrice)) {
+            itemChangeParts.push(
+              `Đơn giá: từ <${formatCurrency(originalItem.unitPrice)}> thành <${formatCurrency(updatedItem.unitPrice)}>`
+            );
+          }
+          
+          if (updatedItem.discount !== undefined && parseFloat(updatedItem.discount) !== parseFloat(originalItem.discount || "0")) {
+            itemChangeParts.push(
+              `Giảm giá: từ <${formatCurrency(originalItem.discount || "0")}> thành <${formatCurrency(updatedItem.discount)}>`
+            );
+          }
+
+          if (itemChangeParts.length > 0) {
+            itemChanges.push(
+              `- STT ${itemIndex}: ${itemChangeParts.join("; ")}`
+            );
+            itemIndex++;
+            hasChanges = true;
+          }
+        }
+      });
+
+      // Created items
+      itemsToCreate.forEach((newItem) => {
+        itemChanges.push(
+          `- STT ${itemIndex}: THÊM MỚI - Tên hàng hóa: <${newItem.productName}>; Số lượng: <${newItem.quantity}>; Đơn giá: <${formatCurrency(newItem.unitPrice)}>`
+        );
+        itemIndex++;
+        hasChanges = true;
+      });
+
+      if (itemChanges.length > 0) {
+        changeDescriptionParts.push("Thông tin chi tiết:\n" + itemChanges.join("\n"));
+      }
+
+      // Step 8: Log order change history ONLY if there are actual changes
+      if (hasChanges) {
+        const detailedDescription = changeDescriptionParts.length > 0 
+          ? changeDescriptionParts.join("\n\n")
+          : "Không có thay đổi";
+
+        try {
+          console.log("📝 Logging order change history:", {
+            orderId: editableInvoice.id,
+            detailedDescriptionLength: detailedDescription.length,
+            detailedDescriptionPreview: detailedDescription.substring(0, 200),
+          });
+
+          await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-change-history", {
+            orderId: editableInvoice.id,
+            action: "edit",
+            detailedDescription: detailedDescription,
+            ipAddress: window.location.hostname,
+            userName: "User", // Get from auth context if available
+          });
+
+          console.log("✅ Order change history logged successfully");
+        } catch (historyError) {
+          console.error("❌ Failed to log order change history:", historyError);
+          // Don't fail the whole operation if history logging fails
+        }
+      } else {
+        console.log("ℹ️ No changes detected - skipping change history logging");
+      }
+
+      // Step 9: Force immediate refresh after ALL operations complete
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] }),
         queryClient.refetchQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] }),
@@ -2197,7 +2373,9 @@ export default function SalesOrders() {
               ? edited.quantity
               : item.quantity || "0",
           );
-          const itemSubtotal = unitPrice * quantity;
+
+          // ✅ ĐƠN GIẢN: Thành tiền = Số lượng × Đơn giá
+          const priceBeforeTax = Math.round(unitPrice * quantity);
 
           // Calculate proportional discount
           let itemDiscountAmount = 0;
@@ -2233,7 +2411,7 @@ export default function SalesOrders() {
               );
             } else {
               itemDiscountAmount = Math.floor(
-                (orderDiscount * itemSubtotal) / totalBeforeDiscount,
+                (orderDiscount * priceBeforeTax) / totalBeforeDiscount,
               );
             }
           }
@@ -2250,25 +2428,20 @@ export default function SalesOrders() {
             storeSettings?.priceIncludesTax ??
             false;
 
+          // Calculate tax and total based on settings
           let itemTax = 0;
-          let priceBeforeTax = 0;
+          let calculatedTotal = 0;
 
-          if (taxRate > 0) {
-            if (priceIncludeTax) {
-              const discountPerUnit = itemDiscountAmount / quantity;
-              const adjustedPrice = Math.max(0, unitPrice - discountPerUnit);
-              const giaGomThue = adjustedPrice * quantity;
-              priceBeforeTax = Math.round(giaGomThue / (1 + taxRate));
-              itemTax = giaGomThue - priceBeforeTax;
-            } else {
-              priceBeforeTax = Math.round(itemSubtotal - itemDiscountAmount);
-              itemTax = Math.round(priceBeforeTax * taxRate);
-            }
+          if (priceIncludeTax) {
+            // Nếu giá đã bao gồm thuế: Tổng cộng = Thành tiền - Giảm giá
+            calculatedTotal = priceBeforeTax - itemDiscountAmount;
+            itemTax = 0; // Không tính thuế riêng vì đã bao gồm trong giá
           } else {
-            priceBeforeTax = Math.round(itemSubtotal - itemDiscountAmount);
+            // Nếu giá chưa bao gồm thuế: Tổng cộng = Thành tiền - Giảm giá + Thuế
+            // Thuế = (Thành tiền - Giảm giá) × Thuế suất
+            itemTax = Math.round((priceBeforeTax - itemDiscountAmount) * taxRate);
+            calculatedTotal = priceBeforeTax - itemDiscountAmount + itemTax;
           }
-
-          const calculatedTotal = priceBeforeTax + itemTax;
 
           // Store ALL calculated values in editedOrderItems for accurate saving
           newEditedItems[item.id] = {
@@ -2589,7 +2762,6 @@ export default function SalesOrders() {
       const taxRate = product?.taxRate ? parseFloat(product.taxRate) / 100 : 0;
       const priceIncludeTax =
         editableInvoice?.priceIncludeTax ??
-        selectedInvoice?.priceIncludeTax ??
         storeSettings?.priceIncludesTax ??
         false;
 
@@ -2656,96 +2828,92 @@ export default function SalesOrders() {
     });
   };
 
-  // Handle keyboard navigation for order items table
+  // Helper function for handling key presses in order item inputs
   const handleOrderItemKeyDown = (
-    e: React.KeyboardEvent,
+    e: React.KeyboardEvent<HTMLInputElement>,
     index: number,
-    fieldType: string,
+    field: string,
   ) => {
-    // Only editable fields (có input)
-    const editableFields = ["sku", "productName", "quantity", "unitPrice"];
-    const currentFieldIndex = editableFields.indexOf(fieldType);
-
-    // Get visible items (not deleted)
     const visibleItems = orderItems.filter(
       (item: any) => !editedOrderItems[item.id]?._deleted,
     );
+    const currentItemId = visibleItems[index]?.id;
 
-    // Enter or Tab - move to next editable field
-    if (e.key === "Enter" || e.key === "Tab") {
-      e.preventDefault();
+    if (!currentItemId) return;
 
-      if (currentFieldIndex === editableFields.length - 1) {
-        // At the last editable field (unitPrice)
-        if (index < visibleItems.length - 1) {
-          // Not the last row, move to first field of next row
-          setTimeout(() => {
-            const nextRowInput = document.querySelector(
-              `[data-field="orderitem-${editableFields[0]}-${index + 1}"]`,
-            ) as HTMLInputElement;
-            nextRowInput?.focus();
-          }, 50);
-        }
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent default form submission
+
+      // Determine next field and item
+      let nextIndex = index;
+      let nextField = "";
+
+      // Logic to find next focusable field
+      const fieldsOrder = [
+        "sku",
+        "productName",
+        "quantity",
+        "unitPrice",
+      ];
+      const currentFieldIndex = fieldsOrder.indexOf(field);
+      const nextFieldIndex = (currentFieldIndex + 1) % fieldsOrder.length;
+
+      if (nextFieldIndex === 0 && currentFieldIndex === fieldsOrder.length - 1) {
+        // Moved from last field to first of next row
+        nextIndex++;
+        nextField = fieldsOrder[nextFieldIndex];
+      } else if (nextFieldIndex === 0) {
+        // Moved from last field to first of current row (this shouldn't happen with modulo logic)
       } else {
-        // Move to next editable field in same row
-        const nextFieldType = editableFields[currentFieldIndex + 1];
-        setTimeout(() => {
+        // Moved to next field in the same row
+        nextField = fieldsOrder[nextFieldIndex];
+      }
+
+      // If moving to the next row, check if it exists
+      if (nextIndex >= visibleItems.length) {
+        // If it's the last item and user presses Enter, potentially add new item or focus on save button
+        if (field === "unitPrice") {
+          // If user is on unitPrice of the last item and presses Enter, focus on Add New Item button
+          if (isEditing) {
+            const addButton = document.querySelector(
+              'button[title="Thêm dòng mới"]',
+            ) as HTMLButtonElement;
+            addButton?.focus();
+          } else {
+            // If not editing, focus on save button
+            const saveButton = document.getElementById("save-order-button");
+            saveButton?.focus();
+          }
+          return;
+        } else {
+          // Otherwise, default to next field if available
           const nextInput = document.querySelector(
-            `[data-field="orderitem-${nextFieldType}-${index}"]`,
+            `[data-field="orderitem-${nextField}-${nextIndex}"]`,
           ) as HTMLInputElement;
           nextInput?.focus();
-        }, 50);
+          return;
+        }
       }
-    }
-    // Arrow Right - move to next editable field
-    else if (e.key === "ArrowRight") {
+
+      // Focus on the next input field
+      const nextInput = document.querySelector(
+        `[data-field="orderitem-${nextField}-${nextIndex}"]`,
+      ) as HTMLInputElement;
+      nextInput?.focus();
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      if (currentFieldIndex < editableFields.length - 1) {
-        const nextFieldType = editableFields[currentFieldIndex + 1];
-        setTimeout(() => {
-          const nextInput = document.querySelector(
-            `[data-field="orderitem-${nextFieldType}-${index}"]`,
-          ) as HTMLInputElement;
-          nextInput?.focus();
-        }, 50);
-      }
-    }
-    // Arrow Left - move to previous editable field
-    else if (e.key === "ArrowLeft") {
+      const prevIndex = Math.max(index - 1, 0);
+      const prevInput = document.querySelector(
+        `[data-field="orderitem-${field}-${prevIndex}"]`,
+      ) as HTMLInputElement;
+      prevInput?.focus();
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (currentFieldIndex > 0) {
-        const prevFieldType = editableFields[currentFieldIndex - 1];
-        setTimeout(() => {
-          const prevInput = document.querySelector(
-            `[data-field="orderitem-${prevFieldType}-${index}"]`,
-          ) as HTMLInputElement;
-          prevInput?.focus();
-        }, 50);
-      }
-    }
-    // Arrow Down - move to same field in next row
-    else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (index < visibleItems.length - 1) {
-        setTimeout(() => {
-          const nextRowInput = document.querySelector(
-            `[data-field="orderitem-${fieldType}-${index + 1}"]`,
-          ) as HTMLInputElement;
-          nextRowInput?.focus();
-        }, 50);
-      }
-    }
-    // Arrow Up - move to same field in previous row
-    else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (index > 0) {
-        setTimeout(() => {
-          const prevRowInput = document.querySelector(
-            `[data-field="orderitem-${fieldType}-${index - 1}"]`,
-          ) as HTMLInputElement;
-          prevRowInput?.focus();
-        }, 50);
-      }
+      const nextIndex = Math.min(index + 1, visibleItems.length - 1);
+      const nextInput = document.querySelector(
+        `[data-field="orderitem-${field}-${nextIndex}"]`,
+      ) as HTMLInputElement;
+      nextInput?.focus();
     }
   };
 
@@ -2796,7 +2964,7 @@ export default function SalesOrders() {
         false;
       let calculatedSubtotal = 0;
       let calculatedTax = 0;
-      const orderDiscount = parseFloat(editableInvoice?.discount || "0");
+      let calculatedDiscount = 0; // Calculate from items
 
       // Calculate from visible order items (excluding deleted ones)
       const visibleItems = orderItems.filter(
@@ -2805,93 +2973,77 @@ export default function SalesOrders() {
 
       visibleItems.forEach((item: any) => {
         const editedItem = editedOrderItems[item.id] || {};
-        // Use tax from editedOrderItems if available (already calculated)
-        if (editedItem.tax !== undefined) {
-          calculatedTax += parseFloat(editedItem.tax);
 
-          // Calculate subtotal from unitPrice and quantity
-          const unitPrice = parseFloat(
-            editedItem.unitPrice !== undefined
-              ? editedItem.unitPrice
-              : item.unitPrice || "0",
-          );
-          const quantity = parseFloat(
-            editedItem.quantity !== undefined
-              ? editedItem.quantity
-              : item.quantity || "0",
-          );
-          calculatedSubtotal += unitPrice * quantity;
-        } else {
-          // Fallback to original calculation if tax not in editedOrderItems
-          const product = products.find((p: any) => p.id === item.productId);
-          const taxRate = product?.taxRate
-            ? parseFloat(product.taxRate) / 100
-            : 0;
+        // Calculate subtotal from unitPrice and quantity
+        const unitPrice = parseFloat(
+          editedItem.unitPrice !== undefined
+            ? editedItem.unitPrice
+            : item.unitPrice || "0",
+        );
+        const quantity = parseFloat(
+          editedItem.quantity !== undefined
+            ? editedItem.quantity
+            : item.quantity || "0",
+        );
+        calculatedSubtotal += unitPrice * quantity;
 
-          const unitPrice = parseFloat(
-            editedItem.unitPrice !== undefined
-              ? editedItem.unitPrice
-              : item.unitPrice || "0",
-          );
-          const quantity = parseFloat(
-            editedItem.quantity !== undefined
-              ? editedItem.quantity
-              : item.quantity || "0",
-          );
+        // Get discount from item (not from order)
+        const itemDiscount = parseFloat(
+          editedItem.discount !== undefined
+            ? editedItem.discount
+            : item.discount || "0",
+        );
+        calculatedDiscount += itemDiscount;
 
-          const itemSubtotal = unitPrice * quantity;
-
-          if (priceIncludeTax && taxRate > 0) {
-            const priceBeforeTax = itemSubtotal / (1 + taxRate);
-            const itemTax = itemSubtotal - priceBeforeTax;
-            calculatedSubtotal += priceBeforeTax;
-            calculatedTax += itemTax;
-          } else {
-            calculatedSubtotal += itemSubtotal;
-            calculatedTax += itemSubtotal * taxRate;
-          }
-        }
+        // Get tax from item
+        const itemTax = parseFloat(
+          editedItem.tax !== undefined
+            ? editedItem.tax
+            : item.tax || "0",
+        );
+        calculatedTax += itemTax;
       });
 
-      // Total = subtotal + tax - discount
-      const totalPayment = Math.max(
-        0,
-        priceIncludeTax
-          ? calculatedSubtotal - orderDiscount - calculatedTax
-          : calculatedSubtotal + calculatedTax - orderDiscount,
-      );
+      // Total = subtotal - discount + tax
+      const totalPayment = Math.round(calculatedSubtotal - calculatedDiscount + calculatedTax);
 
       console.log("📊 Calculated totals from items:", {
         subtotal: calculatedSubtotal,
         tax: calculatedTax,
-        discount: orderDiscount,
+        discount: calculatedDiscount,
         total: totalPayment,
       });
 
       return {
         subtotal: Math.round(calculatedSubtotal),
         tax: Math.round(calculatedTax),
-        discount: Math.round(orderDiscount),
+        discount: Math.round(calculatedDiscount),
         total: Math.round(totalPayment),
       };
     } else {
-      // Otherwise, use the totals from the selected invoice directly
+      // Calculate discount from order items when not editing
+      let itemsDiscount = 0;
+      if (orderItems && orderItems.length > 0) {
+        itemsDiscount = orderItems.reduce((sum, item) => {
+          return sum + parseFloat(item.discount || "0");
+        }, 0);
+      }
+
       const dbSubtotal = parseFloat(selectedInvoice.subtotal || "0");
       const dbTax = parseFloat(selectedInvoice.tax || "0");
-      const dbDiscount = parseFloat(selectedInvoice.discount || "0");
       const dbTotal = parseFloat(selectedInvoice.total || "0");
 
       console.log("📊 Using database values for totals:", {
         subtotal: dbSubtotal,
         tax: dbTax,
-        discount: dbDiscount,
+        discount: itemsDiscount,
         total: dbTotal,
       });
 
       return {
         subtotal: Math.round(dbSubtotal),
         tax: Math.round(dbTax),
-        discount: Math.round(dbDiscount),
+        discount: Math.round(itemsDiscount),
         total: Math.round(dbTotal),
       };
     }
@@ -3182,63 +3334,13 @@ export default function SalesOrders() {
       if (updateResponse.ok) {
         console.log("✅ Order payment status updated successfully");
 
-        // Clear ALL cache completely to force fresh data
-        queryClient.clear();
-        
-        // Wait a bit for database to finish updating
-        await new Promise(resolve => setTimeout(resolve, 200));
-
-        // Force fresh fetch from database
-        await Promise.all([
-          queryClient.refetchQueries({ 
-            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"],
-            type: 'active'
-          }),
-          queryClient.refetchQueries({ 
-            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items", order.id],
-            type: 'active'
-          }),
-          queryClient.refetchQueries({ 
-            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"],
-            type: 'active'
-          }),
-        ]);
-        
-        console.log("✅ All caches cleared and data refetched after payment");
-
-        // Update selected invoice with new status immediately
-        if (selectedInvoice && selectedInvoice.id === order.id) {
-          const updatedInvoice = {
-            ...selectedInvoice,
-            status: "paid",
-            paymentStatus: "paid",
-            displayStatus: 1, // Completed
-            invoiceStatus: 1, // Completed
-            updatedAt: new Date().toISOString(),
-          };
-          setSelectedInvoice(updatedInvoice);
-          console.log("✅ Updated selected invoice status to completed:", updatedInvoice);
-        }
-
-        // Dispatch custom event to force UI refresh
-        window.dispatchEvent(new CustomEvent("orderStatusUpdated", { 
-          detail: { orderId: order.id, status: "paid" } 
-        }));
-
-        // Force immediate refresh of the orders list in the table - WAIT for completion
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        await queryClient.refetchQueries({ 
-          queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"],
-          exact: false,
-          type: 'active'
-        });
-        
-        console.log("✅ Orders list refreshed after payment");
+        // Refresh orders list
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"] });
 
         toast({
           title: "Thanh toán thành công",
-          description: "Đơn hàng đã được cập nhật trạng thái thanh toán",
+          description: "Đơn hàng đã được cập nhật trạng thái thanh to n",
         });
 
         // For laundry business, show receipt modal after payment
@@ -3754,7 +3856,7 @@ export default function SalesOrders() {
                             </div>
                           </th>
                           <th
-                            className="w-[180px] px-3 py-3 text-left font-medium text-[16px] text-gray-600 cursor-pointer hover:bg-gray-100"
+                            className="w-[120px] px-3 py-3 text-left font-medium text-[16px] text-gray-600 cursor-pointer hover:bg-gray-100"
                             onClick={() => handleSort("createdAt")}
                           >
                             <div className="leading-tight flex items-center gap-1">
@@ -3883,9 +3985,17 @@ export default function SalesOrders() {
                               )}
                             </div>
                           </th>
-                          <th className="w-[150px] px-3 py-3 text-left font-medium text-[16px] text-gray-600">
-                            <div className="leading-tight">
+                          <th
+                            className="w-[150px] px-3 py-3 text-left font-medium text-[16px] text-gray-600 cursor-pointer hover:bg-gray-100"
+                            onClick={() => handleSort("paymentMethod")}
+                          >
+                            <div className="leading-tight flex items-center gap-1">
                               {t("common.paymentMethodLabel")}
+                              {sortField === "paymentMethod" && (
+                                <span className="text-blue-600">
+                                  {sortOrder === "asc" ? "↑" : "↓"}
+                                </span>
+                              )}
                             </div>
                           </th>
                           <th
@@ -3966,6 +4076,7 @@ export default function SalesOrders() {
 
                               const customerName = item.customerName || "";
                               const customerPhone = item.customerPhone || ""; // Get customer phone
+                              // Discount is already calculated from order_items in API response
                               const discount = parseFloat(item.discount || "0");
                               const tax = parseFloat(item.tax || "0");
                               const subtotal = parseFloat(item.subtotal || "0");
@@ -4131,42 +4242,7 @@ export default function SalesOrders() {
                                     </td>
                                     <td className="px-3 py-3 text-right">
                                       <div className="text-red-600">
-                                        {(() => {
-                                          // If order discount is 0, calculate from order items
-                                          if (discount === 0 && item.id) {
-                                            // Get order items for this order from cache
-                                            const cachedItems =
-                                              queryClient.getQueryData([
-                                                "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items",
-                                                item.id,
-                                              ]) as any[];
-                                            if (
-                                              cachedItems &&
-                                              cachedItems.length > 0
-                                            ) {
-                                              const totalItemDiscount =
-                                                cachedItems.reduce(
-                                                  (sum, orderItem) => {
-                                                    return (
-                                                      sum +
-                                                      parseFloat(
-                                                        orderItem.discount ||
-                                                          "0",
-                                                      )
-                                                    );
-                                                  },
-                                                  0,
-                                                );
-                                              // Only show if there's actually item discount
-                                              if (totalItemDiscount > 0) {
-                                                return formatCurrency(
-                                                  totalItemDiscount,
-                                                );
-                                              }
-                                            }
-                                          }
-                                          return formatCurrency(discount);
-                                        })()}
+                                        {formatCurrency(discount)}
                                       </div>
                                     </td>
                                     <td className="px-3 py-3 text-right">
@@ -4921,192 +4997,23 @@ export default function SalesOrders() {
                                                                           "0",
                                                                   );
 
-                                                                const orderDiscount =
-                                                                  parseFloat(
-                                                                    selectedInvoice?.discount ||
-                                                                      "0",
-                                                                  );
+                                                                // Get discount directly from API data or edited values
+                                                                const itemDiscountAmount =
+                                                                  editedItem.discount !== undefined
+                                                                    ? parseFloat(editedItem.discount)
+                                                                    : parseFloat(item.discount || "0");
 
-                                                                // Get discount from editedOrderItems if available, otherwise calculate
-                                                                let itemDiscountAmount =
-                                                                  Number(
-                                                                    item.discount ||
-                                                                      "0",
-                                                                  );
+                                                                // Get tax directly from API data or edited values
+                                                                const itemTax =
+                                                                  editedItem.tax !== undefined
+                                                                    ? parseFloat(editedItem.tax)
+                                                                    : parseFloat(item.tax || "0");
 
-                                                                if (
-                                                                  editedItem.discount !==
-                                                                  undefined
-                                                                ) {
-                                                                  // Use the allocated discount from editedOrderItems
-                                                                  itemDiscountAmount =
-                                                                    parseFloat(
-                                                                      editedItem.discount,
-                                                                    );
-                                                                } else if (
-                                                                  orderDiscount >
-                                                                  0
-                                                                ) {
-                                                                  // Calculate total before discount for proportional distribution
-                                                                  const totalBeforeDiscount =
-                                                                    visibleItems.reduce(
-                                                                      (
-                                                                        sum: number,
-                                                                        item: any,
-                                                                      ) => {
-                                                                        const edited =
-                                                                          editedOrderItems[
-                                                                            item
-                                                                              .id
-                                                                          ] ||
-                                                                          {};
-                                                                        const unitPrice =
-                                                                          parseFloat(
-                                                                            edited.unitPrice !==
-                                                                              undefined
-                                                                              ? edited.unitPrice
-                                                                              : item.unitPrice ||
-                                                                                  "0",
-                                                                          );
-                                                                        const quantity =
-                                                                          parseFloat(
-                                                                            edited.quantity !==
-                                                                              undefined
-                                                                              ? edited.quantity
-                                                                              : item.quantity ||
-                                                                                  "0",
-                                                                          );
-                                                                        const subtotal =
-                                                                          unitPrice *
-                                                                          quantity;
-                                                                        return (
-                                                                          sum +
-                                                                          subtotal
-                                                                        );
-                                                                      },
-                                                                      0,
-                                                                    );
-
-                                                                  if (
-                                                                    totalBeforeDiscount >
-                                                                    0
-                                                                  ) {
-                                                                    const isLastItem =
-                                                                      index ===
-                                                                      visibleItems.length -
-                                                                        1;
-                                                                    const itemSubtotal =
-                                                                      unitPrice *
-                                                                      quantity;
-
-                                                                    if (
-                                                                      isLastItem
-                                                                    ) {
-                                                                      // Last item gets remaining discount
-                                                                      const previousDiscounts =
-                                                                        visibleItems
-                                                                          .slice(
-                                                                            0,
-                                                                            -1,
-                                                                          )
-                                                                          .reduce(
-                                                                            (
-                                                                              sum,
-                                                                              it,
-                                                                            ) => {
-                                                                              const editedIt =
-                                                                                editedOrderItems[
-                                                                                  it
-                                                                                    .id
-                                                                                ] ||
-                                                                                {};
-                                                                              const itPrice =
-                                                                                parseFloat(
-                                                                                  editedIt.unitPrice !==
-                                                                                    undefined
-                                                                                    ? editedIt.unitPrice
-                                                                                    : it.unitPrice ||
-                                                                                        "0",
-                                                                                );
-                                                                              const itQty =
-                                                                                parseFloat(
-                                                                                  editedIt.quantity !==
-                                                                                    undefined
-                                                                                    ? editedIt.quantity
-                                                                                    : it.quantity ||
-                                                                                        "0",
-                                                                                );
-                                                                              const itSubtotal =
-                                                                                itPrice *
-                                                                                itQty;
-                                                                              return (
-                                                                                sum +
-                                                                                Math.floor(
-                                                                                  (orderDiscount *
-                                                                                    itSubtotal) /
-                                                                                    totalBeforeDiscount,
-                                                                                )
-                                                                              );
-                                                                            },
-                                                                            0,
-                                                                          );
-                                                                      itemDiscountAmount =
-                                                                        Math.max(
-                                                                          0,
-                                                                          orderDiscount -
-                                                                            previousDiscounts,
-                                                                        );
-                                                                    } else {
-                                                                      itemDiscountAmount =
-                                                                        Math.floor(
-                                                                          (orderDiscount *
-                                                                            itemSubtotal) /
-                                                                            totalBeforeDiscount,
-                                                                        );
-                                                                    }
-                                                                  }
-                                                                }
-
-                                                                // Calculate tax based on priceIncludeTax setting
-                                                                const taxRate =
-                                                                  product?.taxRate
-                                                                    ? parseFloat(
-                                                                        product.taxRate,
-                                                                      ) / 100
-                                                                    : 0;
-                                                                let itemTax = 0;
-                                                                let priceBeforeTax = 0;
-                                                                let itemTotal = 0;
-
-                                                                if (
-                                                                  priceIncludeTax &&
-                                                                  taxRate > 0
-                                                                ) {
-                                                                  const itemSubtotal =
-                                                                    unitPrice *
-                                                                    quantity;
-                                                                  const priceBeforeTax =
-                                                                    itemSubtotal /
-                                                                    (1 +
-                                                                      taxRate);
-                                                                  itemTax =
-                                                                    itemSubtotal -
-                                                                    priceBeforeTax;
-                                                                  itemTotal =
-                                                                    itemSubtotal -
-                                                                    itemDiscountAmount;
-                                                                } else {
-                                                                  const itemSubtotal =
-                                                                    unitPrice *
-                                                                    quantity;
-                                                                  itemTax =
-                                                                    itemSubtotal *
-                                                                    taxRate;
-                                                                  itemTotal =
-                                                                    itemSubtotal +
-                                                                    itemTax -
-                                                                    itemDiscountAmount;
-                                                                }
+                                                                // Calculate itemTotal from API data
+                                                                const itemTotal =
+                                                                  editedItem.total !== undefined
+                                                                    ? parseFloat(editedItem.total)
+                                                                    : parseFloat(item.total || "0");
 
                                                                 // Calculate visible row number (only count non-deleted items before this one)
                                                                 const visibleRowNumber =
@@ -5586,8 +5493,7 @@ export default function SalesOrders() {
                                                                           editedOrderItems[
                                                                             item
                                                                               .id
-                                                                          ] ||
-                                                                          {};
+                                                                          ] || {};
                                                                         if (
                                                                           editedItem.tax !==
                                                                           undefined
@@ -5611,15 +5517,31 @@ export default function SalesOrders() {
                                                                     <td className="text-right py-2 px-3 border-r text-base w-[100px]">
                                                                       {(() => {
                                                                         // Tổng cộng = Thành tiền - Chiết khấu
+                                                                        const priceIncludeTax =
+                                                                          selectedInvoice?.priceIncludeTax ??
+                                                                          storeSettings?.priceIncludesTax ??
+                                                                          false;
+
                                                                         const thanhTien =
                                                                           unitPrice *
                                                                           quantity;
-                                                                        const tongCong =
-                                                                          thanhTien -
-                                                                          itemDiscountAmount;
+
+                                                                        let totalAmount;
+                                                                        if (priceIncludeTax) {
+                                                                          // priceIncludeTax: true → Tổng cộng = Thành tiền - Giảm giá
+                                                                          totalAmount =
+                                                                            thanhTien -
+                                                                            itemDiscountAmount;
+                                                                        } else {
+                                                                          // priceIncludeTax: false → Tổng cộng = Thành tiền - Giảm giá + Thuế
+                                                                          totalAmount =
+                                                                            thanhTien -
+                                                                            itemDiscountAmount +
+                                                                            itemTax;
+                                                                        }
 
                                                                         return Math.floor(
-                                                                          tongCong,
+                                                                          totalAmount,
                                                                         ).toLocaleString(
                                                                           "vi-VN",
                                                                         );
@@ -5771,8 +5693,7 @@ export default function SalesOrders() {
                                                                           editedOrderItems[
                                                                             item
                                                                               .id
-                                                                          ] ||
-                                                                          {};
+                                                                          ] || {};
                                                                         const unitPrice =
                                                                           parseFloat(
                                                                             edited.unitPrice !==
@@ -5789,10 +5710,12 @@ export default function SalesOrders() {
                                                                               : item.quantity ||
                                                                                   "0",
                                                                           );
+                                                                        const subtotal =
+                                                                          unitPrice *
+                                                                          quantity;
                                                                         return (
                                                                           sum +
-                                                                          unitPrice *
-                                                                            quantity
+                                                                          subtotal
                                                                         );
                                                                       },
                                                                       0,
@@ -5860,8 +5783,7 @@ export default function SalesOrders() {
                                                                                     editedOrderItems[
                                                                                       it
                                                                                         .id
-                                                                                    ] ||
-                                                                                    {};
+                                                                                    ] || {};
                                                                                   const itPrice =
                                                                                     parseFloat(
                                                                                       editedIt.unitPrice !==
@@ -5920,8 +5842,7 @@ export default function SalesOrders() {
                                                                         product?.taxRate
                                                                           ? parseFloat(
                                                                               product.taxRate,
-                                                                            ) /
-                                                                            100
+                                                                            ) / 100
                                                                           : 0;
                                                                       const priceIncludeTax =
                                                                         editableInvoice?.priceIncludeTax ??
@@ -6532,7 +6453,7 @@ export default function SalesOrders() {
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() =>
-                                                          setSelectedInvoice(
+                                                                                                                    setSelectedInvoice(
                                                             null,
                                                           )
                                                         }
@@ -6914,7 +6835,7 @@ export default function SalesOrders() {
         />
       )}
 
-      {/* Receipt Modal */}
+      {/*      {/* Receipt Modal */}
       {showReceiptModal && selectedReceipt && (
         <ReceiptModal
           isOpen={showReceiptModal}
