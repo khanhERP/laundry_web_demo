@@ -581,28 +581,56 @@ export default function SalesOrders() {
     mutationFn: async (updatedOrder: Order) => {
       console.log("🔄 Updating order with data:", updatedOrder);
 
+      // Calculate order totals from items before creating the payload
+      let calculatedSubtotal = 0;
+      let calculatedTax = 0;
+      let calculatedDiscount = 0;
+      let calculatedTotal = 0;
+
+      // Fetch fresh items to ensure calculations are based on the latest data
+      const itemsResponse = await apiRequest(
+        "GET",
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${updatedOrder.id}`,
+      );
+      const currentItems = await itemsResponse.json();
+
+      currentItems.forEach((item: any) => {
+        const unitPrice = parseFloat(item.unitPrice || "0");
+        const quantity = parseFloat(item.quantity || "1");
+        const itemSubtotal = unitPrice * quantity;
+        const itemDiscount = parseFloat(item.discount || "0");
+        const itemTax = parseFloat(item.tax || "0");
+
+        calculatedSubtotal += itemSubtotal;
+        calculatedDiscount += itemDiscount;
+        calculatedTax += itemTax;
+      });
+
+      calculatedTotal = calculatedSubtotal - calculatedDiscount + calculatedTax;
+
+      // Create update payload for order
       const updatePayload = {
+        subtotal: calculatedSubtotal.toFixed(2),
+        tax: calculatedTax.toFixed(2),
+        total: calculatedTotal.toFixed(2),
+        discount: calculatedDiscount.toFixed(2),
+        isPaid: updatedOrder.isPaid ?? false,
+        // Fix: Only set paymentMethod if isPaid is true, otherwise set to null
+        paymentMethod: updatedOrder.isPaid
+          ? (updatedOrder.paymentMethod === "unpaid" || !updatedOrder.paymentMethod
+              ? null
+              : updatedOrder.paymentMethod)
+          : null,
         customerName: updatedOrder.customerName || "",
         customerPhone: updatedOrder.customerPhone || "",
         customerAddress: updatedOrder.customerAddress || "",
         customerTaxCode: updatedOrder.customerTaxCode || "",
         customerEmail: updatedOrder.customerEmail || "",
-        isPaid: updatedOrder.isPaid,
-        notes: updatedOrder.notes || "",
-        status: updatedOrder.status,
-        paymentStatus: updatedOrder.paymentStatus,
-        subtotal: updatedOrder.subtotal,
-        tax: updatedOrder.tax,
-        total: updatedOrder.total,
-        discount: updatedOrder.discount,
-        invoiceNumber: updatedOrder.invoiceNumber || "",
         symbol: updatedOrder.symbol || "",
+        invoiceNumber: updatedOrder.invoiceNumber || "",
         templateNumber: updatedOrder.templateNumber || "",
-        einvoiceStatus: updatedOrder.einvoiceStatus,
-        orderNumber: updatedOrder.orderNumber,
-        customerId: updatedOrder.customerId,
-        priceIncludeTax: updatedOrder.priceIncludeTax,
-        paymentMethod: updatedOrder.paymentMethod,
+        notes: updatedOrder.notes || "",
+        customerId: updatedOrder.customerId || null,
       };
 
       console.log("🔍 ===== GỌI API LƯU THÔNG TIN ĐơN HÀNG =====");
@@ -630,7 +658,7 @@ export default function SalesOrders() {
         `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${updatedOrder.id}`,
         updatePayload,
       );
-      
+
       console.log("✅ API Response Status:", response.status);
       if (response.ok) {
         const responseData = await response.json();
@@ -1828,19 +1856,52 @@ export default function SalesOrders() {
         editableInvoice.status === "paid" ||
         editableInvoice.isPaid === true;
 
+      // Ensure we get the latest values from editableInvoice state
+      const finalCustomerName = editableInvoice?.customerName || selectedInvoice?.customerName || "";
+      const finalCustomerPhone = editableInvoice?.customerPhone || selectedInvoice?.customerPhone || "";
+      const finalCustomerAddress = editableInvoice?.customerAddress || selectedInvoice?.customerAddress || "";
+      const finalCustomerTaxCode = editableInvoice?.customerTaxCode || selectedInvoice?.customerTaxCode || "";
+      const finalCustomerEmail = editableInvoice?.customerEmail || selectedInvoice?.customerEmail || "";
+      const finalSymbol = editableInvoice?.symbol || selectedInvoice?.symbol || "";
+      const finalInvoiceNumber = editableInvoice?.invoiceNumber || selectedInvoice?.invoiceNumber || "";
+      const finalTemplateNumber = editableInvoice?.templateNumber || selectedInvoice?.templateNumber || "";
+      const finalNotes = editableInvoice?.notes || selectedInvoice?.notes || "";
+
+      console.log("🔍 ===== TRƯỚC KHI TẠO PAYLOAD =====");
+      console.log("📝 editableInvoice FULL STATE:", JSON.stringify(editableInvoice, null, 2));
+      console.log("📝 selectedInvoice FULL STATE:", JSON.stringify(selectedInvoice, null, 2));
+      console.log("📝 finalCustomerName:", finalCustomerName);
+      console.log("📝 finalCustomerPhone:", finalCustomerPhone);
+      console.log("📝 finalSymbol:", finalSymbol);
+      console.log("📝 finalInvoiceNumber:", finalInvoiceNumber);
+      console.log("📝 finalTemplateNumber:", finalTemplateNumber);
+      console.log("🔍 ==========================================");
+
       const orderUpdatePayload = {
         subtotal: Math.round(exactSubtotal).toString(),
         tax: Math.round(exactTax).toString(),
         total: Math.round(exactTotal).toString(),
         discount: totalItemDiscount.toFixed(2),
         isPaid: updatedIsPaid,
-        paymentMethod: editableInvoice.paymentMethod || null, // Include payment method
+        paymentMethod: editableInvoice.paymentMethod || null,
+        customerName: finalCustomerName,
+        customerPhone: finalCustomerPhone,
+        customerAddress: finalCustomerAddress,
+        customerTaxCode: finalCustomerTaxCode,
+        customerEmail: finalCustomerEmail,
+        symbol: finalSymbol,
+        invoiceNumber: finalInvoiceNumber,
+        templateNumber: finalTemplateNumber,
+        notes: finalNotes,
+        customerId: editableInvoice?.customerId || selectedInvoice?.customerId,
       };
 
+      console.log("🔍 ===== SAU KHI TẠO PAYLOAD =====");
       console.log(
-        "💾 Updating order with totals, isPaid status and paymentMethod:",
-        orderUpdatePayload,
+        "💾 Updating order with totals, isPaid status, payment method and customer info:",
+        JSON.stringify(orderUpdatePayload, null, 2),
       );
+      console.log("🔍 ==========================================");
 
       const orderUpdateResponse = await apiRequest(
         "PUT",
@@ -1857,14 +1918,14 @@ export default function SalesOrders() {
 
       // General information changes
       const generalChanges: string[] = [];
-      
+
       if (originalOrder?.customerName !== editableInvoice.customerName) {
         generalChanges.push(
           `Khách hàng: từ <${originalOrder?.customerName || ""}> thành <${editableInvoice.customerName || ""}>`
         );
         hasChanges = true;
       }
-      
+
       if (originalOrder?.customerPhone !== editableInvoice.customerPhone) {
         generalChanges.push(
           `Số điện thoại: từ <${originalOrder?.customerPhone || ""}> thành <${editableInvoice.customerPhone || ""}>`
@@ -1891,16 +1952,16 @@ export default function SalesOrders() {
         );
         hasChanges = true;
       }}
-      
-      
+
+
       if (originalOrder?.notes !== editableInvoice.notes) {
         generalChanges.push(
           `Ghi chú: từ <${originalOrder?.notes || ""}> thành <${editableInvoice.notes || ""}>`
         );
         hasChanges = true;
       }
-      
-      
+
+
 
       if (generalChanges.length > 0) {
         changeDescriptionParts.push("Thông tin chung: " + generalChanges.join("; "));
@@ -1927,25 +1988,25 @@ export default function SalesOrders() {
         const originalItem = originalItems.find((item: any) => item.id === updatedItem.id);
         if (originalItem) {
           const itemChangeParts: string[] = [];
-          
+
           if (updatedItem.productName && updatedItem.productName !== originalItem.productName) {
             itemChangeParts.push(
               `Tên hàng hóa: từ <${originalItem.productName || originalItem.name}> thành <${updatedItem.productName}>`
             );
           }
-          
+
           if (updatedItem.quantity !== undefined && parseFloat(updatedItem.quantity) !== parseFloat(originalItem.quantity)) {
             itemChangeParts.push(
               `Số lượng: từ <${originalItem.quantity}> thành <${updatedItem.quantity}>`
             );
           }
-          
+
           if (updatedItem.unitPrice !== undefined && parseFloat(updatedItem.unitPrice) !== parseFloat(originalItem.unitPrice)) {
             itemChangeParts.push(
               `Đơn giá: từ <${formatCurrency(originalItem.unitPrice)}> thành <${formatCurrency(updatedItem.unitPrice)}>`
             );
           }
-          
+
           if (updatedItem.discount !== undefined && parseFloat(updatedItem.discount) !== parseFloat(originalItem.discount || "0")) {
             itemChangeParts.push(
               `Giảm giá: từ <${formatCurrency(originalItem.discount || "0")}> thành <${formatCurrency(updatedItem.discount)}>`
@@ -1977,7 +2038,7 @@ export default function SalesOrders() {
 
       // Step 8: Log order change history ONLY if there are actual changes
       if (hasChanges) {
-        const detailedDescription = changeDescriptionParts.length > 0 
+        const detailedDescription = changeDescriptionParts.length > 0
           ? changeDescriptionParts.join("\n\n")
           : "Không có thay đổi";
 
@@ -3516,6 +3577,26 @@ export default function SalesOrders() {
       );
     };
   }, []);
+
+  const handlePaymentMethodChange = (method: string | number | null) => {
+    if (!editableInvoice) return;
+
+    // Ensure payment method is properly set
+    const isPaid = method !== null && method !== "unpaid" && method !== "";
+
+    setEditableInvoice({
+      ...editableInvoice,
+      paymentMethod: isPaid ? method : null,
+      isPaid: isPaid,
+      paymentStatus: isPaid ? "paid" : "pending",
+    });
+
+    console.log("💳 Payment method changed:", {
+      method,
+      isPaid,
+      paymentStatus: isPaid ? "paid" : "pending"
+    });
+  };
 
   return (
     <div className="min-h-screen bg-green-50 grocery-bg">
@@ -6062,18 +6143,16 @@ export default function SalesOrders() {
                                                                     "Type:",
                                                                     typeof value,
                                                                   );
-                                                                  // Nếu chọn "unpaid", set về null
+                                                                  // If select 'unpaid', set paymentMethod to null
                                                                   if (
                                                                     value ===
                                                                     "unpaid"
                                                                   ) {
-                                                                    updateEditableInvoiceField(
-                                                                      "paymentMethod",
+                                                                    handlePaymentMethodChange(
                                                                       null,
                                                                     );
                                                                   } else {
-                                                                    updateEditableInvoiceField(
-                                                                      "paymentMethod",
+                                                                    handlePaymentMethodChange(
                                                                       value,
                                                                     );
                                                                   }
@@ -6453,7 +6532,7 @@ export default function SalesOrders() {
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() =>
-                                                                                                                    setSelectedInvoice(
+                                                          setSelectedInvoice(
                                                             null,
                                                           )
                                                         }
