@@ -628,6 +628,7 @@ export const customers = pgTable("customers", {
   taxCode: text("tax_code"),
   points: integer("points").default(0),
   membershipTier: text("membership_tier").default("bronze"),
+  membershipLevel: text("membership_level").default("BRONZE"), // 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM'
   totalSpent: decimal("total_spent", { precision: 12, scale: 2 }).default("0"),
   lastVisit: text("last_visit"),
   notes: text("notes"),
@@ -1011,7 +1012,9 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
 
 export const orderChangeHistory = pgTable("order_change_history", {
   id: serial("id").primaryKey(),
-  orderId: integer("order_id").notNull().references(() => orders.id, { onDelete: 'cascade' }),
+  orderId: integer("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
   changedAt: timestamp("changed_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

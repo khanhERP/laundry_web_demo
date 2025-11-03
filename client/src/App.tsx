@@ -156,11 +156,20 @@ function App() {
   };
 
   const handleLogout = () => {
+    // Save language preference before clearing
+    const savedLanguage = localStorage.getItem("pos-language");
+    
     // Xóa tất cả thông tin đăng nhập
     sessionStorage.clear();
     localStorage.removeItem("authToken");
     localStorage.removeItem("storeInfo");
     localStorage.removeItem("currentDomain");
+    
+    // Restore language preference
+    if (savedLanguage) {
+      localStorage.setItem("pos-language", savedLanguage);
+    }
+    
     setIsAuthenticated(false);
   };
 
@@ -178,9 +187,17 @@ function App() {
         `🔄 Domain changed from ${storedDomain} to ${currentDomain} - forcing complete logout`,
       );
 
+      // Save language preference before clearing
+      const savedLanguage = localStorage.getItem("pos-language");
+
       // Clear ALL storage to ensure clean state
       sessionStorage.clear();
       localStorage.clear();
+
+      // Restore language preference
+      if (savedLanguage) {
+        localStorage.setItem("pos-language", savedLanguage);
+      }
 
       // Force re-authentication
       setIsAuthenticated(false);

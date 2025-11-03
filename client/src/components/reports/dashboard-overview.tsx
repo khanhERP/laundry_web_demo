@@ -212,8 +212,9 @@ export function DashboardOverview() {
           const subtotal = Number(order.subtotal || 0); // Tạm tính
           const discount = Number(order.discount || 0); // Giảm giá
           const tax = Number(order.tax || 0); // Thuế
-          const priceIncludeTax = order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
-          
+          const priceIncludeTax =
+            order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
+
           let revenue = 0;
           if (priceIncludeTax) {
             // Giá đã bao gồm thuế: Doanh thu = subtotal - discount
@@ -222,7 +223,7 @@ export function DashboardOverview() {
             // Giá chưa bao gồm thuế: Doanh thu = subtotal - discount + tax
             revenue = subtotal - discount + tax;
           }
-          
+
           console.log(
             `Processing order ${order.orderNumber}: subtotal=${subtotal}, discount=${discount}, tax=${tax}, priceIncludeTax=${priceIncludeTax}, revenue=${revenue}`,
           );

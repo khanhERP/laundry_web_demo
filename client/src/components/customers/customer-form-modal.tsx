@@ -113,7 +113,7 @@ export function CustomerFormModal({ isOpen, onClose, customer, initialPhone }: C
         email: customer.email || "",
         address: customer.address || "",
         dateOfBirth: customer.dateOfBirth || "",
-        membershipLevel: customer.membershipLevel || "Silver",
+        membershipLevel: customer.membershipLevel || "SILVER",
         notes: customer.notes || "",
         status: customer.status || "active",
       });

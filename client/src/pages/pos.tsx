@@ -40,6 +40,7 @@ export default function POS({ onLogout }: POSPageProps) {
     isProcessingCheckout,
     processCheckout,
     orderDiscounts, // Assuming orderDiscounts is available from usePOS hook
+    setOrders, // Assuming setOrders is available from usePOS hook for manual cart manipulation
   } = usePOS();
 
   // Add WebSocket listener for refresh signals
@@ -189,6 +190,62 @@ export default function POS({ onLogout }: POSPageProps) {
       delete (window as any).clearActiveOrder;
     };
   }, [clearCart, orders, switchOrder]);
+
+  // Add event listeners for popups and cart item duplication
+  useEffect(() => {
+    const handleClosePopups = () => {
+      console.log("🔄 POS: Received closeAllPopups event");
+      setShowReceiptModal(false);
+      // Assuming setShowPaymentModal and setShowEInvoiceModal are defined elsewhere or will be
+      // For now, let's comment them out or define them as dummy states if they are not essential for this part.
+      // setShowPaymentModal(false);
+      // setShowEInvoiceModal(false);
+    };
+
+    const handleDuplicateCartItem = (event: CustomEvent) => {
+      const { item } = event.detail; // Assuming 'item' is passed directly
+      console.log("📋 POS: Duplicating cart item:", item);
+
+      // Create a new item object to avoid direct mutation of the original item
+      const duplicatedItem = {
+        ...item,
+        // Assign a unique ID for the duplicated item. Using a negative timestamp is a common approach
+        // to ensure it's distinct from existing items and potentially identifiable as a duplicate.
+        id: -Date.now(),
+      };
+
+      // Add the duplicated item to the cart of the active order
+      if (activeOrderId !== undefined) {
+        const orderIndex = orders.findIndex((o) => o.id === activeOrderId);
+        if (orderIndex !== -1) {
+          const updatedOrders = [...orders];
+          const currentOrder = updatedOrders[orderIndex];
+          const updatedCart = [...currentOrder.cart, duplicatedItem];
+          updatedOrders[orderIndex] = { ...currentOrder, cart: updatedCart };
+          setOrders(updatedOrders);
+        } else {
+          console.error(`Order with ID ${activeOrderId} not found.`);
+        }
+      } else {
+        console.error("No active order found to duplicate item into.");
+        // Optionally, create a new order or add to a default cart if no active order exists
+      }
+    };
+
+    window.addEventListener("closeAllPopups", handleClosePopups);
+    window.addEventListener(
+      "duplicateCartItem",
+      handleDuplicateCartItem as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener("closeAllPopups", handleClosePopups);
+      window.removeEventListener(
+        "duplicateCartItem",
+        handleDuplicateCartItem as EventListener,
+      );
+    };
+  }, [activeOrderId, orders, setOrders]); // Add dependencies for state setters and values used
 
   const handleCheckout = async (paymentData: any) => {
     console.log("=== POS PAGE CHECKOUT DEBUG ===");

@@ -431,5 +431,6 @@ export function usePOS() {
     lastReceipt,
     isProcessingCheckout: checkoutMutation.isPending,
     processCheckout,
+    setOrders, // Export setOrders để component khác có thể sử dụng
   };
 }

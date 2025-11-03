@@ -1014,7 +1014,7 @@ export function ShoppingCart({
     );
 
     // Prepare cart items for order - USE EDITED PRICES FROM UI
-    const cartItemsForOrder = cart.map((item) => {
+    let cartItemsForOrder = cart.map((item) => {
       // Get the EDITED price from priceInputValues state (or original if not edited)
       const editedPriceStr = priceInputValues[item.id];
       let unitPrice = parseFloat(item.price);
@@ -1197,6 +1197,15 @@ export function ShoppingCart({
         items: cartItemsForOrder,
       });
 
+      cartItemsForOrder = cartItemsForOrder.map((item) => {
+        if (item.productId < 0) {
+          item.productId = cartItemsForOrder?.find(
+            (x) => x.productName === item.productName,
+          )?.productId;
+        }
+        return item;
+      });
+
       const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1316,7 +1325,7 @@ export function ShoppingCart({
     const displayedTax = tax;
 
     // Chuẩn bị items với đúng thông tin đã tính toán và hiển thị - USE EDITED PRICES FROM UI
-    const cartItemsForReceipt = cart.map((item) => {
+    let cartItemsForReceipt = cart.map((item) => {
       // Get the EDITED price from priceInputValues state (or original if not edited)
       const editedPriceStr = priceInputValues[item.id];
       let unitPrice = parseFloat(item.price);
@@ -1495,6 +1504,15 @@ export function ShoppingCart({
 
         console.log("📤 Creating order with data:", orderData);
 
+        cartItemsForReceipt = cartItemsForReceipt.map((item) => {
+          if (item.productId < 0) {
+            item.productId = cartItemsForReceipt?.find(
+              (x) => x.productName === item.productName,
+            )?.productId;
+          }
+          return item;
+        });
+
         const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1608,6 +1626,15 @@ export function ShoppingCart({
       exactTotal: displayedTotal,
       orderedAt: new Date().toISOString(),
     };
+
+    cartItemsForReceipt = cartItemsForReceipt.map((item) => {
+      if (item.productId < 0) {
+        item.productId = cartItemsForReceipt?.find(
+          (x) => x.productName === item.productName,
+        )?.productId;
+      }
+      return item;
+    });
 
     console.log("✅ Receipt & Order data prepared with DISPLAYED values");
 
@@ -2769,6 +2796,66 @@ export function ShoppingCart({
                       className="w-6 h-6 p-0 text-red-500 hover:text-red-700 border-red-300 hover:border-red-500"
                     >
                       <Trash2 size={10} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Tạo một bản sao của item hiện tại với ID mới (timestamp để đảm bảo unique)
+                        const newItemId = Date.now();
+                        const duplicatedItem = {
+                          ...item,
+                          id: newItemId,
+                          // Giữ nguyên quantity của item gốc
+                        };
+
+                        // Thêm item mới vào cart bằng cách gọi onAddToCart hoặc cập nhật cart trực tiếp
+                        // Vì chúng ta đang trong shopping cart, cần thông báo cho parent component
+                        // để thêm item mới vào cart
+                        const productId =
+                          typeof item.id === "string"
+                            ? parseInt(item.id)
+                            : item.id;
+
+                        // Dispatch custom event để POS component xử lý việc thêm duplicate item
+                        if (typeof window !== "undefined") {
+                          window.dispatchEvent(
+                            new CustomEvent("duplicateCartItem", {
+                              detail: {
+                                item: item,
+                                originalId: productId,
+                              },
+                            }),
+                          );
+                        }
+                      }}
+                      className="w-6 h-6 p-0 text-blue-500 hover:text-blue-700 border-blue-300 hover:border-blue-500"
+                      title="Sao chép"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="9"
+                          y="9"
+                          width="13"
+                          height="13"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2 2v1"></path>
+                      </svg>
                     </Button>
                   </div>
                   <div className="font-bold pos-text-primary text-sm">

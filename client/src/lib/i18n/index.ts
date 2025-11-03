@@ -14,13 +14,30 @@ export const useLanguageStore = create<LanguageStore>()(
     (set) => ({
       currentLanguage: 'ko',
       renderTrigger: 0,
-      setLanguage: (language: Language) => set((state) => ({ 
-        currentLanguage: language,
-        renderTrigger: state.renderTrigger + 1
-      })),
+      setLanguage: (language: Language) => {
+        console.log('🌐 Changing language to:', language);
+        set((state) => ({ 
+          currentLanguage: language,
+          renderTrigger: state.renderTrigger + 1
+        }));
+      },
     }),
     {
       name: 'pos-language',
+      // Ensure the language is persisted in localStorage
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          if (!str) return null;
+          return JSON.parse(str);
+        },
+        setItem: (name, value) => {
+          localStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => {
+          localStorage.removeItem(name);
+        },
+      },
     }
   )
 );

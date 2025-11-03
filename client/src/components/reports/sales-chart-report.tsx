@@ -302,6 +302,12 @@ export function SalesChartReport() {
     queryFn: async () => {
       const response = await fetch(
         `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers/${customerSearch || "all"}/${customerStatus}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
       );
       if (!response.ok) throw new Error("Failed to fetch customers");
       return response.json();
@@ -2334,14 +2340,12 @@ export function SalesChartReport() {
       // Use EXACT values from database
       let orderSubtotal = Number(order.subtotal || 0); // Thành tiền từ DB
       let orderDiscount = Number(order.discount || 0); // Giảm giá từ DB
-      let orderTax =
-        Number(order.tax || 0) ||
-        Number(order.total || 0) - Number(order.subtotal || 0); // Thuế từ DB hoặc tính từ total-subtotal
+      let orderTax = Number(order.tax || 0); // Thuế từ DB hoặc tính từ total-subtotal
       let orderTotal = Number(order.total || 0); // Tổng tiền từ DB
       let orderRevenue = orderSubtotal - orderDiscount; // Doanh thu = thành tiền - giêm giá
 
       if (order.priceIncludeTax === true) {
-        orderSubtotal = orderSubtotal + orderDiscount + orderTax; // Thành tiền = subtotal + discount + tax
+        orderSubtotal = orderSubtotal + orderTax; // Thành tiền = subtotal + discount + tax
         orderRevenue = orderSubtotal - orderDiscount - orderTax; // Doanh thu = subtotal - tax
         orderTotal = orderRevenue + orderTax;
       } else {
@@ -2350,7 +2354,7 @@ export function SalesChartReport() {
 
       const orderSummary = {
         orderDate: order.orderedAt || order.createdAt || order.created_at,
-        orderNumber: order.orderNumber || `ORD-${order.id}`,
+        orderNumber: order.orderNumber || "",
         customerId: order.customerId || "",
         customerName: order.customerName || "",
         totalAmount: orderSubtotal, // Thành tiền từ DB
@@ -2392,7 +2396,7 @@ export function SalesChartReport() {
               ]
             : orderItemsForOrder.map((item: any) => {
                 // Sử dụng giá trị CHÍNH XÁC từ order_items và order
-                const itemQuantity = Number(item.quantity || 1);
+                const itemQuantity = Math.round(Number(item.quantity || 1));
                 let itemUnitPrice = Number(item.unitPrice || 0); // Đơn giá từ order_items
                 let itemTotal = itemUnitPrice * itemQuantity; // Thành tiền = đơn giá * số lượng (trước thuế)
 
@@ -2401,11 +2405,11 @@ export function SalesChartReport() {
                   orderSubtotal > 0 ? itemTotal / orderSubtotal : 0; // Avoid division by zero
                 const itemDiscount = orderDiscount * itemDiscountRatio; // Giảm giá theo tỷ lệ
                 let itemTax = orderTax * itemDiscountRatio; // Thuế theo tỷ lệ
-                let itemRevenue = itemTotal - itemDiscount; // Doanh thu = thành tiền - giảm giá
+                let itemRevenue = itemTotal; // Doanh thu = thành tiền - giảm giá
                 let itemTotalMoney = itemRevenue + itemTax; // Tổng tiền = doanh thu + thuế
 
                 if (order.priceIncludeTax === true) {
-                  itemRevenue = itemTotal - itemDiscount - itemTax;
+                  itemRevenue = itemTotal - itemTax;
                   itemTotalMoney = itemRevenue + itemTax;
                 }
 
@@ -2418,9 +2422,9 @@ export function SalesChartReport() {
                   : 0;
 
                 return {
-                  productCode: item.productSku || `SP${item.productId}`,
-                  productName: item.productName || "Unknown Product",
-                  unit: "Món",
+                  productCode: item.productSku || "",
+                  productName: item.productName || "",
+                  unit: product?.unit,
                   quantity: itemQuantity,
                   unitPrice: itemUnitPrice, // Đơn giá từ order_items
                   totalAmount: itemTotal, // Thành tiền từ order_items
@@ -2429,7 +2433,7 @@ export function SalesChartReport() {
                   tax: itemTax, // Thuế phân bổ
                   vat: itemTax, // VAT = thuế
                   totalMoney: itemTotalMoney, // Tổng tiền = doanh thu + thuế
-                  productGroup: item.categoryName || "Chưa phân loại",
+                  productGroup: item.categoryName || "",
                   taxRate: itemTaxRate,
                 };
               }),
@@ -4291,13 +4295,13 @@ export function SalesChartReport() {
       let orderRevenue;
       if (orderPriceIncludeTax) {
         // When priceIncludeTax = true: doanh thu = subtotal (already includes discount effect)
-        orderRevenue = orderSubtotal + orderDiscount + orderTax;
+        orderRevenue = orderSubtotal + orderTax;
         customerSales[customerId].totalAmount +=
           orderRevenue - orderDiscount - orderTax;
       } else {
         // When priceIncludeTax = false: doanh thu = subtotal - discount
-        orderRevenue = Math.max(0, orderSubtotal - orderDiscount);
-        customerSales[customerId].totalAmount += orderSubtotal - orderDiscount;
+        orderRevenue = Math.max(0, orderSubtotal);
+        customerSales[customerId].totalAmount += orderSubtotal;
       }
       customerSales[customerId].revenue += orderRevenue;
 
@@ -5228,8 +5232,8 @@ export function SalesChartReport() {
           while (currentDate <= timeEnd) {
             // Use local date format to avoid timezone issues
             const year = currentDate.getFullYear();
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-            const day = String(currentDate.getDate()).padStart(2, '0');
+            const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+            const day = String(currentDate.getDate()).padStart(2, "0");
             const dateKey = `${year}-${month}-${day}`;
             dailyData[dateKey] = { revenue: 0, orders: 0 };
             currentDate.setDate(currentDate.getDate() + 1);
@@ -5298,8 +5302,8 @@ export function SalesChartReport() {
                 );
                 // Use local date format to match initialization
                 const year = orderDate.getFullYear();
-                const month = String(orderDate.getMonth() + 1).padStart(2, '0');
-                const day = String(orderDate.getDate()).padStart(2, '0');
+                const month = String(orderDate.getMonth() + 1).padStart(2, "0");
+                const day = String(orderDate.getDate()).padStart(2, "0");
                 const dateKey = `${year}-${month}-${day}`;
 
                 if (dailyData[dateKey]) {
@@ -5366,7 +5370,7 @@ export function SalesChartReport() {
                   ? product.productName.substring(0, 15) + "..."
                   : product.productName,
               revenue: Math.round(Number(product.totalRevenue) || 0),
-              quantity: Number(product.totalQuantity) || 0,
+              quantity: Math.round(Number(product.totalQuantity || "1")),
             }))
             .sort((a, b) => b.revenue - a.revenue)
             .slice(0, 10);
@@ -6470,23 +6474,19 @@ export function SalesChartReport() {
                     <SelectItem value="product">
                       {t("reports.productAnalysis")}
                     </SelectItem>
-                    {
-                      storeSettings.businessType !== "laundry" && (
-                        <SelectItem value="employee">
-                          {t("reports.employeeAnalysis")}
-                        </SelectItem>
-                      )
-                    }
+                    {storeSettings.businessType !== "laundry" && (
+                      <SelectItem value="employee">
+                        {t("reports.employeeAnalysis")}
+                      </SelectItem>
+                    )}
                     <SelectItem value="customer">
                       {t("reports.customerAnalysis")}
                     </SelectItem>
-                    {
-                      storeSettings.businessType !== "laundry" && (
-                        <SelectItem value="salesMethod">
-                          {t("reports.salesMethod")}
-                        </SelectItem>
-                      )
-                    }
+                    {storeSettings.businessType !== "laundry" && (
+                      <SelectItem value="salesMethod">
+                        {t("reports.salesMethod")}
+                      </SelectItem>
+                    )}
                     <SelectItem value="salesDetail">
                       {t("reports.salesDetailReport")}
                     </SelectItem>

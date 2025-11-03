@@ -793,7 +793,7 @@ export function PrintDialog({
 
                 // Send message to parent to stop any popup flows
                 try {
-                  fetch('https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/popup/close', {
+                  fetch('/api/popup/close', {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',

@@ -1987,7 +1987,7 @@ export default function SalesOrders() {
 
       if (generalChanges.length > 0) {
         changeDescriptionParts.push(
-          "Thông tin chung: " + generalChanges.join("; "),
+          "Thông tin chung:\n" + generalChanges.join("; "),
         );
       }
 
@@ -2099,7 +2099,7 @@ export default function SalesOrders() {
             orderId: editableInvoice.id,
             action: "edit",
             detailedDescription: detailedDescription,
-            ipAddress: window.location.hostname,
+            // ipAddress will be captured automatically by server from request headers
             userName: "User", // Get from auth context if available
           });
 
@@ -2140,11 +2140,6 @@ export default function SalesOrders() {
 
       // Dispatch custom event to force refresh
       window.dispatchEvent(new CustomEvent("forceRefresh"));
-
-      toast({
-        title: "Lưu thành công",
-        description: "Đơn hàng đã được cập nhật và danh sách đã được làm mới",
-      });
     } catch (error) {
       console.error("❌ Error saving order:", error);
       toast({
@@ -5661,8 +5656,7 @@ export default function SalesOrders() {
                                                                           editedOrderItems[
                                                                             item
                                                                               .id
-                                                                          ] ||
-                                                                          {};
+                                                                          ] || {};
                                                                         if (
                                                                           editedItem.tax !==
                                                                           undefined
@@ -6115,8 +6109,7 @@ export default function SalesOrders() {
                                                                             ? edited.sku
                                                                             : item.sku ||
                                                                               item.productSku,
-                                                                        quantity:
-                                                                          quantity,
+                                                                        quantity: quantity,
                                                                         unitPrice:
                                                                           unitPrice.toString(),
                                                                       };
@@ -6213,7 +6206,9 @@ export default function SalesOrders() {
                                                             :
                                                           </span>
                                                           <span className="font-bold text-blue-600">
-                                                            {isEditing ? (
+                                                            {isEditing &&
+                                                            editableInvoice.status !=
+                                                              "pending" ? (
                                                               <Select
                                                                 value={
                                                                   editableInvoice.paymentMethod !==
@@ -6261,13 +6256,6 @@ export default function SalesOrders() {
                                                                   />
                                                                 </SelectTrigger>
                                                                 <SelectContent side="top">
-                                                                  {/* chưa thanh toán option */}
-                                                                  {/* <SelectItem value="unpaid">
-                                                                    {t(
-                                                                      "common.unpaid",
-                                                                    )}
-                                                                  </SelectItem> */}
-
                                                                   {enabledPaymentMethods.map(
                                                                     (
                                                                       method: any,
