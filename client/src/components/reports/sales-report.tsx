@@ -36,6 +36,12 @@ import {
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 
+// Assume storeSettings is fetched or available globally
+// For demonstration, we'll mock it. In a real app, this would come from an API or context.
+const storeSettings = {
+  priceIncludesTax: false, // Default to false if not explicitly set
+};
+
 export function SalesReport() {
   const { t } = useTranslation();
 
@@ -182,8 +188,17 @@ export function SalesReport() {
           const orderSubtotal = Number(order.subtotal || 0);
           const orderTax = Number(order.tax || 0);
           const orderDiscount = Number(order.discount || 0);
+          const priceIncludeTax = order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
 
-          dailySales[dateStr].revenue += orderSubtotal + orderTax;
+          // Calculate daily revenue based on priceIncludeTax
+          let dailyRevenue = 0;
+          if (priceIncludeTax) {
+            dailyRevenue = orderSubtotal - orderDiscount;
+          } else {
+            dailyRevenue = orderSubtotal - orderDiscount + orderTax;
+          }
+
+          dailySales[dateStr].revenue += dailyRevenue;
           dailySales[dateStr].orders += 1;
           dailySales[dateStr].customers += Number(order.customerCount || 1); // Use actual customerCount from order
           dailySales[dateStr].discount += orderDiscount;
@@ -204,15 +219,14 @@ export function SalesReport() {
           const orderSubtotal = Number(order.subtotal || 0);
           const orderDiscount = Number(order.discount || 0);
           const orderTax = Number(order.tax || 0);
-          const orderTotal = Number(order.total || 0);
+          const priceIncludeTax = order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
 
           // Calculate revenue for this order
-          const orderPriceIncludeTax = order.priceIncludeTax === true;
-          let orderRevenue;
-          if (orderPriceIncludeTax) {
-            orderRevenue = orderSubtotal; // Revenue = subtotal (already net of discount)
+          let orderRevenue = 0;
+          if (priceIncludeTax) {
+            orderRevenue = orderSubtotal - orderDiscount;
           } else {
-            orderRevenue = Math.max(0, orderSubtotal - orderDiscount);
+            orderRevenue = orderSubtotal - orderDiscount + orderTax;
           }
 
           // Try to parse as JSON for multi-payment
@@ -241,7 +255,7 @@ export function SalesReport() {
                 paymentMethods[paymentMethodStr] = { count: 0, revenue: 0 };
               }
               paymentMethods[paymentMethodStr].count += 1;
-              paymentMethods[paymentMethodStr].revenue += orderRevenue;
+              paymentMethods[paymentMethods[paymentMethodStr]].revenue += orderRevenue;
             }
           } catch (e) {
             // Not JSON, single payment method
@@ -249,7 +263,7 @@ export function SalesReport() {
               paymentMethods[paymentMethodStr] = { count: 0, revenue: 0 };
             }
             paymentMethods[paymentMethodStr].count += 1;
-            paymentMethods[paymentMethodStr].revenue += orderRevenue;
+            paymentMethods[paymentMethods[paymentMethodStr]].revenue += orderRevenue;
           }
         } catch (error) {
           console.warn("Error processing order for payment methods:", error);
@@ -283,23 +297,46 @@ export function SalesReport() {
       });
 
       // Calculate totals based on unique combined data
-      const totalRevenue = uniqueCombinedData.reduce(
+      // Formula depends on priceIncludesTax setting
+      const totalSalesRevenue = paidOrders.reduce(
         (sum: number, order: any) => {
-          // Revenue = Subtotal (đã trừ giảm giá) + Tax
-          const subtotal = Number(order.subtotal || 0); // Thành tiền sau khi trừ giảm giá
+          const subtotal = Number(order.subtotal || 0); // Tạm tính
+          const discount = Number(order.discount || 0); // Giảm giá
           const tax = Number(order.tax || 0); // Thuế
-          const revenue = subtotal + tax; // Doanh thu thực tế
+          const priceIncludeTax = order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
 
+          let revenue = 0;
+          if (priceIncludeTax) {
+            // Giá đã bao gồm thuế: Doanh thu = subtotal - discount
+            revenue = subtotal - discount;
+          } else {
+            // Giá chưa bao gồm thuế: Doanh thu = subtotal - discount + tax
+            revenue = subtotal - discount + tax;
+          }
+
+          console.log(
+            `Order ${order.orderNumber}: subtotal=${subtotal}, discount=${discount}, tax=${tax}, priceIncludeTax=${priceIncludeTax}, revenue=${revenue}`,
+          );
           return sum + revenue;
         },
         0,
       );
 
-      // Calculate subtotal revenue (excluding tax)
-      const subtotalRevenue = paidOrders.reduce((total: number, order: any) => {
-        const subtotal = Number(order.subtotal || 0); // Subtotal đã là giá trị sau khi trừ discount
-        return total + subtotal;
-      }, 0);
+      console.log(`Total Revenue Calculation: totalRevenue=${totalSalesRevenue}, from ${paidOrders.length} orders`);
+
+      // Calculate subtotal revenue from completed orders
+      const subtotalRevenue = paidOrders.reduce(
+        (total: number, order: any) => {
+          const subtotal = Number(order.subtotal || 0); // Tạm tính
+          const discount = Number(order.discount || 0); // Giảm giá
+
+          // Công thức: Doanh thu = subtotal - discount
+          const revenue = subtotal - discount;
+
+          return total + revenue;
+        },
+        0,
+      );
 
       // Total orders should be based on unique orders, not items
       const totalOrders = paidOrders.length;
@@ -325,11 +362,11 @@ export function SalesReport() {
       console.log(`Sales Report - Returning final data:`, {
         totalCustomers,
         totalOrders,
-        totalRevenue,
+        totalRevenue: totalSalesRevenue,
         verification: `${totalCustomers} customers from ${totalOrders} orders`,
       });
       const averageOrderValue =
-        totalOrders > 0 ? totalRevenue / totalOrders : 0;
+        totalOrders > 0 ? totalSalesRevenue / totalOrders : 0;
 
       const paymentMethodsArray = Object.entries(paymentMethods).map(
         ([method, data]) => ({
@@ -347,7 +384,7 @@ export function SalesReport() {
           .sort((a, b) => a.date.localeCompare(b.date)),
         paymentMethods: paymentMethodsArray,
         hourlySales,
-        totalRevenue,
+        totalRevenue: totalSalesRevenue,
         subtotalRevenue,
         totalOrders,
         totalCustomers,

@@ -121,6 +121,23 @@ export function DashboardOverview() {
     queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"],
   });
 
+  // Query store settings for priceIncludesTax
+  const { data: storeSettings } = useQuery({
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
+    queryFn: async () => {
+      try {
+        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching store settings:", error);
+        return null;
+      }
+    },
+  });
+
   const handleRefresh = () => {
     // Refresh the queries to get the latest data for the selected date
     setStartDate(formatDateToYYYYMMDD(new Date()));
@@ -189,26 +206,42 @@ export function DashboardOverview() {
           : null,
       });
 
-      // Calculate total revenue from completed orders (subtotal + tax = revenue after discount)
+      // Calculate total revenue from completed orders
       const totalSalesRevenue = completedOrders.reduce(
         (sum: number, order: any) => {
-          // Revenue = Subtotal (đã trừ giảm giá) + Tax
-          const subtotal = Number(order.subtotal || 0); // Thành tiền sau khi trừ giảm giá
+          const subtotal = Number(order.subtotal || 0); // Tạm tính
+          const discount = Number(order.discount || 0); // Giảm giá
           const tax = Number(order.tax || 0); // Thuế
-          const revenue = subtotal + tax; // Doanh thu thực tế
+          const priceIncludeTax = order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
+          
+          let revenue = 0;
+          if (priceIncludeTax) {
+            // Giá đã bao gồm thuế: Doanh thu = subtotal - discount
+            revenue = subtotal - discount;
+          } else {
+            // Giá chưa bao gồm thuế: Doanh thu = subtotal - discount + tax
+            revenue = subtotal - discount + tax;
+          }
+          
           console.log(
-            `Processing order ${order.orderNumber}: subtotal=${subtotal}, tax=${tax}, revenue=${revenue}, originalTotal=${order.total}`,
+            `Processing order ${order.orderNumber}: subtotal=${subtotal}, discount=${discount}, tax=${tax}, priceIncludeTax=${priceIncludeTax}, revenue=${revenue}`,
           );
           return sum + revenue;
         },
         0,
       );
 
-      // Calculate subtotal revenue from completed orders (excludes tax, after discount)
+      // Calculate subtotal revenue from completed orders
+      // Công thức: Doanh thu = subtotal - discount
       const subtotalRevenue = completedOrders.reduce(
         (total: number, order: any) => {
-          const subtotal = Number(order.subtotal || 0); // Subtotal đã là giá trị sau khi trừ discount
-          return total + subtotal;
+          const subtotal = Number(order.subtotal || 0); // Tạm tính
+          const discount = Number(order.discount || 0); // Giảm giá
+
+          // Công thức: Doanh thu = subtotal - discount
+          const revenue = subtotal - discount;
+
+          return total + revenue;
         },
         0,
       );

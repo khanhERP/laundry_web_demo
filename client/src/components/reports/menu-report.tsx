@@ -187,9 +187,12 @@ function MenuReport() {
         const data = await response.json();
         console.log("Menu analysis data received:", data);
 
+        // Use totalRevenue directly from backend
+        const totalRevenue = Number(data.totalRevenue || 0);
+
         // Ensure data structure is correct
         return {
-          totalRevenue: Number(data.totalRevenue || 0),
+          totalRevenue: totalRevenue,
           totalQuantity: Number(data.totalQuantity || 0),
           categoryStats: Array.isArray(data.categoryStats)
             ? data.categoryStats
