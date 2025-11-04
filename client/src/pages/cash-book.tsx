@@ -105,17 +105,34 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
         break;
       case "thisWeek":
         const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay());
+        // Get day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+        const dayOfWeek = today.getDay();
+        // Calculate days to subtract to get to Monday (day 1)
+        // If Sunday (0), go back 6 days; otherwise go back (dayOfWeek - 1) days
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        startOfWeek.setDate(today.getDate() - daysToMonday);
         setStartDate(startOfWeek.toISOString().split("T")[0]);
         setEndDate(today.toISOString().split("T")[0]);
         break;
       case "lastWeek":
-        const startOfLastWeek = new Date(today);
-        startOfLastWeek.setDate(today.getDate() - today.getDay() - 7);
-        const endOfLastWeek = new Date(startOfLastWeek);
-        endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
-        setStartDate(startOfLastWeek.toISOString().split("T")[0]);
-        setEndDate(endOfLastWeek.toISOString().split("T")[0]);
+        const currentDayOfWeek = today.getDay();
+        // Calculate days to subtract to get to Monday of current week
+        const daysToCurrentMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+        
+        // Get Monday of current week
+        const currentMonday = new Date(today);
+        currentMonday.setDate(today.getDate() - daysToCurrentMonday);
+        
+        // Get Monday of last week (7 days before current Monday)
+        const lastWeekMonday = new Date(currentMonday);
+        lastWeekMonday.setDate(currentMonday.getDate() - 7);
+        
+        // Get Sunday of last week (6 days after last Monday)
+        const lastWeekSunday = new Date(lastWeekMonday);
+        lastWeekSunday.setDate(lastWeekMonday.getDate() + 6);
+        
+        setStartDate(lastWeekMonday.toISOString().split("T")[0]);
+        setEndDate(lastWeekSunday.toISOString().split("T")[0]);
         break;
       case "thisMonth":
         const firstDayOfMonth = new Date(
@@ -166,7 +183,11 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
     queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", startDate, endDate],
     queryFn: async () => {
       try {
-        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders");
+        const params = new URLSearchParams();
+        if (startDate) params.append("startDate", `${startDate} 00:00:00`);
+        if (endDate) params.append("endDate", `${endDate} 23:59:59`);
+        
+        const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders?${params.toString()}`);
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
@@ -183,7 +204,11 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
     queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts", startDate, endDate],
     queryFn: async () => {
       try {
-        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts");
+        const params = new URLSearchParams();
+        if (startDate) params.append("startDate", `${startDate} 00:00:00`);
+        if (endDate) params.append("endDate", `${endDate} 23:59:59`);
+        
+        const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts?${params.toString()}`);
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
@@ -200,7 +225,11 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
     queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers", startDate, endDate],
     queryFn: async () => {
       try {
-        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers");
+        const params = new URLSearchParams();
+        if (startDate) params.append("startDate", `${startDate} 00:00:00`);
+        if (endDate) params.append("endDate", `${endDate} 23:59:59`);
+        
+        const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers?${params.toString()}`);
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
@@ -217,7 +246,11 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
     queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers", startDate, endDate],
     queryFn: async () => {
       try {
-        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers");
+        const params = new URLSearchParams();
+        if (startDate) params.append("startDate", `${startDate} 00:00:00`);
+        if (endDate) params.append("endDate", `${endDate} 23:59:59`);
+        
+        const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers?${params.toString()}`);
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
