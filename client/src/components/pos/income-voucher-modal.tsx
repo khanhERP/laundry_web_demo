@@ -114,7 +114,7 @@ export default function IncomeVoucherModal({
     if (voucher && mode === "edit") {
       setFormData(voucher);
       setIsEditing(false);
-    } else if (mode === "create") {
+    } else if (mode === "create" && isOpen) {
       // Generate voucher number for new voucher with format PT-YYYYMMDD0001
       const generateVoucherNumber = async () => {
         try {
@@ -154,7 +154,7 @@ export default function IncomeVoucherModal({
       generateVoucherNumber();
       setIsEditing(true);
     }
-  }, [voucher, mode]);
+  }, [voucher, mode, isOpen]);
 
   const createVoucherMutation = useMutation({
     mutationFn: async (data: IncomeVoucher) => {

@@ -1113,7 +1113,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 mb-6">
             <Button
-              onClick={() => {
+              onClick={async () => {
                 // Helper function to get payment method for a transaction
                 const getPaymentMethod = (transaction: CashTransaction) => {
                   if (transaction.voucherType === "income_voucher") {
@@ -1443,7 +1443,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
               {t("common.exportExcel")}
             </Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 setSelectedVoucher(null);
                 setVoucherMode("create");
                 setShowIncomeVoucherModal(true);
@@ -1454,7 +1454,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
               {t("common.createIncomeVoucher")}
             </Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 setSelectedVoucher(null);
                 setVoucherMode("create");
                 setShowExpenseVoucherModal(true);

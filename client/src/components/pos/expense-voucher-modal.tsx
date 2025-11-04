@@ -162,7 +162,7 @@ export default function ExpenseVoucherModal({
     if (voucher && mode === "edit") {
       setFormData(voucher);
       setIsEditing(false);
-    } else if (mode === "create") {
+    } else if (mode === "create" && isOpen) {
       // Generate voucher number for new expense voucher with format PC-YYYYMMDD0001
       const generateVoucherNumber = async () => {
         try {
@@ -230,7 +230,7 @@ export default function ExpenseVoucherModal({
       generateVoucherNumber();
       setIsEditing(true);
     }
-  }, [voucher, mode]);
+  }, [voucher, mode, isOpen]);
 
   const createVoucherMutation = useMutation({
     mutationFn: async (data: ExpenseVoucher) => {
