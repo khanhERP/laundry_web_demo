@@ -176,11 +176,6 @@ export function ReceiptModal({
       let selectBank = lstBank.find((item) => item.domain === domainConnect);
       if (selectBank) {
         setBankAccounts(selectBank);
-      } else if (
-        domainConnect != "0108670987-004.edpos.vn" &&
-        domainConnect != "0108670987-008.edpos.vn"
-      ) {
-        setBankAccounts(lstBank[0]);
       }
       console.log("=== RECEIPT MODAL RENDERED ===");
       console.log(
