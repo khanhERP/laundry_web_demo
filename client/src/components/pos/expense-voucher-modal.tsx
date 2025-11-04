@@ -68,7 +68,7 @@ export default function ExpenseVoucherModal({
   isOpen,
   onClose,
   voucher,
-  mode
+  mode,
 }: ExpenseVoucherModalProps) {
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -101,11 +101,12 @@ export default function ExpenseVoucherModal({
     queryFn: async () => {
       try {
         const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers");
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         return Array.isArray(data) ? data : [];
       } catch (error) {
-        console.error('Error fetching customers:', error);
+        console.error("Error fetching customers:", error);
         return [];
       }
     },
@@ -117,11 +118,12 @@ export default function ExpenseVoucherModal({
     queryFn: async () => {
       try {
         const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees");
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         return Array.isArray(data) ? data : [];
       } catch (error) {
-        console.error('Error fetching employees:', error);
+        console.error("Error fetching employees:", error);
         return [];
       }
     },
@@ -133,11 +135,12 @@ export default function ExpenseVoucherModal({
     queryFn: async () => {
       try {
         const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers");
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         return Array.isArray(data) ? data : [];
       } catch (error) {
-        console.error('Error fetching suppliers:', error);
+        console.error("Error fetching suppliers:", error);
         return [];
       }
     },
@@ -145,7 +148,7 @@ export default function ExpenseVoucherModal({
 
   const [formData, setFormData] = useState<ExpenseVoucher>({
     voucherNumber: "",
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split("T")[0],
     amount: 0,
     account: "cash", // Use nameKey instead of hardcoded Vietnamese
     recipient: "",
@@ -160,26 +163,68 @@ export default function ExpenseVoucherModal({
       setFormData(voucher);
       setIsEditing(false);
     } else if (mode === "create") {
-      // Generate voucher number for new expense voucher (same logic as income voucher)
-      const generateVoucherNumber = () => {
-        const today = new Date();
-        const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
-        const timeStr = Date.now().toString().slice(-3);
-        const autoVoucherNumber = `PC${dateStr}${timeStr}`;
-
-        console.log(`✅ Auto-generated expense voucher number: ${autoVoucherNumber}`);
-
-        setFormData({
-          voucherNumber: autoVoucherNumber,
-          date: new Date().toISOString().split('T')[0],
-          amount: 0,
-          account: "cash", // Use nameKey instead of hardcoded Vietnamese
-          recipient: "",
-          receiverName: "",
-          phone: "",
-          category: "other",
-          description: "",
-        });
+      // Generate voucher number for new expense voucher with format PC-YYYYMMDD0001
+      const generateVoucherNumber = async () => {
+        try {
+          const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers/next-voucher-number");
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ Auto-generated expense voucher number: ${data.voucherNumber}`);
+            
+            setFormData({
+              voucherNumber: data.voucherNumber,
+              date: new Date().toISOString().split("T")[0],
+              amount: 0,
+              account: "cash",
+              recipient: "",
+              receiverName: "",
+              phone: "",
+              category: "other",
+              description: "",
+            });
+          } else {
+            // Fallback to old format if API fails
+            const today = new Date();
+            const dateStr = today.toISOString().split("T")[0].replace(/-/g, "");
+            const timeStr = Date.now().toString().slice(-3);
+            const autoVoucherNumber = `PC${dateStr}${timeStr}`;
+            
+            console.log(`✅ Auto-generated expense voucher number (fallback): ${autoVoucherNumber}`);
+            
+            setFormData({
+              voucherNumber: autoVoucherNumber,
+              date: new Date().toISOString().split("T")[0],
+              amount: 0,
+              account: "cash",
+              recipient: "",
+              receiverName: "",
+              phone: "",
+              category: "other",
+              description: "",
+            });
+          }
+        } catch (error) {
+          console.error("Error generating voucher number:", error);
+          // Fallback to old format
+          const today = new Date();
+          const dateStr = today.toISOString().split("T")[0].replace(/-/g, "");
+          const timeStr = Date.now().toString().slice(-3);
+          const autoVoucherNumber = `PC${dateStr}${timeStr}`;
+          
+          console.log(`✅ Auto-generated expense voucher number (error fallback): ${autoVoucherNumber}`);
+          
+          setFormData({
+            voucherNumber: autoVoucherNumber,
+            date: new Date().toISOString().split("T")[0],
+            amount: 0,
+            account: "cash",
+            recipient: "",
+            receiverName: "",
+            phone: "",
+            category: "other",
+            description: "",
+          });
+        }
       };
 
       generateVoucherNumber();
@@ -198,7 +243,8 @@ export default function ExpenseVoucherModal({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+        const errorMessage =
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`;
         throw new Error(errorMessage);
       }
 
@@ -212,16 +258,16 @@ export default function ExpenseVoucherModal({
       });
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/expense-vouchers"] });
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
-      
+
       // Reset form to initial state
       const today = new Date();
-      const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+      const dateStr = today.toISOString().split("T")[0].replace(/-/g, "");
       const timeStr = Date.now().toString().slice(-3);
       const autoVoucherNumber = `PC${dateStr}${timeStr}`;
-      
+
       setFormData({
         voucherNumber: autoVoucherNumber,
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
         amount: 0,
         account: "cash",
         recipient: "",
@@ -230,12 +276,13 @@ export default function ExpenseVoucherModal({
         category: "other",
         description: "",
       });
-      
+
       onClose();
     },
     onError: (error) => {
       console.error("Failed to create expense voucher:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể tạo phiếu chi";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể tạo phiếu chi";
       toast({
         title: "Lỗi tạo phiếu chi",
         description: errorMessage,
@@ -255,7 +302,8 @@ export default function ExpenseVoucherModal({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+        const errorMessage =
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`;
         throw new Error(errorMessage);
       }
 
@@ -274,7 +322,8 @@ export default function ExpenseVoucherModal({
     },
     onError: (error) => {
       console.error("Failed to update expense voucher:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể cập nhật phiếu chi";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể cập nhật phiếu chi";
       toast({
         title: "Lỗi cập nhật phiếu chi",
         description: errorMessage,
@@ -368,13 +417,15 @@ export default function ExpenseVoucherModal({
     };
 
     // Add supplierId if recipient is a supplier
-    const selectedRecipient = recipientOptions.find(option => option.name === formData.recipient);
+    const selectedRecipient = recipientOptions.find(
+      (option) => option.name === formData.recipient,
+    );
     if (selectedRecipient && selectedRecipient.id) {
       cleanData.supplierId = selectedRecipient.id;
       console.log("💾 Adding supplierId to expense voucher:", {
         recipientName: formData.recipient,
         supplierId: selectedRecipient.id,
-        mode: mode
+        mode: mode,
       });
     } else {
       console.warn("⚠️ No supplierId found for recipient:", formData.recipient);
@@ -389,7 +440,7 @@ export default function ExpenseVoucherModal({
       account: cleanData.account,
       accountType: typeof cleanData.account,
       voucherNumber: cleanData.voucherNumber,
-      fullData: cleanData
+      fullData: cleanData,
     });
 
     if (mode === "create") {
@@ -406,26 +457,26 @@ export default function ExpenseVoucherModal({
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('vi-VN').format(value);
+    return new Intl.NumberFormat("vi-VN").format(value);
   };
 
   // Get recipient options based on selected category
   const getRecipientOptions = () => {
     switch (formData.category) {
       case "customerRefund":
-        return customers.map(customer => ({
+        return customers.map((customer) => ({
           id: customer.id,
           name: customer.name,
           phone: customer.phone || "",
         }));
       case "salary":
-        return employees.map(employee => ({
+        return employees.map((employee) => ({
           id: employee.id,
           name: employee.name,
           phone: employee.phone || "",
         }));
       default:
-        return suppliers.map(supplier => ({
+        return suppliers.map((supplier) => ({
           id: supplier.id,
           name: supplier.name,
           phone: supplier.phone || "",
@@ -437,7 +488,7 @@ export default function ExpenseVoucherModal({
 
   // Handle category change - reset recipient when category changes
   const handleCategoryChange = (newCategory: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       category: newCategory,
       recipient: "", // Reset recipient when category changes
@@ -448,9 +499,11 @@ export default function ExpenseVoucherModal({
 
   // Handle recipient selection
   const handleRecipientChange = (recipientName: string) => {
-    const selectedRecipient = recipientOptions.find(option => option.name === recipientName);
+    const selectedRecipient = recipientOptions.find(
+      (option) => option.name === recipientName,
+    );
     if (selectedRecipient) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         recipient: selectedRecipient.name,
         phone: selectedRecipient.phone,
@@ -468,7 +521,9 @@ export default function ExpenseVoucherModal({
               <Button variant="ghost" size="sm" onClick={onClose}>
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <span className="font-bold">{t('common.expenseVoucherTitle')}</span>
+              <span className="font-bold">
+                {t("common.expenseVoucherTitle")}
+              </span>
             </DialogTitle>
           </DialogHeader>
 
@@ -477,16 +532,27 @@ export default function ExpenseVoucherModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left Column */}
               <div className="space-y-5 p-4 bg-gray-50 rounded-lg border">
-                <h3 className="font-bold text-lg text-gray-800 mb-4">{t('common.voucherInfo')}</h3>
+                <h3 className="font-bold text-lg text-gray-800 mb-4">
+                  {t("common.voucherInfo")}
+                </h3>
 
                 <div>
-                  <Label htmlFor="voucherNumber" className="text-base font-bold mb-2">
-                    {t('common.expenseVoucherNumber')} <span className="text-red-600">*</span>
+                  <Label
+                    htmlFor="voucherNumber"
+                    className="text-base font-bold mb-2"
+                  >
+                    {t("common.expenseVoucherNumber")}{" "}
+                    <span className="text-red-600">*</span>
                   </Label>
                   <Input
                     id="voucherNumber"
                     value={formData.voucherNumber}
-                    onChange={(e) => setFormData(prev => ({ ...prev, voucherNumber: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        voucherNumber: e.target.value,
+                      }))
+                    }
                     disabled
                     className={`h-11 text-base font-bold ${!isEditing ? "bg-gray-100 text-gray-900" : "bg-white"}`}
                   />
@@ -494,13 +560,16 @@ export default function ExpenseVoucherModal({
 
                 <div>
                   <Label htmlFor="date" className="text-base font-bold mb-2">
-                    {t('common.expenseDate')} <span className="text-red-600">*</span>
+                    {t("common.expenseDate")}{" "}
+                    <span className="text-red-600">*</span>
                   </Label>
                   <Input
                     id="date"
                     type="date"
                     value={formData.date}
-                    onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, date: e.target.value }))
+                    }
                     disabled={!isEditing}
                     className={`h-11 text-base font-bold ${!isEditing ? "bg-gray-100 text-gray-900" : "bg-white"}`}
                   />
@@ -508,15 +577,20 @@ export default function ExpenseVoucherModal({
 
                 <div>
                   <Label htmlFor="amount" className="text-base font-bold mb-2">
-                    {t('common.amount')} <span className="text-red-600">*</span>
+                    {t("common.amount")} <span className="text-red-600">*</span>
                   </Label>
                   <Input
                     id="amount"
                     type="text"
-                    value={formData.amount > 0 ? formatCurrency(formData.amount) : ""}
+                    value={
+                      formData.amount > 0 ? formatCurrency(formData.amount) : ""
+                    }
                     onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '');
-                      setFormData(prev => ({ ...prev, amount: parseFloat(value) || 0 }));
+                      const value = e.target.value.replace(/\D/g, "");
+                      setFormData((prev) => ({
+                        ...prev,
+                        amount: parseFloat(value) || 0,
+                      }));
                     }}
                     disabled={!isEditing}
                     className={`h-11 text-base font-bold ${!isEditing ? "bg-gray-100 text-gray-900" : "bg-white"}`}
@@ -526,21 +600,32 @@ export default function ExpenseVoucherModal({
 
                 <div>
                   <Label htmlFor="account" className="text-base font-bold mb-2">
-                    {t('common.expenseAccount')} <span className="text-red-600">*</span>
+                    {t("common.expenseAccount")}{" "}
+                    <span className="text-red-600">*</span>
                   </Label>
                   <Select
                     value={formData.account}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, account: value }))}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, account: value }))
+                    }
                     disabled={!isEditing}
                   >
-                    <SelectTrigger className={`h-11 text-base font-bold ${!isEditing ? "bg-gray-100 text-gray-900" : "bg-white"}`}>
+                    <SelectTrigger
+                      className={`h-11 text-base font-bold ${!isEditing ? "bg-gray-100 text-gray-900" : "bg-white"}`}
+                    >
                       <SelectValue>
-                        {formData.account ? t(`common.${formData.account}`) : t('common.selectCategory')}
+                        {formData.account
+                          ? t(`common.${formData.account}`)
+                          : t("common.selectCategory")}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {paymentMethods.map((method) => (
-                        <SelectItem key={method.id} value={method.nameKey} className="text-base">
+                        <SelectItem
+                          key={method.id}
+                          value={method.nameKey}
+                          className="text-base"
+                        >
                           {t(`common.${method.nameKey}`)} {method.icon}
                         </SelectItem>
                       ))}
@@ -549,22 +634,36 @@ export default function ExpenseVoucherModal({
                 </div>
 
                 <div>
-                  <Label htmlFor="category" className="text-base font-bold mb-2">
-                    {t('common.expenseCategory')} <span className="text-red-600">*</span>
+                  <Label
+                    htmlFor="category"
+                    className="text-base font-bold mb-2"
+                  >
+                    {t("common.expenseCategory")}{" "}
+                    <span className="text-red-600">*</span>
                   </Label>
                   <Select
                     value={formData.category}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, category: value }))
+                    }
                     disabled={!isEditing}
                   >
-                    <SelectTrigger className={`h-11 text-base font-bold ${!isEditing ? "bg-gray-100 text-gray-900" : "bg-white"}`}>
+                    <SelectTrigger
+                      className={`h-11 text-base font-bold ${!isEditing ? "bg-gray-100 text-gray-900" : "bg-white"}`}
+                    >
                       <SelectValue>
-                        {formData.category ? t(`common.${formData.category}`) : t('common.selectCategory')}
+                        {formData.category
+                          ? t(`common.${formData.category}`)
+                          : t("common.selectCategory")}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {EXPENSE_CATEGORY_KEYS.map((categoryKey) => (
-                        <SelectItem key={categoryKey} value={categoryKey} className="text-base">
+                        <SelectItem
+                          key={categoryKey}
+                          value={categoryKey}
+                          className="text-base"
+                        >
                           {t(`common.${categoryKey}`)}
                         </SelectItem>
                       ))}
@@ -575,14 +674,25 @@ export default function ExpenseVoucherModal({
 
               {/* Right Column */}
               <div className="space-y-5 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h3 className="font-bold text-lg text-gray-800 mb-4">{t('common.recipientInfo')}</h3>
+                <h3 className="font-bold text-lg text-gray-800 mb-4">
+                  {t("common.recipientInfo")}
+                </h3>
 
                 <div>
-                  <Label htmlFor="recipient" className="text-base font-bold mb-2">
-                    {t('common.recipientObject')} <span className="text-red-600">*</span>
+                  <Label
+                    htmlFor="recipient"
+                    className="text-base font-bold mb-2"
+                  >
+                    {t("common.recipientObject")}{" "}
+                    <span className="text-red-600">*</span>
                     <span className="text-sm font-normal text-gray-500 ml-2">
-                      ({formData.category === "customerRefund" ? t('common.customer') :
-                        formData.category === "salary" ? t('common.employee') : t('suppliers.supplier')})
+                      (
+                      {formData.category === "customerRefund"
+                        ? t("common.customer")
+                        : formData.category === "salary"
+                          ? t("common.employee")
+                          : t("suppliers.supplier")}
+                      )
                     </span>
                   </Label>
                   {isEditing ? (
@@ -591,13 +701,26 @@ export default function ExpenseVoucherModal({
                       onValueChange={handleRecipientChange}
                       disabled={!isEditing}
                     >
-                      <SelectTrigger className={`h-11 text-base font-bold ${!isEditing ? "bg-blue-100 text-gray-900" : "bg-white"}`}>
-                        <SelectValue placeholder={formData.category === "customerRefund" ? t('common.selectCustomer') :
-                          formData.category === "salary" ? t('common.selectEmployee') : t('common.selectSupplier')} />
+                      <SelectTrigger
+                        className={`h-11 text-base font-bold ${!isEditing ? "bg-blue-100 text-gray-900" : "bg-white"}`}
+                      >
+                        <SelectValue
+                          placeholder={
+                            formData.category === "customerRefund"
+                              ? t("common.selectCustomer")
+                              : formData.category === "salary"
+                                ? t("common.selectEmployee")
+                                : t("common.selectSupplier")
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {recipientOptions.map((option) => (
-                          <SelectItem key={option.id} value={option.name} className="text-base">
+                          <SelectItem
+                            key={option.id}
+                            value={option.name}
+                            className="text-base"
+                          >
                             {option.name}
                           </SelectItem>
                         ))}
@@ -609,32 +732,49 @@ export default function ExpenseVoucherModal({
                       value={formData.recipient}
                       disabled={true}
                       className="h-11 text-base font-bold bg-blue-100 text-gray-900"
-                      placeholder={t('common.recipientPlaceholder')}
+                      placeholder={t("common.recipientPlaceholder")}
                     />
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="receiverName" className="text-base font-bold mb-2">{t('common.receiverName')}</Label>
+                  <Label
+                    htmlFor="receiverName"
+                    className="text-base font-bold mb-2"
+                  >
+                    {t("common.receiverName")}
+                  </Label>
                   <Input
                     id="receiverName"
                     value={formData.receiverName || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, receiverName: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        receiverName: e.target.value,
+                      }))
+                    }
                     disabled={!isEditing}
                     className={`h-11 text-base font-bold ${!isEditing ? "bg-blue-100 text-gray-900" : "bg-white"}`}
-                    placeholder={t('common.receiverNamePlaceholder')}
+                    placeholder={t("common.receiverNamePlaceholder")}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="phone" className="text-base font-bold mb-2">{t('common.phone')}</Label>
+                  <Label htmlFor="phone" className="text-base font-bold mb-2">
+                    {t("common.phone")}
+                  </Label>
                   <Input
                     id="phone"
                     value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
+                    }
                     disabled={!isEditing}
                     className={`h-11 text-base font-bold ${!isEditing ? "bg-blue-100 text-gray-900" : "bg-white"}`}
-                    placeholder={t('common.phoneNumberPlaceholder')}
+                    placeholder={t("common.phoneNumberPlaceholder")}
                   />
                 </div>
               </div>
@@ -642,14 +782,21 @@ export default function ExpenseVoucherModal({
 
             {/* Description */}
             <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-              <Label htmlFor="description" className="text-base font-bold mb-2">{t('common.explanation')}</Label>
+              <Label htmlFor="description" className="text-base font-bold mb-2">
+                {t("common.explanation")}
+              </Label>
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 disabled={!isEditing}
                 className={`text-base font-semibold ${!isEditing ? "bg-green-100 text-gray-900" : "bg-white"}`}
-                placeholder={t('common.explanationPlaceholder')}
+                placeholder={t("common.explanationPlaceholder")}
                 rows={4}
               />
             </div>
@@ -667,7 +814,7 @@ export default function ExpenseVoucherModal({
                       className="h-11 text-base"
                     >
                       <Trash2 className="w-5 h-5 mr-2" />
-                      {t('common.delete')}
+                      {t("common.delete")}
                     </Button>
                     <Button
                       variant="outline"
@@ -677,7 +824,7 @@ export default function ExpenseVoucherModal({
                       className="h-11 text-base"
                     >
                       <Edit className="w-5 h-5 mr-2" />
-                      {t('common.edit')}
+                      {t("common.edit")}
                     </Button>
                   </>
                 )}
@@ -688,21 +835,27 @@ export default function ExpenseVoucherModal({
                   variant="outline"
                   size="lg"
                   onClick={onClose}
-                  disabled={createVoucherMutation.isPending || updateVoucherMutation.isPending}
+                  disabled={
+                    createVoucherMutation.isPending ||
+                    updateVoucherMutation.isPending
+                  }
                   className="h-11 text-base"
                 >
                   <X className="w-5 h-5 mr-2" />
-                  {t('common.close')}
+                  {t("common.close")}
                 </Button>
                 {isEditing && (
                   <Button
                     size="lg"
                     onClick={handleSave}
-                    disabled={createVoucherMutation.isPending || updateVoucherMutation.isPending}
+                    disabled={
+                      createVoucherMutation.isPending ||
+                      updateVoucherMutation.isPending
+                    }
                     className="bg-green-600 hover:bg-green-700 h-11 text-base px-8"
                   >
                     <Save className="w-5 h-5 mr-2" />
-                    {t('common.save')}
+                    {t("common.save")}
                   </Button>
                 )}
               </div>
@@ -715,21 +868,24 @@ export default function ExpenseVoucherModal({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('common.confirmDelete')}</AlertDialogTitle>
+            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('common.confirmDeleteVoucher').replace('{voucherNumber}', formData.voucherNumber)}
+              {t("common.confirmDeleteVoucher").replace(
+                "{voucherNumber}",
+                formData.voucherNumber,
+              )}
               <br />
-              <span className="text-red-600">{t('common.cannotUndo')}</span>
+              <span className="text-red-600">{t("common.cannotUndo")}</span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.skip')}</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.skip")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteVoucherMutation.isPending}
               className="bg-red-600 hover:bg-red-700"
             >
-              {t('common.agree')}
+              {t("common.agree")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
