@@ -2274,7 +2274,7 @@ export function ShoppingCart({
                           const rawValue = e.target.value.replace(/[^\d]/g, "");
                           const newPrice = parseFloat(rawValue) || 0;
 
-                          if (newPrice <= 0) {
+                          if (newPrice < 0) {
                             toast({
                               title: "Giá không hợp lệ",
                               description:
