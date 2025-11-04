@@ -1855,10 +1855,7 @@ export default function SalesOrders() {
 
       // Step 6: Update order totals in database
       // Determine isPaid status: if paymentStatus is 'paid' or status is 'paid', then isPaid should be true
-      const updatedIsPaid =
-        editableInvoice.paymentStatus === "paid" ||
-        editableInvoice.status === "paid" ||
-        editableInvoice.isPaid === true;
+      const updatedIsPaid = editableInvoice.isPaid === true;
 
       // Ensure we get the latest values from editableInvoice state
       const finalCustomerName =
