@@ -487,7 +487,7 @@ export default function ExpenseVoucherModal({
                     id="voucherNumber"
                     value={formData.voucherNumber}
                     onChange={(e) => setFormData(prev => ({ ...prev, voucherNumber: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled
                     className={`h-11 text-base font-bold ${!isEditing ? "bg-gray-100 text-gray-900" : "bg-white"}`}
                   />
                 </div>
