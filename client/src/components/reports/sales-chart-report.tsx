@@ -315,6 +315,16 @@ export function SalesChartReport() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: generalSettings } = useQuery({
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings"],
+    queryFn: async () => {
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings/ST-002");
+      if (!response.ok) throw new Error("Failed to fetch general settings");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Product Analysis Data from new API
   const { data: productAnalysisData, isLoading: productAnalysisLoading } =
     useQuery({
@@ -655,7 +665,10 @@ export function SalesChartReport() {
       const hourlyOrders: { [key: number]: number } = {};
 
       completedOrders.forEach((order: any) => {
-        const orderDate = new Date(order.orderedAt || order.createdAt);
+        let orderDate = new Date(order.createdAt);
+        if (generalSettings?.isActive === false) {
+          orderDate = new Date(order.updatedAt);
+        }
         if (!isNaN(orderDate.getTime())) {
           const hour = orderDate.getHours();
           hourlyOrders[hour] = (hourlyOrders[hour] || 0) + 1;
@@ -752,9 +765,11 @@ export function SalesChartReport() {
         ? Number(order.subtotal || 0) + Number(order.tax || 0)
         : order.subtotal,
       discount: order.discount || 0,
-      paymentMethod: order.paymentMethod || "cash",
-      createdAt: order.createdAt || order.orderedAt || order.paidAt,
-      created_at: order.createdAt || order.orderedAt || order.paidAt,
+      paymentMethod: order.paymentMethod || "",
+      createdAt:
+        generalSettings?.isActive === false ? order.updatedAt : order.createdAt,
+      created_at:
+        generalSettings?.isActive === false ? order.updatedAt : order.createdAt,
       customerName: order.customerName,
       tax: order.tax || 0,
       customerId: order.customerId,
@@ -785,13 +800,10 @@ export function SalesChartReport() {
     filteredCompletedOrders.forEach((order: any) => {
       try {
         // Use correct date field from order - prioritize createdAt for consistency with API filter
-        const orderDate = new Date(
-          order.createdAt ||
-            order.created_at ||
-            order.orderedAt ||
-            order.paidAt ||
-            order.date,
-        );
+        let orderDate = new Date(order.createdAt);
+        if (generalSettings?.isActive === false) {
+          orderDate = new Date(order.updatedAt);
+        }
 
         if (isNaN(orderDate.getTime())) {
           console.warn("Invalid date for order:", order.id);
@@ -2183,7 +2195,10 @@ export function SalesChartReport() {
 
     // Filter completed orders with all search criteria
     const filteredOrders = orders.filter((order: any) => {
-      const orderDate = new Date(order.createdAt);
+      let orderDate = new Date(order.createdAt);
+      if (generalSettings?.isActive === false) {
+        orderDate = new Date(order.updatedAt);
+      }
 
       if (isNaN(orderDate.getTime())) {
         console.warn("Skipping order with invalid createdAt date:", order.id);
@@ -4163,9 +4178,10 @@ export function SalesChartReport() {
     end.setHours(23, 59, 59, 999);
 
     const filteredOrders = orders.filter((order: any) => {
-      const orderDate = new Date(
-        order.orderedAt || order.created_at || order.createdAt,
-      );
+      let orderDate = new Date(order.createdAt);
+      if (generalSettings?.isActive === false) {
+        orderDate = new Date(order.updatedAt);
+      }
 
       if (isNaN(orderDate.getTime())) {
         return false;
@@ -4228,9 +4244,7 @@ export function SalesChartReport() {
 
       // Include paid, completed, and cancelled orders
       const validOrderStatus =
-        order.status === "paid" ||
-        order.status === "completed" ||
-        order.status === "cancelled";
+        order.status === "paid" || order.status === "completed";
 
       return (
         dateMatch &&
