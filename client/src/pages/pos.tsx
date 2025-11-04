@@ -203,7 +203,7 @@ export default function POS({ onLogout }: POSPageProps) {
     };
 
     const handleDuplicateCartItem = (event: CustomEvent) => {
-      const { item } = event.detail; // Assuming 'item' is passed directly
+      const { item, originalId } = event.detail;
       console.log("📋 POS: Duplicating cart item:", item);
 
       // Create a new item object to avoid direct mutation of the original item
@@ -214,13 +214,25 @@ export default function POS({ onLogout }: POSPageProps) {
         id: -Date.now(),
       };
 
-      // Add the duplicated item to the cart of the active order
+      // Add the duplicated item to the cart of the active order, right after the original item
       if (activeOrderId !== undefined) {
         const orderIndex = orders.findIndex((o) => o.id === activeOrderId);
         if (orderIndex !== -1) {
           const updatedOrders = [...orders];
           const currentOrder = updatedOrders[orderIndex];
-          const updatedCart = [...currentOrder.cart, duplicatedItem];
+          
+          // Find the index of the original item in the cart
+          const originalItemIndex = currentOrder.cart.findIndex((cartItem) => cartItem.id === originalId);
+          
+          // Insert the duplicated item right after the original item
+          const updatedCart = [...currentOrder.cart];
+          if (originalItemIndex !== -1) {
+            updatedCart.splice(originalItemIndex + 1, 0, duplicatedItem);
+          } else {
+            // If original item not found, add to the end
+            updatedCart.push(duplicatedItem);
+          }
+          
           updatedOrders[orderIndex] = { ...currentOrder, cart: updatedCart };
           setOrders(updatedOrders);
         } else {
