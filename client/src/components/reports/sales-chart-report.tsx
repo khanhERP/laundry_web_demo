@@ -2200,9 +2200,7 @@ export function SalesChartReport() {
           selectedFloor;
 
       const dateMatch = orderDate >= start && orderDate <= end;
-      let statusMatch =
-        order.status === "paid" ||
-        order.status === "completed";
+      let statusMatch = order.status === "paid" || order.status === "completed";
       if (orderStatusFilter !== "all") {
         if (orderStatusFilter == "completed") {
           statusMatch = order.status === "paid" || order.status === "completed";
@@ -5834,13 +5832,10 @@ export function SalesChartReport() {
                     "Đơn vị tính": t("common.perUnit"),
                     "Sn lượng bán": product.quantity,
                     "Thành tiền": formatCurrency(
-                      (product.unitPrice || 0) * (product.quantity || 1),
+                      product.total + (product.discount || 0),
                     ),
                     "Giảm giá": formatCurrency(product.discount),
-                    "Doanh thu": formatCurrency(
-                      (product.unitPrice || 0) * (product.quantity || 1) -
-                        (product.discount || 0),
-                    ),
+                    "Doanh thu": formatCurrency(product.total || 0),
                     "Nhóm hàng": product.categoryName,
                   })),
                   // Add summary row
@@ -5849,11 +5844,11 @@ export function SalesChartReport() {
                     "Tên hàng": `${totalProducts} sản phẩm`,
                     "Đơn vị tính": "-",
                     "Số l>ợng bán": totalQuantity,
-                    "Thành tiền": formatCurrency(totalRevenue),
-                    "Giảm giá": formatCurrency(totalDiscount),
-                    "Doanh thu": formatCurrency(
-                      (totalRevenue || 0) - (totalDiscount || 0),
+                    "Thành tiền": formatCurrency(
+                      totalRevenue + (totalDiscount || 0),
                     ),
+                    "Giảm giá": formatCurrency(totalDiscount),
+                    "Doanh thu": formatCurrency(totalRevenue || 0),
                     "Nhóm hàng": "-",
                   },
                 ];
@@ -5944,7 +5939,7 @@ export function SalesChartReport() {
                         </TableCell>
                         <TableCell className="text-right font-semibold">
                           {formatCurrency(
-                            (product.unitPrice || 0) * (product.quantity || 1),
+                            product.total + (product.discount || 0),
                           )}
                         </TableCell>
                         {analysisType !== "employee" && (
@@ -5953,10 +5948,7 @@ export function SalesChartReport() {
                           </TableCell>
                         )}
                         <TableCell className="text-right font-semibold text-green-600">
-                          {formatCurrency(
-                            (product.unitPrice || 0) * (product.quantity || 1) -
-                              (product.discount || 0),
-                          )}
+                          {formatCurrency(product.total)}
                         </TableCell>
                         <TableCell className="text-center">
                           {product.categoryName}
@@ -5992,7 +5984,7 @@ export function SalesChartReport() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right font-bold text-blue-600">
-                        {formatCurrency(totalRevenue)}
+                        {formatCurrency(totalRevenue + (totalDiscount || 0))}
                       </TableCell>
                       {analysisType !== "employee" && (
                         <TableCell className="text-right font-bold text-red-600">
@@ -6000,9 +5992,7 @@ export function SalesChartReport() {
                         </TableCell>
                       )}
                       <TableCell className="text-right font-bold text-green-600">
-                        {formatCurrency(
-                          (totalRevenue || 0) - (totalDiscount || 0),
-                        )}
+                        {formatCurrency(totalRevenue || 0)}
                       </TableCell>
                       <TableCell className="text-center font-bold">
                         {" "}
