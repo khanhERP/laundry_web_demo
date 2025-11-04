@@ -143,6 +143,25 @@ export default function IncomeVoucherModal({
       });
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers"] });
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+      
+      // Reset form to initial state
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+      const timeStr = Date.now().toString().slice(-3);
+      const autoVoucherNumber = `PT${dateStr}${timeStr}`;
+      
+      setFormData({
+        voucherNumber: autoVoucherNumber,
+        date: new Date().toISOString().split('T')[0],
+        amount: 0,
+        account: "cash",
+        recipient: "",
+        receiverName: "",
+        phone: "",
+        category: "other",
+        description: "",
+      });
+      
       onClose();
     },
     onError: (error) => {
@@ -181,6 +200,7 @@ export default function IncomeVoucherModal({
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/income-vouchers"] });
       queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
       setIsEditing(false);
+      onClose();
     },
     onError: (error) => {
       console.error("Failed to update income voucher:", error);
