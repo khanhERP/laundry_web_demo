@@ -5278,12 +5278,10 @@ export function SalesChartReport() {
                     ?.floor === selectedFloor;
 
                 // EXACT same date parsing as dashboard
-                const orderDate = new Date(
-                  order.orderedAt ||
-                    order.paidAt ||
-                    order.createdAt ||
-                    order.created_at,
-                );
+                let orderDate = new Date(order.createdAt);
+                if (generalSettings?.isActive === false) {
+                  orderDate = new Date(order.updatedAt);
+                }
 
                 if (isNaN(orderDate.getTime())) {
                   console.warn("Invalid date for order:", order.id);
@@ -5305,12 +5303,10 @@ export function SalesChartReport() {
 
             filteredOrders.forEach((order: any) => {
               try {
-                const orderDate = new Date(
-                  order.orderedAt ||
-                    order.paidAt ||
-                    order.createdAt ||
-                    order.created_at,
-                );
+                let orderDate = new Date(order.createdAt);
+                if (generalSettings?.isActive === false) {
+                  orderDate = new Date(order.updatedAt);
+                }
                 // Use local date format to match initialization
                 const year = orderDate.getFullYear();
                 const month = String(orderDate.getMonth() + 1).padStart(2, "0");
@@ -5417,12 +5413,10 @@ export function SalesChartReport() {
                     ?.floor === selectedFloor;
 
                 // Try multiple possible date fields (EXACT same as dashboard)
-                const orderDate = new Date(
-                  order.orderedAt ||
-                    order.createdAt ||
-                    order.created_at ||
-                    order.paidAt,
-                );
+                let orderDate = new Date(order.createdAt);
+                if (generalSettings?.isActive === false) {
+                  orderDate = new Date(order.updatedAt);
+                }
 
                 // Skip if date is invalid
                 if (isNaN(orderDate.getTime())) {
@@ -5546,9 +5540,10 @@ export function SalesChartReport() {
 
             const custFilteredOrders = orders.filter((order: any) => {
               try {
-                const orderDate = new Date(
-                  order.orderedAt || order.created_at || order.createdAt,
-                );
+                let orderDate = new Date(order.createdAt);
+                if (generalSettings?.isActive === false) {
+                  orderDate = new Date(order.updatedAt);
+                }
 
                 if (isNaN(orderDate.getTime())) {
                   console.warn("Invalid date for customer order:", order.id);
@@ -5663,12 +5658,10 @@ export function SalesChartReport() {
                   tables.find((table: any) => table.id === order.tableId)
                     ?.floor === selectedFloor;
 
-                const orderDate = new Date(
-                  order.orderedAt ||
-                    order.createdAt ||
-                    order.created_at ||
-                    order.paidAt,
-                );
+                let orderDate = new Date(order.createdAt);
+                if (generalSettings?.isActive === false) {
+                  orderDate = new Date(order.updatedAt);
+                }
 
                 if (isNaN(orderDate.getTime())) {
                   console.warn(
