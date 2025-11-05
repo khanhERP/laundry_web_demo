@@ -5610,7 +5610,7 @@ export default function SalesOrders() {
                                                                       )}
                                                                     </td>
                                                                     <td className="text-right py-2 px-3 border-r text-base w-[120px]">
-                                                                      {isEditing ? (
+                                                                      {isEditing && storeSettings.isEdit === true ? (
                                                                         <Input
                                                                           type="text"
                                                                           value={Math.floor(
