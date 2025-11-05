@@ -1982,6 +1982,13 @@ export default function SalesOrders() {
         hasChanges = true;
       }
 
+      if(originalOrder.paymentMethod !== editableInvoice.paymentMethod) {
+        generalChanges.push(
+          `Phương thức thanh toán: từ <${getPaymentMethodName(originalOrder.paymentMethod)}> thành <${getPaymentMethodName(editableInvoice.paymentMethod)}>`,
+        );
+        hasChanges = true;
+      }
+
       if (generalChanges.length > 0) {
         changeDescriptionParts.push(
           "Thông tin chung:\n" + generalChanges.join("; "),
