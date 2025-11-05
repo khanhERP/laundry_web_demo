@@ -6376,10 +6376,6 @@ export default function SalesOrders() {
                                                       placeholder={t(
                                                         "common.enterNotes",
                                                       )}
-                                                      disabled={
-                                                        selectedInvoice.displayStatus ===
-                                                        1
-                                                      }
                                                     />
                                                   ) : (
                                                     <div className="p-3 bg-gray-50 rounded border min-h-[80px]">
