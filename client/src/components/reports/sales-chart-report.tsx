@@ -2365,7 +2365,10 @@ export function SalesChartReport() {
       }
 
       const orderSummary = {
-        orderDate: order.orderedAt || order.createdAt || order.created_at,
+        orderDate:
+          generalSettings?.isActive === false
+            ? order.updatedAt
+            : order.createdAt,
         orderNumber: order.orderNumber || "",
         customerId: order.customerId || "",
         customerName: order.customerName || "",
@@ -2408,7 +2411,7 @@ export function SalesChartReport() {
               ]
             : orderItemsForOrder.map((item: any) => {
                 // Sử dụng giá trị CHÍNH XÁC từ order_items và order
-                const itemQuantity = Math.round(Number(item.quantity || 1));
+                const itemQuantity = parseFloat(item.quantity || 1);
                 let itemUnitPrice = Number(item.unitPrice || 0); // Đơn giá từ order_items
                 let itemTotal = itemUnitPrice * itemQuantity; // Thành tiền = đơn giá * số lượng (trước thuế)
 
@@ -2495,7 +2498,7 @@ export function SalesChartReport() {
     groupedOrders.forEach((order) => {
       // For quantity, sum from items
       order.items.forEach((item) => {
-        totalQuantity += item.quantity;
+        totalQuantity += parseFloat(item.quantity || 1);
       });
 
       // For financial data, use order-level values to avoid double counting
@@ -2765,7 +2768,11 @@ export function SalesChartReport() {
                               -
                             </TableCell>
                             <TableCell className="text-center min-w-[100px] px-2 font-semibold">
-                              {order.items.length}
+                              {order.items.reduce(
+                                (sum: number, item: any) =>
+                                  sum + parseFloat(item.quantity || 1),
+                                0,
+                              )}
                             </TableCell>
                             <TableCell className="text-right min-w-[120px] px-2 font-bold">
                               -
