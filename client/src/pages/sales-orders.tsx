@@ -4321,7 +4321,7 @@ export default function SalesOrders() {
                                       )}
                                     </td>
                                     <td className="px-3 py-3">
-                                      <div className="text-[16px] truncate">
+                                      <div className="text-[16px]">
                                         {formatDate(item.createdAt)}
                                       </div>
                                     </td>
