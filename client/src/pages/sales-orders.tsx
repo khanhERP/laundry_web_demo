@@ -3665,20 +3665,9 @@ export default function SalesOrders() {
   const handlePaymentMethodChange = (method: string | number | null) => {
     if (!editableInvoice) return;
 
-    // Ensure payment method is properly set
-    const isPaid = method !== null && method !== "unpaid" && method !== "";
-
     setEditableInvoice({
       ...editableInvoice,
-      paymentMethod: isPaid ? method : null,
-      isPaid: isPaid,
-      paymentStatus: isPaid ? "paid" : "pending",
-    });
-
-    console.log("💳 Payment method changed:", {
-      method,
-      isPaid,
-      paymentStatus: isPaid ? "paid" : "pending",
+      paymentMethod: method || "",
     });
   };
 
