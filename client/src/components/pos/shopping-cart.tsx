@@ -2239,116 +2239,121 @@ export function ShoppingCart({
                     {item.name}
                   </h4>
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium text-gray-700 w-16">
-                        Giá:
-                      </span>
-                      <input
-                        type="text"
-                        value={
-                          priceInputValues[item.id] !== undefined
-                            ? priceInputValues[item.id]
-                            : Math.round(getDisplayPrice(item)).toLocaleString(
-                                "vi-VN",
-                              )
-                        }
-                        onChange={(e) => {
-                          // Store input value in state
-                          setPriceInputValues((prev) => ({
-                            ...prev,
-                            [item.id]: e.target.value,
-                          }));
-                        }}
-                        onFocus={(e) => {
-                          // Select all text when focused for easy editing
-                          e.target.select();
-                          // Initialize state with current value
-                          setPriceInputValues((prev) => ({
-                            ...prev,
-                            [item.id]: Math.round(
-                              getDisplayPrice(item),
-                            ).toLocaleString("vi-VN"),
-                          }));
-                        }}
-                        onBlur={(e) => {
-                          const rawValue = e.target.value.replace(/[^\d]/g, "");
-                          const newPrice = parseFloat(rawValue) || 0;
+                    {storeSettings.isEdit === true && (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium text-gray-700 w-16">
+                          Giá:
+                        </span>
+                        <input
+                          type="text"
+                          value={
+                            priceInputValues[item.id] !== undefined
+                              ? priceInputValues[item.id]
+                              : Math.round(
+                                  getDisplayPrice(item),
+                                ).toLocaleString("vi-VN")
+                          }
+                          onChange={(e) => {
+                            // Store input value in state
+                            setPriceInputValues((prev) => ({
+                              ...prev,
+                              [item.id]: e.target.value,
+                            }));
+                          }}
+                          onFocus={(e) => {
+                            // Select all text when focused for easy editing
+                            e.target.select();
+                            // Initialize state with current value
+                            setPriceInputValues((prev) => ({
+                              ...prev,
+                              [item.id]: Math.round(
+                                getDisplayPrice(item),
+                              ).toLocaleString("vi-VN"),
+                            }));
+                          }}
+                          onBlur={(e) => {
+                            const rawValue = e.target.value.replace(
+                              /[^\d]/g,
+                              "",
+                            );
+                            const newPrice = parseFloat(rawValue) || 0;
 
-                          if (newPrice < 0) {
-                            toast({
-                              title: "Giá không hợp lệ",
-                              description:
-                                "Giá phải lớn hơn 0. Giá đã được khôi phục.",
-                              variant: "destructive",
+                            if (newPrice < 0) {
+                              toast({
+                                title: "Giá không hợp lệ",
+                                description:
+                                  "Giá phải lớn hơn 0. Giá đã được khôi phục.",
+                                variant: "destructive",
+                              });
+                              // Clear state to show original price
+                              setPriceInputValues((prev) => {
+                                const updated = { ...prev };
+                                delete updated[item.id];
+                                return updated;
+                              });
+                              return;
+                            }
+
+                            // Update price when user finishes editing
+                            const productId =
+                              typeof item.id === "string"
+                                ? parseInt(item.id)
+                                : item.id;
+
+                            // Calculate new total
+                            const newTotal = newPrice * item.quantity;
+
+                            console.log("💰 Price updated:", {
+                              productId: productId,
+                              oldPrice: item.price,
+                              newPrice: newPrice,
+                              quantity: item.quantity,
+                              oldTotal: item.total,
+                              newTotal: newTotal,
                             });
-                            // Clear state to show original price
+
+                            // Update the item price in cart
+                            item.price = newPrice.toString();
+                            item.total = newTotal.toString();
+
+                            // Clear input state
                             setPriceInputValues((prev) => {
                               const updated = { ...prev };
                               delete updated[item.id];
                               return updated;
                             });
-                            return;
-                          }
 
-                          // Update price when user finishes editing
-                          const productId =
-                            typeof item.id === "string"
-                              ? parseInt(item.id)
-                              : item.id;
+                            // Trigger cart update
+                            onUpdateQuantity(productId, item.quantity);
 
-                          // Calculate new total
-                          const newTotal = newPrice * item.quantity;
-
-                          console.log("💰 Price updated:", {
-                            productId: productId,
-                            oldPrice: item.price,
-                            newPrice: newPrice,
-                            quantity: item.quantity,
-                            oldTotal: item.total,
-                            newTotal: newTotal,
-                          });
-
-                          // Update the item price in cart
-                          item.price = newPrice.toString();
-                          item.total = newTotal.toString();
-
-                          // Clear input state
-                          setPriceInputValues((prev) => {
-                            const updated = { ...prev };
-                            delete updated[item.id];
-                            return updated;
-                          });
-
-                          // Trigger cart update
-                          onUpdateQuantity(productId, item.quantity);
-
-                          // Broadcast update via WebSocket
-                          setTimeout(() => {
-                            broadcastCartUpdate();
-                          }, 100);
-                        }}
-                        onKeyDown={(e) => {
-                          // Allow Enter key to trigger blur and save
-                          if (e.key === "Enter") {
-                            e.currentTarget.blur();
-                          }
-                          // Allow Escape key to cancel editing
-                          if (e.key === "Escape") {
-                            setPriceInputValues((prev) => {
-                              const updated = { ...prev };
-                              delete updated[item.id];
-                              return updated;
-                            });
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        className="flex h-6 w-24 rounded-md border border-input bg-white px-3 py-2 text-xs text-right ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                        placeholder="Nhập giá"
-                      />
-                      <span className="text-xs pos-text-secondary whitespace-nowrap">
-                        ₫
-                      </span>
-                    </div>
+                            // Broadcast update via WebSocket
+                            setTimeout(() => {
+                              broadcastCartUpdate();
+                            }, 100);
+                          }}
+                          onKeyDown={(e) => {
+                            // Allow Enter key to trigger blur and save
+                            if (e.key === "Enter") {
+                              e.currentTarget.blur();
+                            }
+                            // Allow Escape key to cancel editing
+                            if (e.key === "Escape") {
+                              setPriceInputValues((prev) => {
+                                const updated = { ...prev };
+                                delete updated[item.id];
+                                return updated;
+                              });
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className="flex h-6 w-24 rounded-md border border-input bg-white px-3 py-2 text-xs text-right ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                          placeholder="Nhập giá"
+                        />
+                        <span className="text-xs pos-text-secondary whitespace-nowrap">
+                          ₫
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <span className="text-xs font-medium text-gray-700 whitespace-nowrap">
                         Giảm giá:

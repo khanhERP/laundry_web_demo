@@ -1949,30 +1949,30 @@ export default function SalesOrders() {
           `Số điện thoại: từ <${originalOrder?.customerPhone || ""}> thành <${editableInvoice.customerPhone || ""}>`,
         );
         hasChanges = true;
-        // Check isPaid status change (for laundry business)
-        if (
-          storeSettings?.businessType === "laundry" &&
-          originalOrder?.isPaid !== editableInvoice.isPaid
-        ) {
-          generalChanges.push(
-            `Đã trả đồ: từ <${originalOrder?.isPaid ? "Đã trả" : "Chưa trả"}> thành <${editableInvoice.isPaid ? "Đã trả" : "Chưa trả"}>`,
-          );
-          hasChanges = true;
-        }
+      }
+      // Check isPaid status change (for laundry business)
+      if (
+        storeSettings?.businessType === "laundry" &&
+        originalOrder?.isPaid !== editableInvoice.isPaid
+      ) {
+        generalChanges.push(
+          `Đã trả đồ: từ <${originalOrder?.isPaid ? "Đã trả" : "Chưa trả"}> thành <${editableInvoice.isPaid ? "Đã trả" : "Chưa trả"}>`,
+        );
+        hasChanges = true;
+      }
 
-        if (originalOrder?.symbol !== editableInvoice.symbol) {
-          generalChanges.push(
-            `Ký hiệu hóa đơn: từ <${originalOrder?.symbol || ""}> thành <${editableInvoice.symbol || ""}>`,
-          );
-          hasChanges = true;
-        }
+      if (originalOrder?.symbol !== editableInvoice.symbol) {
+        generalChanges.push(
+          `Ký hiệu hóa đơn: từ <${originalOrder?.symbol || ""}> thành <${editableInvoice.symbol || ""}>`,
+        );
+        hasChanges = true;
+      }
 
-        if (originalOrder?.invoiceNumber !== editableInvoice.invoiceNumber) {
-          generalChanges.push(
-            `Số hóa đơn: từ <${originalOrder?.invoiceNumber || ""}> thành <${editableInvoice.invoiceNumber || ""}>`,
-          );
-          hasChanges = true;
-        }
+      if (originalOrder?.invoiceNumber !== editableInvoice.invoiceNumber) {
+        generalChanges.push(
+          `Số hóa đơn: từ <${originalOrder?.invoiceNumber || ""}> thành <${editableInvoice.invoiceNumber || ""}>`,
+        );
+        hasChanges = true;
       }
 
       if (originalOrder?.notes !== editableInvoice.notes) {
@@ -2085,22 +2085,38 @@ export default function SalesOrders() {
             ? changeDescriptionParts.join("\n\n")
             : "Không có thay đổi";
 
+        // Get order number from multiple sources with priority
+        const currentOrderNumber =
+          editableInvoice.orderNumber ||
+          selectedInvoice?.orderNumber ||
+          editableInvoice.displayNumber ||
+          selectedInvoice?.displayNumber ||
+          `ORD-${String(editableInvoice.id).padStart(13, "0")}`;
+
         try {
           console.log("📝 Logging order change history:", {
             orderId: editableInvoice.id,
+            orderNumber: currentOrderNumber,
             detailedDescriptionLength: detailedDescription.length,
             detailedDescriptionPreview: detailedDescription.substring(0, 200),
           });
 
-          await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-change-history", {
+          // Create change history record
+          const changeHistoryPayload = {
             orderId: editableInvoice.id,
+            orderNumber: currentOrderNumber, // Add order number to payload
             action: "edit",
             detailedDescription: detailedDescription,
-            // ipAddress will be captured automatically by server from request headers
-            userName: "User", // Get from auth context if available
-          });
+            userName: "User",
+            storeCode: editableInvoice.storeCode || selectedInvoice?.storeCode,
+            // TODO: Get actual client IP and userId from auth context
+            ipAddress: "client-ip",
+            userId: null,
+          };
 
-          console.log("✅ Order change history logged successfully");
+          await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-change-history", changeHistoryPayload);
+
+          console.log("✅ Order change history logged successfully with order number:", currentOrderNumber);
         } catch (historyError) {
           console.error("❌ Failed to log order change history:", historyError);
           // Don't fail the whole operation if history logging fails
@@ -4244,15 +4260,20 @@ export default function SalesOrders() {
                                         : ""
                                     }`}
                                     onClick={() => {
-                                      const itemWithType = {
-                                        ...item,
-                                        type:
-                                          item.type ||
-                                          (item.orderNumber
-                                            ? "order"
-                                            : "invoice"),
-                                      };
-                                      setSelectedInvoice(itemWithType);
+                                      // Toggle: if clicking the same order, close it; otherwise open the new one
+                                      if (selectedInvoice?.id === item.id && selectedInvoice?.type === item.type) {
+                                        setSelectedInvoice(null);
+                                      } else {
+                                        const itemWithType = {
+                                          ...item,
+                                          type:
+                                            item.type ||
+                                            (item.orderNumber
+                                              ? "order"
+                                              : "invoice"),
+                                        };
+                                        setSelectedInvoice(itemWithType);
+                                      }
                                     }}
                                   >
                                     <td className="px-3 py-3 text-center">
@@ -4483,7 +4504,10 @@ export default function SalesOrders() {
                                                             )}
                                                           </td>
                                                           <td className="py-2 pr-4 font-semibold whitespace-nowrap text-base">
-                                                            {t("common.date")}:
+                                                            {t(
+                                                              "common.date",
+                                                            )}
+                                                            :
                                                           </td>
                                                           <td className="py-2 pr-6 text-base">
                                                             {isEditing &&
@@ -4714,8 +4738,7 @@ export default function SalesOrders() {
                                                                 };
                                                               return (
                                                                 statusLabels[
-                                                                  selectedInvoice
-                                                                    .displayStatus
+                                                                  selectedInvoice.displayStatus
                                                                 ] ||
                                                                 "Đang phục vụ"
                                                               );
@@ -6069,6 +6092,18 @@ export default function SalesOrders() {
                                                                         priceBeforeTax +
                                                                         itemTax;
 
+                                                                      if (
+                                                                        orderDiscount ===
+                                                                        sumDiscountItem
+                                                                      ) {
+                                                                        itemDiscountAmount =
+                                                                          parseFloat(
+                                                                            item.discount ||
+                                                                              "0",
+                                                                          );
+                                                                      }
+
+                                                                      // Update item with recalculated values
                                                                       newEditedItems[
                                                                         item.id
                                                                       ] = {

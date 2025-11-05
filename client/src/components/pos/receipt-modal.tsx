@@ -169,6 +169,7 @@ export function ReceiptModal({
   }, [receipt?.tableNumber, tableInfo?.tableNumber]);
 
   // Log receipt modal state for debugging - ALWAYS CALL THIS HOOK
+
   useEffect(() => {
     if (isOpen) {
       const domainConnect = window.location.hostname;
@@ -1723,7 +1724,7 @@ export function ReceiptModal({
 
                         return qrUrl;
                       })()}
-                      alt="QR Code thanh toán"
+                      alt="Hệ thống đang chưa sinh được QR code. Vui lòng vào danh sách đơn hàng để in hóa đơn"
                       style={{
                         width: "100%",
                         height: "100%",
