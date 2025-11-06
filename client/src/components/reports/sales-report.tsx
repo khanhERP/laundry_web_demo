@@ -183,7 +183,7 @@ export function SalesReport() {
         try {
           let orderDate = new Date(order.createdAt);
           if (generalSettings?.isActive === false) {
-            orderDate = new Date(item.updatedAt);
+            orderDate = new Date(order.updatedAt);
           }
           if (isNaN(orderDate.getTime())) return;
 
