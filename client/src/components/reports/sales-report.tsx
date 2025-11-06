@@ -80,6 +80,16 @@ export function SalesReport() {
     retryDelay: 1000,
   });
 
+  const { data: generalSettings } = useQuery({
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings"],
+    queryFn: async () => {
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings/ST-002");
+      if (!response.ok) throw new Error("Failed to fetch general settings");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Query order items by date range
   const {
     data: orderItems = [],
@@ -171,7 +181,10 @@ export function SalesReport() {
       // Process paid orders for daily sales
       paidOrders.forEach((order: any) => {
         try {
-          const orderDate = new Date(order.orderedAt || order.createdAt);
+          let orderDate = new Date(order.createdAt);
+          if (generalSettings?.isActive === false) {
+            orderDate = new Date(item.updatedAt);
+          }
           if (isNaN(orderDate.getTime())) return;
 
           const dateStr = orderDate.toISOString().split("T")[0];
@@ -188,7 +201,8 @@ export function SalesReport() {
           const orderSubtotal = Number(order.subtotal || 0);
           const orderTax = Number(order.tax || 0);
           const orderDiscount = Number(order.discount || 0);
-          const priceIncludeTax = order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
+          const priceIncludeTax =
+            order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
 
           // Calculate daily revenue based on priceIncludeTax
           let dailyRevenue = 0;
@@ -219,7 +233,8 @@ export function SalesReport() {
           const orderSubtotal = Number(order.subtotal || 0);
           const orderDiscount = Number(order.discount || 0);
           const orderTax = Number(order.tax || 0);
-          const priceIncludeTax = order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
+          const priceIncludeTax =
+            order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
 
           // Calculate revenue for this order
           let orderRevenue = 0;
@@ -234,7 +249,10 @@ export function SalesReport() {
             const parsed = JSON.parse(paymentMethodStr);
             if (Array.isArray(parsed) && parsed.length > 0) {
               // Multi-payment: distribute revenue proportionally by payment amounts
-              const totalPaymentAmount = parsed.reduce((sum: number, pm: any) => sum + Number(pm.amount || 0), 0);
+              const totalPaymentAmount = parsed.reduce(
+                (sum: number, pm: any) => sum + Number(pm.amount || 0),
+                0,
+              );
 
               parsed.forEach((pm: any) => {
                 const method = pm.method || "cash";
@@ -245,7 +263,10 @@ export function SalesReport() {
                 }
 
                 // Distribute revenue proportionally
-                const revenueShare = totalPaymentAmount > 0 ? (paymentAmount / totalPaymentAmount) * orderRevenue : 0;
+                const revenueShare =
+                  totalPaymentAmount > 0
+                    ? (paymentAmount / totalPaymentAmount) * orderRevenue
+                    : 0;
                 paymentMethods[method].revenue += revenueShare;
                 paymentMethods[method].count += 1;
               });
@@ -255,7 +276,8 @@ export function SalesReport() {
                 paymentMethods[paymentMethodStr] = { count: 0, revenue: 0 };
               }
               paymentMethods[paymentMethodStr].count += 1;
-              paymentMethods[paymentMethods[paymentMethodStr]].revenue += orderRevenue;
+              paymentMethods[paymentMethods[paymentMethodStr]].revenue +=
+                orderRevenue;
             }
           } catch (e) {
             // Not JSON, single payment method
@@ -263,7 +285,8 @@ export function SalesReport() {
               paymentMethods[paymentMethodStr] = { count: 0, revenue: 0 };
             }
             paymentMethods[paymentMethodStr].count += 1;
-            paymentMethods[paymentMethods[paymentMethodStr]].revenue += orderRevenue;
+            paymentMethods[paymentMethods[paymentMethodStr]].revenue +=
+              orderRevenue;
           }
         } catch (error) {
           console.warn("Error processing order for payment methods:", error);
@@ -274,7 +297,10 @@ export function SalesReport() {
       const hourlySales: { [hour: number]: number } = {};
       uniqueCombinedData.forEach((item: any) => {
         try {
-          const itemDate = new Date(item.orderedAt || item.createdAt);
+          let itemDate = new Date(item.createdAt);
+          if (generalSettings?.isActive === false) {
+            itemDate = new Date(item.updatedAt);
+          }
           if (isNaN(itemDate.getTime())) return;
 
           const hour = itemDate.getHours();
@@ -298,45 +324,42 @@ export function SalesReport() {
 
       // Calculate totals based on unique combined data
       // Formula depends on priceIncludesTax setting
-      const totalSalesRevenue = paidOrders.reduce(
-        (sum: number, order: any) => {
-          const subtotal = Number(order.subtotal || 0); // Tạm tính
-          const discount = Number(order.discount || 0); // Giảm giá
-          const tax = Number(order.tax || 0); // Thuế
-          const priceIncludeTax = order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
+      const totalSalesRevenue = paidOrders.reduce((sum: number, order: any) => {
+        const subtotal = Number(order.subtotal || 0); // Tạm tính
+        const discount = Number(order.discount || 0); // Giảm giá
+        const tax = Number(order.tax || 0); // Thuế
+        const priceIncludeTax =
+          order.priceIncludeTax ?? storeSettings?.priceIncludesTax ?? false;
 
-          let revenue = 0;
-          if (priceIncludeTax) {
-            // Giá đã bao gồm thuế: Doanh thu = subtotal - discount
-            revenue = subtotal - discount;
-          } else {
-            // Giá chưa bao gồm thuế: Doanh thu = subtotal - discount + tax
-            revenue = subtotal - discount + tax;
-          }
+        let revenue = 0;
+        if (priceIncludeTax) {
+          // Giá đã bao gồm thuế: Doanh thu = subtotal - discount
+          revenue = subtotal - discount;
+        } else {
+          // Giá chưa bao gồm thuế: Doanh thu = subtotal - discount + tax
+          revenue = subtotal - discount + tax;
+        }
 
-          console.log(
-            `Order ${order.orderNumber}: subtotal=${subtotal}, discount=${discount}, tax=${tax}, priceIncludeTax=${priceIncludeTax}, revenue=${revenue}`,
-          );
-          return sum + revenue;
-        },
-        0,
+        console.log(
+          `Order ${order.orderNumber}: subtotal=${subtotal}, discount=${discount}, tax=${tax}, priceIncludeTax=${priceIncludeTax}, revenue=${revenue}`,
+        );
+        return sum + revenue;
+      }, 0);
+
+      console.log(
+        `Total Revenue Calculation: totalRevenue=${totalSalesRevenue}, from ${paidOrders.length} orders`,
       );
-
-      console.log(`Total Revenue Calculation: totalRevenue=${totalSalesRevenue}, from ${paidOrders.length} orders`);
 
       // Calculate subtotal revenue from completed orders
-      const subtotalRevenue = paidOrders.reduce(
-        (total: number, order: any) => {
-          const subtotal = Number(order.subtotal || 0); // Tạm tính
-          const discount = Number(order.discount || 0); // Giảm giá
+      const subtotalRevenue = paidOrders.reduce((total: number, order: any) => {
+        const subtotal = Number(order.subtotal || 0); // Tạm tính
+        const discount = Number(order.discount || 0); // Giảm giá
 
-          // Công thức: Doanh thu = subtotal - discount
-          const revenue = subtotal - discount;
+        // Công thức: Doanh thu = subtotal - discount
+        const revenue = subtotal - discount;
 
-          return total + revenue;
-        },
-        0,
-      );
+        return total + revenue;
+      }, 0);
 
       // Total orders should be based on unique orders, not items
       const totalOrders = paidOrders.length;
