@@ -61,15 +61,8 @@ export function CustomerFormModal({ isOpen, onClose, customer, initialPhone }: C
       // Prioritize customerId match, then fallback to phone/name
       return allOrders.filter((order: any) => {
         // Primary match: customerId
-        if (order.customerId === customer.id) {
-          return true;
-        }
 
-        // Fallback matches for orders created before customerId was added
-        const matchesPhone = customer.phone && order.customerPhone === customer.phone;
-        const matchesName = customer.name && order.customerName === customer.name;
-
-        return matchesPhone || matchesName;
+        return order.customerId === customer.id;
       });
     },
     enabled: isOpen && !!customer?.id,
