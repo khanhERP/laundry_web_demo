@@ -74,6 +74,7 @@ export function ShoppingCart({
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false); // Added state for PaymentMethodModal
   const [isProcessingPayment, setIsProcessingPayment] = useState(false); // Flag to prevent duplicate processing
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // Flag to prevent duplicate order placement
 
   // New state variables for order management flow
   const [lastCartItems, setLastCartItems] = useState<CartItem[]>([]);
@@ -966,6 +967,7 @@ export function ShoppingCart({
 
   const handlePlaceOrder = async () => {
     console.log("=== POS PLACE ORDER STARTED ===");
+    setIsPlacingOrder(true); // Set loading state
 
     if (cart.length === 0) {
       toast({
@@ -973,6 +975,7 @@ export function ShoppingCart({
         description: t("pos.addProductsToStart"),
         variant: "destructive",
       });
+      setIsPlacingOrder(false);
       return;
     }
 
@@ -983,6 +986,7 @@ export function ShoppingCart({
         description: "Vui lòng chọn khách hàng trước khi đặt hàng",
         variant: "destructive",
       });
+      setIsPlacingOrder(false);
       return;
     }
 
@@ -1269,6 +1273,7 @@ export function ShoppingCart({
 
       // Refresh orders list
       await queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+      setIsPlacingOrder(false); // Reset loading state
     } catch (error) {
       console.error("❌ Error placing order:", error);
       toast({
@@ -1279,6 +1284,7 @@ export function ShoppingCart({
             : "Không thể đặt hàng. Vui lòng thử lại.",
         variant: "destructive",
       });
+      setIsPlacingOrder(false); // Reset loading state
     }
   };
 
@@ -1287,6 +1293,7 @@ export function ShoppingCart({
 
     if (cart.length === 0) {
       alert("Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán.");
+      setIsProcessingPayment(false);
       return;
     }
 
@@ -1297,6 +1304,7 @@ export function ShoppingCart({
         description: "Vui lòng chọn khách hàng trước khi thanh toán",
         variant: "destructive",
       });
+      setIsProcessingPayment(false);
       return;
     }
 
@@ -1473,6 +1481,7 @@ export function ShoppingCart({
     // Check if laundry business - process payment directly
     if (storeSettings?.businessType === "laundry") {
       console.log("🧺 LAUNDRY BUSINESS - Processing direct payment");
+      setIsProcessingPayment(true); // Start processing payment
 
       try {
         // Create order data
@@ -1571,6 +1580,8 @@ export function ShoppingCart({
               : "Không thể thanh toán. Vui lòng thử lại.",
           variant: "destructive",
         });
+      } finally {
+        setIsProcessingPayment(false); // End processing payment
       }
       return;
     }
@@ -3178,7 +3189,7 @@ export function ShoppingCart({
               <Button
                 onClick={handlePlaceOrder}
                 disabled={
-                  cart.length === 0 || isProcessing || !selectedCustomer
+                  !canCheckout || isPlacingOrder || isProcessingPayment
                 }
                 className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-2 text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
                 title={
@@ -3201,16 +3212,19 @@ export function ShoppingCart({
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  {t("pos.placeOrder")}
+                  {isPlacingOrder ? "Đang đặt hàng..." : t("pos.placeOrder")}
                 </span>
               </Button>
             )}
             <Button
-              onClick={handleCheckout}
+              onClick={() => {
+                if (!isProcessingPayment && !isPlacingOrder) {
+                  setIsProcessingPayment(true);
+                  handleCheckout();
+                }
+              }}
               disabled={
-                cart.length === 0 ||
-                isProcessing ||
-                (storeSettings?.businessType === "laundry" && !selectedCustomer)
+                !canCheckout || isProcessing || isPlacingOrder || isProcessingPayment
               }
               className={`${storeSettings?.businessType !== "laundry" ? "w-full" : "flex-1"} bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-2 text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md`}
               title={
@@ -3233,7 +3247,9 @@ export function ShoppingCart({
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                {isProcessing ? t("tables.placing") : t("pos.checkout")}
+                {isProcessing || isPlacingOrder || isProcessingPayment
+                  ? t("tables.placing")
+                  : t("pos.checkout")}
               </span>
             </Button>
           </div>
