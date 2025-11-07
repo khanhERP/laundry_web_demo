@@ -389,7 +389,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
           transactions.push({
             id: voucher.voucherNumber, // Use actual voucher number instead of internal ID
             date: voucher.date || new Date().toISOString().split("T")[0],
-            createdAt: voucher.createdAt,
+            createdAt: voucher.date,
             description: voucher.category || "orther",
             source: voucher.recipient || "",
             type: "thu",
@@ -428,7 +428,7 @@ export default function CashBookPage({ onLogout }: CashBookPageProps) {
           transactions.push({
             id: voucher.voucherNumber, // Use actual voucher number instead of internal ID
             date: voucher.date || new Date().toISOString().split("T")[0],
-            createdAt: voucher.createdAt,
+            createdAt: voucher.date,
             description: voucher.category || "other",
             source: voucher.recipient || "Không rõ",
             type: "chi",
