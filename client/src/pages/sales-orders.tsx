@@ -616,12 +616,7 @@ export default function SalesOrders() {
         discount: calculatedDiscount.toFixed(2),
         isPaid: updatedOrder.isPaid ?? false,
         // Fix: Only set paymentMethod if isPaid is true, otherwise set to null
-        paymentMethod: updatedOrder.isPaid
-          ? updatedOrder.paymentMethod === "unpaid" ||
-            !updatedOrder.paymentMethod
-            ? null
-            : updatedOrder.paymentMethod
-          : null,
+        paymentMethod: updatedOrder.paymentMethod || "",
         customerName: updatedOrder.customerName || "",
         customerPhone: updatedOrder.customerPhone || "",
         customerAddress: updatedOrder.customerAddress || "",
