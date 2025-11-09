@@ -52,7 +52,7 @@ export default function ReportsPage({ onLogout }: ReportsPageProps) {
 
   // Fetch store settings to check business type
   const { data: storeSettings } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/store-settings"],
   });
 
   useEffect(() => {

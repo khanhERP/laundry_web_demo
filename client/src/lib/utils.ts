@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-const BASE_URL = "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev"; // 👈 đổi theo domain backend của bạn
+const BASE_URL = "https://laundry-be-demo.onrender.com"; // 👈 đổi theo domain backend của bạn
 
 export async function defaultFetcher({ queryKey }) {
   const [path] = queryKey;
@@ -43,7 +43,7 @@ export async function defaultFetcher({ queryKey }) {
  */
 export async function completeOrderPayment(orderId, paymentData, apiRequest) {
   // Update order with payment completion
-  const response = await apiRequest("PUT", `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderId}`, {
+  const response = await apiRequest("PUT", `https://laundry-be-demo.onrender.com/api/orders/${orderId}`, {
     status: "paid",
     paymentMethod: paymentData.paymentMethod,
     paymentStatus: "paid",

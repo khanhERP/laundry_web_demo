@@ -40,18 +40,18 @@ export function SupplierFormModal({ isOpen, onClose, supplier }: SupplierFormMod
 
   // Fetch store settings to get storeCode
   const { data: storeSettings } = useQuery({
-    queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings'],
+    queryKey: ['https://laundry-be-demo.onrender.com/api/store-settings'],
     queryFn: async () => {
-      const response = await apiRequest('GET', 'https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings');
+      const response = await apiRequest('GET', 'https://laundry-be-demo.onrender.com/api/store-settings');
       return response.json();
     },
   });
 
   // Fetch all suppliers to generate next code
   const { data: suppliers } = useQuery({
-    queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers'],
+    queryKey: ['https://laundry-be-demo.onrender.com/api/suppliers'],
     queryFn: async () => {
-      const response = await apiRequest('GET', 'https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers');
+      const response = await apiRequest('GET', 'https://laundry-be-demo.onrender.com/api/suppliers');
       return response.json();
     },
   });
@@ -116,11 +116,11 @@ export function SupplierFormModal({ isOpen, onClose, supplier }: SupplierFormMod
         ...data,
         storeCode: storeSettings?.storeCode || null,
       };
-      const response = await apiRequest('POST', 'https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers', dataWithStoreCode);
+      const response = await apiRequest('POST', 'https://laundry-be-demo.onrender.com/api/suppliers', dataWithStoreCode);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['https://laundry-be-demo.onrender.com/api/suppliers'] });
       toast({
         title: t("common.successTitle"),
         description: t("suppliers.createSuccess"),
@@ -138,11 +138,11 @@ export function SupplierFormModal({ isOpen, onClose, supplier }: SupplierFormMod
 
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<InsertSupplier>) => {
-      const response = await apiRequest('PUT', `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers/${supplier!.id}`, data);
+      const response = await apiRequest('PUT', `https://laundry-be-demo.onrender.com/api/suppliers/${supplier!.id}`, data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['https://laundry-be-demo.onrender.com/api/suppliers'] });
       toast({
         title: t("common.successTitle"),
         description: t("suppliers.updateSuccess"),
