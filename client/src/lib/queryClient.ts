@@ -16,7 +16,7 @@ export async function apiRequest(
 ) {
   // Log payment method tracking for order status updates
   if (
-    url.includes("https://laundry-be-demo.onrender.com/api/orders/") &&
+    url.includes("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/") &&
     url.includes("/status") &&
     method === "PUT"
   ) {
@@ -52,7 +52,7 @@ export async function apiRequest(
 
     // Additional logging for payment method requests
     if (
-      url.includes("https://laundry-be-demo.onrender.com/api/orders/") &&
+      url.includes("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/") &&
       url.includes("/status") &&
       method === "PUT"
     ) {

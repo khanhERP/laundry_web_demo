@@ -30,15 +30,15 @@ export function AttendanceList({
 }: AttendanceListProps) {
   const { t } = useTranslation();
   const { data: employees } = useQuery({
-    queryKey: ['https://laundry-be-demo.onrender.com/api/employees'],
+    queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees'],
   });
 
   const { data: attendanceRecords, isLoading } = useQuery({
     queryKey: useRange 
-      ? ['https://laundry-be-demo.onrender.com/api/attendance', 'range', dateRange?.startDate, dateRange?.endDate]
-      : ['https://laundry-be-demo.onrender.com/api/attendance', selectedDate],
+      ? ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance', 'range', dateRange?.startDate, dateRange?.endDate]
+      : ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance', selectedDate],
     queryFn: async () => {
-      let url = 'https://laundry-be-demo.onrender.com/api/attendance';
+      let url = 'https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance';
       if (useRange && dateRange?.startDate && dateRange?.endDate) {
         url += `?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
       } else {

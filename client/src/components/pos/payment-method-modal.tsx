@@ -22,7 +22,7 @@ import { ReceiptModal } from "./receipt-modal";
 import { usePopupSignal } from "@/hooks/use-popup-signal";
 import VirtualKeyboard from "@/components/ui/virtual-keyboard";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
 import { PrintDialog } from "./print-dialog"; // Assuming PrintDialog is in the same directory
 
 // Helper function for API requests (assuming it exists and handles headers, etc.)
@@ -91,9 +91,9 @@ export function PaymentMethodModal({
 
   // Query store settings to get dynamic address - ALWAYS CALL THIS HOOK
   const { data: storeSettings } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/store-settings"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://laundry-be-demo.onrender.com/api/store-settings");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
       return response.json();
     },
     enabled: isOpen, // Only fetch when modal is open
@@ -174,11 +174,14 @@ export function PaymentMethodModal({
   const [receiptDataForModal, setReceiptDataForModal] = useState<any>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false); // Add showPrintDialog state
 
+  // Initialize queryClient
+  const queryClient = useQueryClient();
+
   // Query payment methods from API
   const { data: paymentMethodsData } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/payment-methods"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "https://laundry-be-demo.onrender.com/api/payment-methods");
+      const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods");
       return response.json();
     },
     enabled: isOpen, // Only fetch when modal is open
@@ -394,7 +397,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
               console.log(
                 "🎯 QR Payment: Connecting to WebSocket for customer display:",
                 wsUrl,
@@ -529,7 +532,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
               console.log(
                 "Fallback QR Payment: Attempting to connect to WebSocket:",
                 wsUrl,
@@ -601,8 +604,7 @@ export function PaymentMethodModal({
             receipt?.exactTax ||
             (orderForPayment?.tax ??
               orderInfo?.exactTax ??
-              parseFloat(receipt?.tax || "0") ??
-              0);
+              parseFloat(receipt?.tax || "0"));
 
           const discount = parseFloat(
             receipt?.discount || orderForPayment?.discount || "0",
@@ -697,7 +699,7 @@ export function PaymentMethodModal({
         try {
           const protocol =
             window.location.protocol === "https:" ? "wss:" : "ws:";
-          const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+          const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
           const ws = new WebSocket(wsUrl);
 
           ws.onopen = () => {
@@ -865,7 +867,7 @@ export function PaymentMethodModal({
         console.log(`📦 Order items:`, orderItems);
 
         // Create order via API
-        const createResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+        const createResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -921,6 +923,10 @@ export function PaymentMethodModal({
             setReceiptDataForModal(receiptData);
             setShowReceiptModal(true);
 
+            // Invalidate queries to refresh sales orders list
+            queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+            queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+
             // Show success toast
             toast({
               title: "Thanh toán thành công",
@@ -931,6 +937,17 @@ export function PaymentMethodModal({
               `🏪 RESTAURANT BUSINESS - showing E-Invoice modal for ${method} payment`,
             );
 
+            // Invalidate queries to refresh sales orders list
+            queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+            queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+
+            // Show success toast
+            toast({
+              title: "Thanh toán thành công",
+              description: `Đã thanh toán bằng ${getPaymentMethodName(method)}`,
+            });
+
+            // Set payment method and show E-Invoice modal
             setSelectedPaymentMethod(method);
             setShowEInvoice(true);
             console.log(
@@ -954,7 +971,7 @@ export function PaymentMethodModal({
 
         try {
           // First update the payment method and status
-          const updateResponse = await fetch(`https://laundry-be-demo.onrender.com/api/orders/${orderInfo.id}`, {
+          const updateResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -990,7 +1007,7 @@ export function PaymentMethodModal({
 
               try {
                 // Check if there are any other unpaid orders on this table
-                const ordersResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+                const ordersResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
                   method: "GET",
                   headers: {
                     "Content-Type": "application/json",
@@ -1033,7 +1050,7 @@ export function PaymentMethodModal({
                   );
 
                   const tableUpdateResponse = await fetch(
-                    `https://laundry-be-demo.onrender.com/api/tables/${updatedOrder.tableId}/status`,
+                    `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
                     {
                       method: "PUT",
                       headers: {
@@ -1058,7 +1075,7 @@ export function PaymentMethodModal({
                   try {
                     const protocol =
                       window.location.protocol === "https:" ? "wss:" : "ws:";
-                    const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                    const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                     const ws = new WebSocket(wsUrl);
 
                     ws.onopen = () => {
@@ -1144,6 +1161,10 @@ export function PaymentMethodModal({
               setReceiptDataForModal(receiptData);
               setShowReceiptModal(true);
 
+              // Invalidate queries to refresh sales orders list
+              queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+              queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+
               // Show success toast
               toast({
                 title: "Thanh toán thành công",
@@ -1153,6 +1174,10 @@ export function PaymentMethodModal({
               console.log(
                 `🏪 RESTAURANT BUSINESS - showing E-Invoice modal for ${method} payment`,
               );
+
+              // Invalidate queries to refresh sales orders list
+              queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+              queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
 
               // Show success toast
               toast({
@@ -1315,7 +1340,7 @@ export function PaymentMethodModal({
       console.log("📦 Order items:", orderItems);
 
       // Create order via API
-      const createResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+      const createResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1371,9 +1396,9 @@ export function PaymentMethodModal({
           setReceiptDataForModal(receiptData);
           setShowReceiptModal(true);
 
-          // Hide QR code display
-          setShowQRCode(false);
-          setQrCodeUrl("");
+          // Invalidate queries to refresh sales orders list
+          queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+          queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
 
           // Show success toast
           toast({
@@ -1384,6 +1409,16 @@ export function PaymentMethodModal({
           console.log(
             `🏪 RESTAURANT BUSINESS - showing E-Invoice modal for QR payment`,
           );
+
+          // Invalidate queries to refresh sales orders list
+          queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+          queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+
+          // Show success toast
+          toast({
+            title: "Thanh toán thành công",
+            description: "Đã thanh toán bằng QR Code",
+          });
 
           setShowQRCode(false);
           setQrCodeUrl("");
@@ -1407,7 +1442,7 @@ export function PaymentMethodModal({
       try {
         console.log(`🔥 MAKING API CALL: PUT /api/orders/${orderInfo.id}`);
 
-        const statusResponse = await fetch(`https://laundry-be-demo.onrender.com/api/orders/${orderInfo.id}`, {
+        const statusResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -1423,6 +1458,10 @@ export function PaymentMethodModal({
         if (statusResponse.ok) {
           const data = await statusResponse.json();
           console.log(`✅ Order status updated to paid successfully:`, data);
+
+          // Invalidate queries to refresh sales orders list
+          queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+          queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
 
           setShowQRCode(false);
           setQrCodeUrl("");
@@ -1441,7 +1480,7 @@ export function PaymentMethodModal({
 
             try {
               // Check if there are any other unpaid orders on this table
-              const ordersResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+              const ordersResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
                 method: "GET",
                 headers: {
                   "Content-Type": "application/json",
@@ -1468,7 +1507,7 @@ export function PaymentMethodModal({
                 // If no other unpaid orders, update table to available
                 if (otherActiveOrders.length === 0) {
                   const tableUpdateResponse = await fetch(
-                    `https://laundry-be-demo.onrender.com/api/tables/${data.tableId}/status`,
+                    `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${data.tableId}/status`,
                     {
                       method: "PUT",
                       headers: {
@@ -1489,7 +1528,7 @@ export function PaymentMethodModal({
                     try {
                       const protocol =
                         window.location.protocol === "https:" ? "wss:" : "ws:";
-                      const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                       const ws = new WebSocket(wsUrl);
 
                       ws.onopen = () => {
@@ -1601,7 +1640,7 @@ export function PaymentMethodModal({
     // Send message to customer display to clear QR payment
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
@@ -1728,7 +1767,7 @@ export function PaymentMethodModal({
         discount: discountAmount.toString(),
       };
 
-      const createResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+      const createResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order: orderData, items: orderItems }),
@@ -1740,6 +1779,11 @@ export function PaymentMethodModal({
         receipt.id = createdOrder.id;
         orderForPayment.id = createdOrder.id;
         orderInfo.orderNumber = createdOrder.orderNumber;
+
+        // Invalidate queries to refresh sales orders list
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+
         setShowMultiPayment(false);
         setSelectedPaymentMethods([]);
         setSelectedPaymentMethod("multi");
@@ -1747,7 +1791,7 @@ export function PaymentMethodModal({
       }
     } else {
       // Update existing order
-      const updateResponse = await fetch(`https://laundry-be-demo.onrender.com/api/orders/${orderInfo.id}`, {
+      const updateResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1762,6 +1806,10 @@ export function PaymentMethodModal({
         const updatedOrder = await updateResponse.json();
         console.log("✅ Multi-payment order updated:", updatedOrder);
 
+        // Invalidate queries to refresh sales orders list
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+
         // ALWAYS update table status if order has a table - regardless of payment method
         if (updatedOrder.tableId) {
           console.log(
@@ -1770,7 +1818,7 @@ export function PaymentMethodModal({
 
           try {
             // Check if there are any other unpaid orders on this table
-            const ordersResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+            const ordersResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
@@ -1811,7 +1859,7 @@ export function PaymentMethodModal({
               );
 
               const tableUpdateResponse = await fetch(
-                `https://laundry-be-demo.onrender.com/api/tables/${updatedOrder.tableId}/status`,
+                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
                 {
                   method: "PUT",
                   headers: { "Content-Type": "application/json" },
@@ -1832,7 +1880,7 @@ export function PaymentMethodModal({
               try {
                 const protocol =
                   window.location.protocol === "https:" ? "wss:" : "ws:";
-                const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                 const ws = new WebSocket(wsUrl);
 
                 ws.onopen = () => {
@@ -2112,7 +2160,7 @@ export function PaymentMethodModal({
       console.log("📦 Order items:", orderItems);
 
       // Create order via API
-      const createResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+      const createResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2132,6 +2180,10 @@ export function PaymentMethodModal({
         receipt.id = createdOrder.id;
         orderForPayment.id = createdOrder.id;
         orderInfo.orderNumber = createdOrder.orderNumber;
+
+        // Invalidate queries to refresh sales orders list
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
 
         // CHECK BUSINESS TYPE - if laundry, show receipt modal directly
         const businessType = storeSettings?.businessType;
@@ -2195,7 +2247,7 @@ export function PaymentMethodModal({
       try {
         console.log(`🔥 MAKING API CALL: PUT /api/orders/${orderInfo.id}`);
 
-        const statusResponse = await fetch(`https://laundry-be-demo.onrender.com/api/orders/${orderInfo.id}`, {
+        const statusResponse = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${orderInfo.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -2215,6 +2267,10 @@ export function PaymentMethodModal({
             updatedOrder,
           );
 
+          // Invalidate queries to refresh sales orders list
+          queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+          queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+
           // ALWAYS update table status if order has a table - for cash payment
           if (updatedOrder.tableId) {
             console.log(
@@ -2223,7 +2279,7 @@ export function PaymentMethodModal({
 
             try {
               // Check if there are any other unpaid orders on this table
-              const ordersResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+              const ordersResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
                 method: "GET",
                 headers: {
                   "Content-Type": "application/json",
@@ -2266,7 +2322,7 @@ export function PaymentMethodModal({
                 );
 
                 const tableUpdateResponse = await fetch(
-                  `https://laundry-be-demo.onrender.com/api/tables/${updatedOrder.tableId}/status`,
+                  `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables/${updatedOrder.tableId}/status`,
                   {
                     method: "PUT",
                     headers: {
@@ -2291,7 +2347,7 @@ export function PaymentMethodModal({
                 try {
                   const protocol =
                     window.location.protocol === "https:" ? "wss:" : "ws:";
-                  const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                  const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                   const ws = new WebSocket(wsUrl);
 
                   ws.onopen = () => {
@@ -2447,6 +2503,10 @@ export function PaymentMethodModal({
       publishLater: invoiceData.publishLater,
     });
 
+    // Invalidate queries to refresh sales orders list
+    queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/list"] });
+    queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+
     // Reset state
     setSelectedPaymentMethod("");
   };
@@ -2593,7 +2653,7 @@ export function PaymentMethodModal({
         try {
           const protocol =
             window.location.protocol === "https:" ? "wss:" : "ws:";
-          const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+          const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
           const ws = new WebSocket(wsUrl);
 
           ws.onopen = () => {
@@ -2698,7 +2758,7 @@ export function PaymentMethodModal({
             try {
               const protocol =
                 window.location.protocol === "https:" ? "wss:" : "ws:";
-              const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+              const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
               const ws = new WebSocket(wsUrl);
 
               ws.onopen = () => {
@@ -2837,7 +2897,7 @@ export function PaymentMethodModal({
                     try {
                       const protocol =
                         window.location.protocol === "https:" ? "wss:" : "ws:";
-                      const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                      const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                       const ws = new WebSocket(wsUrl);
 
                       ws.onopen = () => {
@@ -3073,7 +3133,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3119,7 +3179,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3305,7 +3365,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {
@@ -3342,7 +3402,7 @@ export function PaymentMethodModal({
                           window.location.protocol === "https:"
                             ? "wss:"
                             : "ws:";
-                        const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                         const ws = new WebSocket(wsUrl);
 
                         ws.onopen = () => {

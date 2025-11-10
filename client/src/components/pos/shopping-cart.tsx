@@ -119,7 +119,7 @@ export function ShoppingCart({
   const { data: storeSettings } = useQuery({
     queryKey: ["store-settings"],
     queryFn: async () => {
-      const response = await fetch("https://laundry-be-demo.onrender.com/api/store-settings");
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
       if (!response.ok) {
         throw new Error("Failed to fetch store settings");
       }
@@ -131,7 +131,7 @@ export function ShoppingCart({
   const { data: userInfo } = useQuery({
     queryKey: ["user-info"],
     queryFn: async () => {
-      const response = await fetch("https://laundry-be-demo.onrender.com/api/auth/me");
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/auth/me");
       if (!response.ok) {
         throw new Error("Failed to fetch user info");
       }
@@ -457,7 +457,7 @@ export function ShoppingCart({
   const { data: products } = useQuery<any[]>({
     queryKey: ["products"],
     queryFn: async () => {
-      const response = await fetch("https://laundry-be-demo.onrender.com/api/products");
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products");
       if (!response.ok) {
         throw new Error("Failed to fetch products");
       }
@@ -487,7 +487,7 @@ export function ShoppingCart({
     try {
       setIsSearching(true);
       const response = await fetch(
-        `https://laundry-be-demo.onrender.com/api/customers?search=${encodeURIComponent(searchTerm)}`,
+        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers?search=${encodeURIComponent(searchTerm)}`,
         {
           method: "GET",
           headers: {
@@ -569,7 +569,7 @@ export function ShoppingCart({
   useEffect(() => {
     console.log("📡 Shopping Cart: Initializing single WebSocket connection");
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+    const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
 
     let reconnectTimer: NodeJS.Timeout | null = null;
     let shouldReconnect = true;
@@ -777,9 +777,9 @@ export function ShoppingCart({
 
   // Query payment methods from API
   const { data: paymentMethodsData } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/payment-methods"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods"],
     queryFn: async () => {
-      const response = await fetch("https://laundry-be-demo.onrender.com/api/payment-methods");
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods");
       if (!response.ok) throw new Error("Failed to fetch payment methods");
       return response.json();
     },
@@ -931,7 +931,7 @@ export function ShoppingCart({
       // Send WebSocket signal for refresh
       try {
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+        const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
         const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
@@ -993,7 +993,7 @@ export function ShoppingCart({
     // Generate next order number with BH prefix
     let orderNumber = `BH-0000001`; // Default fallback
     try {
-      const orderNumberResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders/next-order-number");
+      const orderNumberResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/next-order-number");
       if (orderNumberResponse.ok) {
         const data = await orderNumberResponse.json();
         orderNumber = data.nextOrderNumber;
@@ -1210,7 +1210,7 @@ export function ShoppingCart({
         return item;
       });
 
-      const response = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1272,7 +1272,7 @@ export function ShoppingCart({
       });
 
       // Refresh orders list
-      await queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/orders"] });
+      await queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
       setIsPlacingOrder(false); // Reset loading state
     } catch (error) {
       console.error("❌ Error placing order:", error);
@@ -1311,7 +1311,7 @@ export function ShoppingCart({
     // Generate next order number with BH prefix
     let orderNumber = `BH-0000001`; // Default fallback
     try {
-      const orderNumberResponse = await fetch("https://laundry-be-demo.onrender.com/api/orders/next-order-number");
+      const orderNumberResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/next-order-number");
       if (orderNumberResponse.ok) {
         const data = await orderNumberResponse.json();
         orderNumber = data.nextOrderNumber;
@@ -1522,7 +1522,7 @@ export function ShoppingCart({
           return item;
         });
 
-        const response = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
+        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1569,7 +1569,7 @@ export function ShoppingCart({
         });
 
         // Refresh orders list
-        await queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/orders"] });
+        await queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
       } catch (error) {
         console.error("❌ Error processing payment:", error);
         toast({
@@ -3507,7 +3507,7 @@ export function ShoppingCart({
                 // Fallback WebSocket connection if main one is not available
                 const protocol =
                   window.location.protocol === "https:" ? "wss:" : "ws:";
-                const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+                const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
                 const fallbackWs = new WebSocket(wsUrl);
 
                 fallbackWs.onopen = () => {

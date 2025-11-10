@@ -39,10 +39,10 @@ function Router({ onLogout }: { onLogout: () => void }) {
     // Assuming you have a function to get your auth token
     const getAuthToken = () => localStorage.getItem("authToken");
     const { data: storeSettings } = useQuery<StoreSettings>({
-      queryKey: ["https://laundry-be-demo.onrender.com/api/store-settings"],
+      queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
       queryFn: async () => {
         const token = getAuthToken();
-        const response = await fetch("https://laundry-be-demo.onrender.com/api/store-settings", {
+        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`, // Set the token in the Authorization header

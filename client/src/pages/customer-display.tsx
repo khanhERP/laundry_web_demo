@@ -50,7 +50,7 @@ export default function CustomerDisplayPage() {
         console.log("Customer Display: Fetching initial data...");
 
         // Fetch store info
-        const storeResponse = await fetch('https://laundry-be-demo.onrender.com/api/store-settings');
+        const storeResponse = await fetch('https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings');
         if (storeResponse.ok) {
           const storeData = await storeResponse.json();
           console.log("Customer Display: Store info loaded:", storeData);
@@ -60,7 +60,7 @@ export default function CustomerDisplayPage() {
         }
 
         // Try to fetch current cart state if available
-        const cartResponse = await fetch('https://laundry-be-demo.onrender.com/api/current-cart');
+        const cartResponse = await fetch('https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/current-cart');
         if (cartResponse.ok) {
           const cartData = await cartResponse.json();
           console.log("Customer Display: Initial cart loaded:", cartData);
@@ -87,7 +87,7 @@ export default function CustomerDisplayPage() {
   useEffect(() => {
     console.log("Customer Display: Initializing WebSocket connection");
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `https://laundry-be-demo.onrender.com/ws`;
+    const wsUrl = `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/ws`;
 
     let ws: WebSocket;
     let reconnectTimer: NodeJS.Timeout;

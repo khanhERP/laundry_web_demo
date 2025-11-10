@@ -60,11 +60,11 @@ export function SalesReport() {
     error: ordersError,
     refetch: refetchOrders,
   } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/orders/date-range", startDate, endDate, "all"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/date-range", startDate, endDate, "all"],
     queryFn: async () => {
       try {
         const response = await fetch(
-          `https://laundry-be-demo.onrender.com/api/orders/date-range/${startDate}/${endDate}/all`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/date-range/${startDate}/${endDate}/all`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -81,9 +81,9 @@ export function SalesReport() {
   });
 
   const { data: generalSettings } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/general-settings"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings"],
     queryFn: async () => {
-      const response = await fetch("https://laundry-be-demo.onrender.com/api/general-settings/ST-002");
+      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings/ST-002");
       if (!response.ok) throw new Error("Failed to fetch general settings");
       return response.json();
     },
@@ -96,11 +96,11 @@ export function SalesReport() {
     isLoading: orderItemsLoading,
     refetch: refetchOrderItems,
   } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/order-items/date-range", startDate, endDate, "all"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/date-range", startDate, endDate, "all"],
     queryFn: async () => {
       try {
         const response = await fetch(
-          `https://laundry-be-demo.onrender.com/api/order-items/${startDate}/${endDate}`,
+          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${startDate}/${endDate}`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

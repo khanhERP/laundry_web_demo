@@ -182,12 +182,12 @@ export default function PurchaseFormPage({
 
   // Fetch user info and store settings for storeCode
   const { data: userInfo } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/auth/verify"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/auth/verify"],
     retry: false,
   });
 
   const { data: storeSettings } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/store-settings"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
   });
 
   // Form setup
@@ -236,13 +236,13 @@ export default function PurchaseFormPage({
 
   // Fetch suppliers
   const { data: suppliers = [] } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/suppliers"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers"],
     select: (data: any) => data || [],
   });
 
   // Fetch employees for assignment
   const { data: employees = [] } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/employees"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees"],
     select: (data: any[]) =>
       (data || []).map((emp: any) => ({
         id: emp.id,
@@ -255,13 +255,13 @@ export default function PurchaseFormPage({
 
   // Fetch categories for new product form
   const { data: categories = [] } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/categories"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/categories"],
     select: (data: any) => data || [],
   });
 
   // Fetch payment methods
   const { data: paymentMethods = [] } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/payment-methods"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/payment-methods"],
     select: (data: any[]) =>
       (data || [])
         .filter((method: any) => method.enabled === true) // Only show enabled payment methods
@@ -275,7 +275,7 @@ export default function PurchaseFormPage({
 
   // Fetch products for selection
   const { data: allProducts = [] } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/products"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products"],
     select: (data: any[]) =>
       (data || []).map((product: any) => ({
         ...product,
@@ -295,7 +295,7 @@ export default function PurchaseFormPage({
 
   // Fetch existing purchase order for edit mode
   const { data: existingOrder, isLoading: isLoadingOrder } = useQuery({
-    queryKey: [`https://laundry-be-demo.onrender.com/api/purchase-orders/${id}`],
+    queryKey: [`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-orders/${id}`],
     enabled: Boolean(id),
     select: (data: any) => {
       console.log("📊 Purchase order API response:", data);
@@ -305,7 +305,7 @@ export default function PurchaseFormPage({
 
   // Fetch existing documents for edit mode
   const { data: existingDocuments } = useQuery({
-    queryKey: [`https://laundry-be-demo.onrender.com/api/purchase-orders/${id}/documents`],
+    queryKey: [`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-orders/${id}/documents`],
     enabled: Boolean(id),
     select: (data: any) => data || [],
   });
@@ -316,14 +316,14 @@ export default function PurchaseFormPage({
     error: nextPOError,
     isLoading: isLoadingPONumber,
   } = useQuery({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/purchase-orders/next-po-number"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-orders/next-po-number"],
     enabled: !isEditMode,
     queryFn: async () => {
       try {
         console.log("🔍 Fetching next PO number...");
         const response = await apiRequest(
           "GET",
-          "https://laundry-be-demo.onrender.com/api/purchase-orders/next-po-number",
+          "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-orders/next-po-number",
         );
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -562,7 +562,7 @@ export default function PurchaseFormPage({
   // Create new product mutation
   const createProductMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "https://laundry-be-demo.onrender.com/api/products", data);
+      const response = await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products", data);
       return response.json();
     },
     onSuccess: (newProduct) => {
@@ -573,7 +573,7 @@ export default function PurchaseFormPage({
       });
 
       // Update products query cache
-      queryClient.setQueryData(["https://laundry-be-demo.onrender.com/api/products"], (old: any[]) => {
+      queryClient.setQueryData(["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products"], (old: any[]) => {
         return [
           ...(old || []),
           { ...newProduct, unitPrice: Number(newProduct.price) || 0 },
@@ -581,7 +581,7 @@ export default function PurchaseFormPage({
       });
 
       // Invalidate queries for cache consistency
-      queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products"] });
 
       // Add new product to selected items automatically
       addProduct({
@@ -1231,12 +1231,12 @@ export default function PurchaseFormPage({
 
       // Submit data
       const response = isEditMode
-        ? await fetch(`https://laundry-be-demo.onrender.com/api/purchase-receipts/${id}`, {
+        ? await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(submissionData),
           })
-        : await fetch("https://laundry-be-demo.onrender.com/api/purchase-receipts", {
+        : await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(submissionData),
@@ -1337,7 +1337,7 @@ export default function PurchaseFormPage({
 
             // Send file data as JSON with original filename preserved
             const uploadResponse = await fetch(
-              `https://laundry-be-demo.onrender.com/api/purchase-receipts/${result.id}/documents`,
+              `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/${result.id}/documents`,
               {
                 method: "POST",
                 headers: {
@@ -1401,8 +1401,8 @@ export default function PurchaseFormPage({
       });
 
       // Refresh queries and navigate
-      queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/purchase-receipts"] });
-      queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts"] });
+      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/suppliers"] });
 
       setTimeout(() => {
         navigate("/purchases");

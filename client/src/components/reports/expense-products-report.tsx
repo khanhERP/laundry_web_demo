@@ -38,7 +38,7 @@ export function ExpenseProductsReport() {
     message: string;
     data: ExpenseProduct[];
   }>({
-    queryKey: ["https://laundry-be-demo.onrender.com/api/purchase-receipts/expense-products"],
+    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/purchase-receipts/expense-products"],
   });
 
   const expenseProducts = response?.data || [];

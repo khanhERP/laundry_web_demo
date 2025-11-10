@@ -15,11 +15,11 @@ export function AttendanceStats() {
   );
 
   const { data: employees } = useQuery({
-    queryKey: ['https://laundry-be-demo.onrender.com/api/employees'],
+    queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees'],
   });
 
   const { data: attendanceRecords } = useQuery({
-    queryKey: ['https://laundry-be-demo.onrender.com/api/attendance'],
+    queryKey: ['https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/attendance'],
   });
 
   const getMonthlyStats = () => {
