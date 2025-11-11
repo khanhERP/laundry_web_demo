@@ -107,9 +107,9 @@ export function SalesChartReport() {
 
   // Query store settings for priceIncludesTax
   const { data: storeSettings } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/store-settings"],
     queryFn: async () => {
-      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
+      const response = await fetch("https://laundry-be-demo.onrender.com/api/store-settings");
       if (!response.ok) {
         throw new Error("Failed to fetch store settings");
       }
@@ -125,7 +125,7 @@ export function SalesChartReport() {
     error: ordersError,
   } = useQuery({
     queryKey: [
-      "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/date-range",
+      "https://laundry-be-demo.onrender.com/api/orders/date-range",
       startDate,
       endDate,
       startTime,
@@ -167,7 +167,7 @@ export function SalesChartReport() {
           selectedFloor !== "all" ? `/${selectedFloor}` : "/all";
 
         const response = await fetch(
-          `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/date-range/${startDateTimeISO}/${endDateTimeISO}${floorFilter}`,
+          `https://laundry-be-demo.onrender.com/api/orders/date-range/${startDateTimeISO}/${endDateTimeISO}${floorFilter}`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -226,10 +226,10 @@ export function SalesChartReport() {
 
   // Query order items for all orders
   const { data: orderItems = [], isLoading: orderItemsLoading } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/order-items"],
     queryFn: async () => {
       try {
-        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items");
+        const response = await fetch("https://laundry-be-demo.onrender.com/api/order-items");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -255,7 +255,7 @@ export function SalesChartReport() {
     isLoading: tablesLoading,
     error: tablesError,
   } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/tables"],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
@@ -263,13 +263,13 @@ export function SalesChartReport() {
   const isLoading = ordersLoading || orderItemsLoading;
 
   const { data: employees } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/employees"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/employees"],
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: products } = useQuery({
     queryKey: [
-      "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products",
+      "https://laundry-be-demo.onrender.com/api/products",
       selectedCategory,
       productType,
       productSearch,
@@ -278,7 +278,7 @@ export function SalesChartReport() {
     ],
     queryFn: async () => {
       const response = await fetch(
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products/${selectedCategory}/${productType}/${productSearch || ""}`,
+        `https://laundry-be-demo.onrender.com/api/products/${selectedCategory}/${productType}/${productSearch || ""}`,
       );
       if (!response.ok) throw new Error("Failed to fetch products");
       return response.json();
@@ -287,13 +287,13 @@ export function SalesChartReport() {
   });
 
   const { data: categories } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/categories"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/categories"],
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: customers } = useQuery({
     queryKey: [
-      "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers",
+      "https://laundry-be-demo.onrender.com/api/customers",
       customerSearch,
       customerStatus,
       startDate,
@@ -301,7 +301,7 @@ export function SalesChartReport() {
     ],
     queryFn: async () => {
       const response = await fetch(
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/customers/${customerSearch || "all"}/${customerStatus}`,
+        `https://laundry-be-demo.onrender.com/api/customers/${customerSearch || "all"}/${customerStatus}`,
         {
           method: "GET",
           headers: {
@@ -316,9 +316,9 @@ export function SalesChartReport() {
   });
 
   const { data: generalSettings } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/general-settings"],
     queryFn: async () => {
-      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/general-settings/ST-002");
+      const response = await fetch("https://laundry-be-demo.onrender.com/api/general-settings/ST-002");
       if (!response.ok) throw new Error("Failed to fetch general settings");
       return response.json();
     },
@@ -329,7 +329,7 @@ export function SalesChartReport() {
   const { data: productAnalysisData, isLoading: productAnalysisLoading } =
     useQuery({
       queryKey: [
-        "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/product-analysis",
+        "https://laundry-be-demo.onrender.com/api/product-analysis",
         startDate,
         endDate,
         startTime,
@@ -363,7 +363,7 @@ export function SalesChartReport() {
           });
 
           const response = await fetch(
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/product-analysis/${encodeURIComponent(startDateTimeLocal)}/${encodeURIComponent(endDateTimeLocal)}${floorFilter}?${params}`,
+            `https://laundry-be-demo.onrender.com/api/product-analysis/${encodeURIComponent(startDateTimeLocal)}/${encodeURIComponent(endDateTimeLocal)}${floorFilter}?${params}`,
             {
               method: "GET",
               headers: {
@@ -403,7 +403,7 @@ export function SalesChartReport() {
     });
 
   const { data: transactions } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/transactions"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/transactions"],
     staleTime: 5 * 60 * 1000,
   });
 

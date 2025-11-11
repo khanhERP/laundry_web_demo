@@ -48,10 +48,10 @@ export function PinAuth({ onAuthSuccess }: PinAuthProps) {
 
   // Fetch store settings để lấy PIN
   const { data: storeData } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/store-settings"],
     queryFn: async () => {
       try {
-        const response = await apiRequest("GET", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings");
+        const response = await apiRequest("GET", "https://laundry-be-demo.onrender.com/api/store-settings");
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -98,7 +98,7 @@ export function PinAuth({ onAuthSuccess }: PinAuthProps) {
       });
 
       // Gọi API đăng nhập bằng PIN
-      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/auth/login-pin", {
+      const response = await fetch("https://laundry-be-demo.onrender.com/api/auth/login-pin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

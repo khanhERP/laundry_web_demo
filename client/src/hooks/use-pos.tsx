@@ -44,7 +44,7 @@ export function usePOS() {
       // Get storeCode from user session/auth
       let storeCode = null;
       try {
-        const authResponse = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/auth/me");
+        const authResponse = await fetch("https://laundry-be-demo.onrender.com/api/auth/me");
         if (authResponse.ok) {
           const userData = await authResponse.json();
           storeCode = userData.storeCode;
@@ -94,7 +94,7 @@ export function usePOS() {
         notes: null,
       }));
 
-      const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", {
+      const response = await fetch("https://laundry-be-demo.onrender.com/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order: orderData, items }),
@@ -132,8 +132,8 @@ export function usePOS() {
 
       setLastReceipt(receipt);
       updateActiveOrderCart([]);
-      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products"] });
-      queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/orders"] });
 
       // Dispatch events for real-time updates
       if (typeof window !== "undefined") {
@@ -209,7 +209,7 @@ export function usePOS() {
 
     try {
       // Fetch product details
-      const response = await fetch(`https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products/${productId}`);
+      const response = await fetch(`https://laundry-be-demo.onrender.com/api/products/${productId}`);
       if (!response.ok) {
         throw new Error("Failed to fetch product");
       }

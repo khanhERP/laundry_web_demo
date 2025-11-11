@@ -79,10 +79,10 @@ export function FinancialReport() {
 
   // Query orders and transactions for financial calculations
   const { data: orders = [] } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/orders"],
     queryFn: async () => {
       try {
-        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders");
+        const response = await fetch("https://laundry-be-demo.onrender.com/api/orders");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         return Array.isArray(data) ? data : [];
@@ -94,10 +94,10 @@ export function FinancialReport() {
   });
 
   const { data: transactions = [] } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/transactions"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/transactions"],
     queryFn: async () => {
       try {
-        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/transactions");
+        const response = await fetch("https://laundry-be-demo.onrender.com/api/transactions");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         return Array.isArray(data) ? data : [];
@@ -109,10 +109,10 @@ export function FinancialReport() {
   });
 
   const { data: invoices = [] } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoices"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/invoices"],
     queryFn: async () => {
       try {
-        const response = await fetch("https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/invoices");
+        const response = await fetch("https://laundry-be-demo.onrender.com/api/invoices");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         return Array.isArray(data) ? data : [];

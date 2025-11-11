@@ -64,26 +64,26 @@ export function OrderDialog({
   const queryClient = useQueryClient();
 
   const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/products"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/products"],
   });
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/categories"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/categories"],
   });
 
   const { data: storeSettings } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/store-settings"],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/store-settings"],
   });
 
   const { data: existingOrderItems, refetch: refetchExistingItems } = useQuery({
-    queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items", existingOrder?.id],
+    queryKey: ["https://laundry-be-demo.onrender.com/api/order-items", existingOrder?.id],
     enabled: !!(existingOrder?.id && mode === "edit" && open),
     staleTime: 0,
     queryFn: async () => {
       console.log("Fetching existing order items for order:", existingOrder.id);
       const response = await apiRequest(
         "GET",
-        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${existingOrder.id}`,
+        `https://laundry-be-demo.onrender.com/api/order-items/${existingOrder.id}`,
       );
       const data = await response.json();
       console.log("Existing order items response:", data);
@@ -124,7 +124,7 @@ export function OrderDialog({
             );
             const addItemsResponse = await apiRequest(
               "POST",
-              `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${existingOrder.id}/items`,
+              `https://laundry-be-demo.onrender.com/api/orders/${existingOrder.id}/items`,
               {
                 items: orderData.items,
               },
@@ -152,7 +152,7 @@ export function OrderDialog({
             try {
               const recalcResponse = await apiRequest(
                 "POST",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${existingOrder.id}/recalculate`,
+                `https://laundry-be-demo.onrender.com/api/orders/${existingOrder.id}/recalculate`,
               );
               const recalcResult = await recalcResponse.json();
               console.log("✅ Order totals recalculated:", recalcResult);
@@ -263,7 +263,7 @@ export function OrderDialog({
 
                 const updateResponse = await apiRequest(
                   "PUT",
-                  `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
+                  `https://laundry-be-demo.onrender.com/api/order-items/${item.id}`,
                   updatePayload,
                 );
 
@@ -321,7 +321,7 @@ export function OrderDialog({
 
           const updateResponse = await apiRequest(
             "PUT",
-            `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${existingOrder.id}`,
+            `https://laundry-be-demo.onrender.com/api/orders/${existingOrder.id}`,
             {
               customerName: orderData.order.customerName,
               customerCount: orderData.order.customerCount,
@@ -343,7 +343,7 @@ export function OrderDialog({
         } else {
           console.log("📝 Creating new order...");
 
-          const response = await apiRequest("POST", "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders", orderData);
+          const response = await apiRequest("POST", "https://laundry-be-demo.onrender.com/api/orders", orderData);
 
           if (!response.ok) {
             const errorData = await response.text();
@@ -383,16 +383,16 @@ export function OrderDialog({
         try {
           // Clear existing cache for this specific order items
           queryClient.removeQueries({
-            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items", existingOrder.id],
+            queryKey: ["https://laundry-be-demo.onrender.com/api/order-items", existingOrder.id],
           });
 
           // Force fresh fetch of order items
           const freshOrderItems = await queryClient.fetchQuery({
-            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items", existingOrder.id],
+            queryKey: ["https://laundry-be-demo.onrender.com/api/order-items", existingOrder.id],
             queryFn: async () => {
               const response = await apiRequest(
                 "GET",
-                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${existingOrder.id}`,
+                `https://laundry-be-demo.onrender.com/api/order-items/${existingOrder.id}`,
               );
               const data = await response.json();
               console.log("🔄 Fresh order items fetched:", data);
@@ -416,11 +416,11 @@ export function OrderDialog({
 
       // Invalidate and refetch all related queries
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] }),
-        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"] }),
-        queryClient.invalidateQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items"] }),
-        queryClient.refetchQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"] }),
-        queryClient.refetchQueries({ queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"] }),
+        queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/orders"] }),
+        queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/tables"] }),
+        queryClient.invalidateQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/order-items"] }),
+        queryClient.refetchQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/orders"] }),
+        queryClient.refetchQueries({ queryKey: ["https://laundry-be-demo.onrender.com/api/tables"] }),
       ]);
 
       // Reset form state
@@ -1631,7 +1631,7 @@ export function OrderDialog({
                                       // Call API to delete the order item
                                       apiRequest(
                                         "DELETE",
-                                        `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${item.id}`,
+                                        `https://laundry-be-demo.onrender.com/api/order-items/${item.id}`,
                                       )
                                         .then(async () => {
                                           console.log(
@@ -1655,7 +1655,7 @@ export function OrderDialog({
                                               // Fetch current order items after deletion
                                               const response = await apiRequest(
                                                 "GET",
-                                                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items/${existingOrder.id}`,
+                                                `https://laundry-be-demo.onrender.com/api/order-items/${existingOrder.id}`,
                                               );
                                               const remainingItems =
                                                 await response.json();
@@ -1742,7 +1742,7 @@ export function OrderDialog({
                                               // Update order with new totals
                                               apiRequest(
                                                 "PUT",
-                                                `https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders/${existingOrder.id}`,
+                                                `https://laundry-be-demo.onrender.com/api/orders/${existingOrder.id}`,
                                                 {
                                                   subtotal:
                                                     newSubtotal.toString(),
@@ -1758,25 +1758,25 @@ export function OrderDialog({
                                                 Promise.all([
                                                   queryClient.invalidateQueries(
                                                     {
-                                                      queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"],
+                                                      queryKey: ["https://laundry-be-demo.onrender.com/api/orders"],
                                                     },
                                                   ),
                                                   queryClient.invalidateQueries(
                                                     {
-                                                      queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"],
+                                                      queryKey: ["https://laundry-be-demo.onrender.com/api/tables"],
                                                     },
                                                   ),
                                                   queryClient.invalidateQueries(
                                                     {
                                                       queryKey: [
-                                                        "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items",
+                                                        "https://laundry-be-demo.onrender.com/api/order-items",
                                                       ],
                                                     },
                                                   ),
                                                   queryClient.invalidateQueries(
                                                     {
                                                       queryKey: [
-                                                        "https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items",
+                                                        "https://laundry-be-demo.onrender.com/api/order-items",
                                                         existingOrder.id,
                                                       ],
                                                     },
@@ -1785,10 +1785,10 @@ export function OrderDialog({
                                                   // Force immediate refetch to update table grid display
                                                   return Promise.all([
                                                     queryClient.refetchQueries({
-                                                      queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"],
+                                                      queryKey: ["https://laundry-be-demo.onrender.com/api/orders"],
                                                     }),
                                                     queryClient.refetchQueries({
-                                                      queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/tables"],
+                                                      queryKey: ["https://laundry-be-demo.onrender.com/api/tables"],
                                                     }),
                                                   ]);
                                                 });
@@ -1813,10 +1813,10 @@ export function OrderDialog({
 
                                           // Invalidate queries to refresh data
                                           queryClient.invalidateQueries({
-                                            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/order-items"],
+                                            queryKey: ["https://laundry-be-demo.onrender.com/api/order-items"],
                                           });
                                           queryClient.invalidateQueries({
-                                            queryKey: ["https://9be1b990-a8c1-421a-a505-64253c7b3cff-00-2h4xdaesakh9p.sisko.replit.dev/api/orders"],
+                                            queryKey: ["https://laundry-be-demo.onrender.com/api/orders"],
                                           });
                                         })
                                         .catch((error) => {
