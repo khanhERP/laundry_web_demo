@@ -299,7 +299,7 @@ export default function SalesOrders() {
   );
   const [showBulkCancelDialog, setShowBulkCancelDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [printReceiptData, setPrintReceiptData] = useState<any>(null);
