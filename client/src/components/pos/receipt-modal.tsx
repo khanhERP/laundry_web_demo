@@ -1222,7 +1222,7 @@ export function ReceiptModal({
 
   // Always render the Dialog component, let it handle the open state
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md w-full max-h-screen overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
