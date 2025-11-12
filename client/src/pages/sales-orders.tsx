@@ -616,7 +616,12 @@ export default function SalesOrders() {
         discount: calculatedDiscount.toFixed(2),
         isPaid: updatedOrder.isPaid ?? false,
         // Fix: Only set paymentMethod if isPaid is true, otherwise set to null
-        paymentMethod: updatedOrder.paymentMethod || "",
+        paymentMethod: updatedOrder.isPaid
+          ? updatedOrder.paymentMethod === "unpaid" ||
+            !updatedOrder.paymentMethod
+            ? null
+            : updatedOrder.paymentMethod
+          : null,
         customerName: updatedOrder.customerName || "",
         customerPhone: updatedOrder.customerPhone || "",
         customerAddress: updatedOrder.customerAddress || "",
@@ -1361,7 +1366,7 @@ export default function SalesOrders() {
       updatedAt: order.updatedAt,
       customerName: order.customerName || "",
       customerPhone: order.customerPhone || "",
-      customerAddress: order.customerAddress || "",
+      customerAddress: order.customerTaxCode || "",
       customerTaxCode: order.customerTaxCode || "",
       customerEmail: order.customerEmail || "",
       customerCode: order.customerCode,
@@ -4211,8 +4216,7 @@ export default function SalesOrders() {
                             )
                             .map((item) => {
                               // Get customer info - prioritize customerId from customer table if order has customerId
-                              let customerCode =
-                                item.customerCode || item.customerTaxCode || "";
+                              let customerCode = "";
 
                               // If order has customerId, try to find customer in customers list
                               if (

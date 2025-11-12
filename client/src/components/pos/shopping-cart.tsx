@@ -1174,8 +1174,7 @@ export function ShoppingCart({
       customerId: selectedCustomer?.id || null, // Ensure customerId is saved
       customerName: selectedCustomer?.name || "",
       customerPhone: selectedCustomer?.phone || null,
-      customerTaxCode:
-        selectedCustomer?.taxCode || selectedCustomer?.address || null,
+      customerTaxCode: selectedCustomer?.address || null,
       customerAddress: selectedCustomer?.address || null,
       customerEmail: selectedCustomer?.email || null,
       status: "pending", // Trạng thái: Đặt hàng
@@ -1491,8 +1490,7 @@ export function ShoppingCart({
           customerId: selectedCustomer?.id || null, // Ensure customerId is saved
           customerName: selectedCustomer?.name || "",
           customerPhone: selectedCustomer?.phone || null,
-          customerTaxCode:
-            selectedCustomer?.taxCode || selectedCustomer?.address || null,
+          customerTaxCode: selectedCustomer?.address || null,
           customerAddress: selectedCustomer?.address || null,
           customerEmail: selectedCustomer?.email || null,
           status: "paid",
@@ -3188,9 +3186,7 @@ export function ShoppingCart({
             {storeSettings?.businessType === "laundry" && (
               <Button
                 onClick={handlePlaceOrder}
-                disabled={
-                  !canCheckout || isPlacingOrder || isProcessingPayment
-                }
+                disabled={!canCheckout || isPlacingOrder || isProcessingPayment}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-2 text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
                 title={
                   !selectedCustomer
@@ -3224,7 +3220,10 @@ export function ShoppingCart({
                 }
               }}
               disabled={
-                !canCheckout || isProcessing || isPlacingOrder || isProcessingPayment
+                !canCheckout ||
+                isProcessing ||
+                isPlacingOrder ||
+                isProcessingPayment
               }
               className={`${storeSettings?.businessType !== "laundry" ? "w-full" : "flex-1"} bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-2 text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md`}
               title={
