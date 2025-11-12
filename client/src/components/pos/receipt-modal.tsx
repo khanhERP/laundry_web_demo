@@ -1310,15 +1310,15 @@ export function ReceiptModal({
                     {t("common.receiptTime")}:
                   </td>
                   <td style={{ padding: "2px 0", textAlign: "right" }}>
-                    {receipt.createdAt
-                      ? new Date(receipt.createdAt).toLocaleString("vi-VN", {
+                    {receipt?.status === "paid"
+                      ? new Date(receipt.updatedAt).toLocaleString("vi-VN", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
                           hour: "2-digit",
                           minute: "2-digit",
                         })
-                      : new Date().toLocaleString("vi-VN", {
+                      : new Date(receipt.createdAt).toLocaleString("vi-VN", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
